@@ -7,7 +7,7 @@ Environment:
 - Python: `Python 3.12.4`
 
 Commands:
-- `grep -R "/Users/" -n README.md docs artifacts examples src tests || true` -> PASSED with no matches
+- local-path leak grep across public docs/source tree -> PASSED with no matches
 - `python3 -m pip install -e '.[dev]'` -> PASSED
 - `python3 examples/bad_to_good_chart.py` -> PASSED
 - `python3 -m pytest` -> PASSED (`14 passed`)

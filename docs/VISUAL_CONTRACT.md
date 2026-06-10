@@ -27,8 +27,7 @@ grain: customer segment
 dimensions: [segment]
 source: synthetic.segment_conversion
 units: conversion rate
-filters:
-  quarter: 2026-Q2
+filters: none
 time_window: latest synthetic snapshot
 caveats:
   - Observational segment summary; not causal proof.
@@ -49,12 +48,12 @@ Why this is strong:
 ```yaml
 claim: Conversion is better.
 metric: conversion_rate
-grain:
+grain: ""
 dimensions: []
-source:
-units:
-filters:
-time_window:
+source: ""
+units: ""
+filters: ""
+time_window: ""
 caveats: []
 visual_intent: show data
 chart_type: pie
