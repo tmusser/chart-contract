@@ -1,0 +1,129 @@
+{
+  "repo": "chart-contract",
+  "package": "chart_contract",
+  "version_scope": "v0.1",
+  "built_with": "ai-engineering-skills",
+  "generated_date": "2026-06-10",
+  "front_door_api": [
+    "Chart.trend",
+    "Chart.rank",
+    "Chart.compare",
+    "Chart.audit",
+    "Chart.to_altair",
+    "Chart.to_vega_lite",
+    "audit_spec"
+  ],
+  "chart_intents": [
+    "trend",
+    "rank",
+    "compare"
+  ],
+  "renderer": "altair",
+  "experimental": [
+    "audit_spec"
+  ],
+  "audit_categories": [
+    "data contract",
+    "visual form",
+    "claim support",
+    "labels and units",
+    "scale and axis risk",
+    "provenance",
+    "caveats",
+    "accessibility/readability",
+    "Tufte-inspired visual integrity"
+  ],
+  "docs": [
+    "README.md",
+    "AGENTS.md",
+    "docs/WHY.md",
+    "docs/VISUAL_CONTRACT.md",
+    "docs/DESIGN_PRINCIPLES.md",
+    "docs/AGENT_WORKFLOW_CASE_STUDY.md"
+  ],
+  "examples": [
+    "examples/bad_to_good_chart.py",
+    "examples/trend_claim.py",
+    "examples/rank_claim.py",
+    "examples/compare_claim.py",
+    "examples/output/corrected_chart.vl.json",
+    "examples/output/trend_claim.vl.json",
+    "examples/output/rank_claim.vl.json",
+    "examples/output/compare_claim.vl.json"
+  ],
+  "tests": [
+    "tests/test_import.py",
+    "tests/test_audit_rules.py",
+    "tests/test_chart_intents.py",
+    "tests/test_audit_spec.py"
+  ],
+  "artifacts": [
+    "artifacts/SPEC.md",
+    "artifacts/PLAN.md",
+    "artifacts/TODO.md",
+    "artifacts/VERIFY.md",
+    "artifacts/HANDOFF.md",
+    "artifacts/CREATION_INVOCATIONS.md",
+    "artifacts/BUILD_MANIFEST.md",
+    "artifacts/build_manifest.json"
+  ],
+  "workflow_invocations": [
+    "$mini-spec",
+    "$thin-plan",
+    "$scope-freeze",
+    "$build-one",
+    "$test-mini",
+    "$verify-contract",
+    "$handoff"
+  ],
+  "verification": {
+    "commands": [
+      {
+        "command": "python3 -m pip install -e '.[dev]'",
+        "status": "passed"
+      },
+      {
+        "command": "python3 -m pytest",
+        "status": "passed"
+      },
+      {
+        "command": "python3 examples/bad_to_good_chart.py",
+        "status": "passed"
+      },
+      {
+        "command": "python3 examples/trend_claim.py",
+        "status": "passed"
+      },
+      {
+        "command": "python3 examples/rank_claim.py",
+        "status": "passed"
+      },
+      {
+        "command": "python3 examples/compare_claim.py",
+        "status": "passed"
+      },
+      {
+        "command": "git diff --check",
+        "status": "passed"
+      },
+      {
+        "command": "structural validation inline python check",
+        "status": "passed"
+      }
+    ],
+    "status": "passed"
+  },
+  "remaining_risks": [
+    "audit_spec is experimental and limited to deterministic Vega-Lite-like checks",
+    "visual verification stops at generated specs rather than browser rendering",
+    "current dependency graph emits Altair-related deprecation warnings during tests"
+  ],
+  "non_goals": [
+    "ui",
+    "dashboards",
+    "automatic chart correction",
+    "multiple renderers",
+    "llm calls",
+    "telemetry"
+  ]
+}

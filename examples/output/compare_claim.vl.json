@@ -1,0 +1,85 @@
+{
+  "config": {
+    "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+    }
+  },
+  "data": {
+    "name": "data-eb06ab1a7eacc5baf1a04c35baca6b50"
+  },
+  "mark": {
+    "type": "bar"
+  },
+  "encoding": {
+    "color": {
+      "field": "region",
+      "type": "nominal"
+    },
+    "tooltip": [
+      {
+        "field": "segment",
+        "type": "nominal"
+      },
+      {
+        "field": "region",
+        "type": "nominal"
+      },
+      {
+        "field": "win_rate",
+        "type": "quantitative"
+      }
+    ],
+    "x": {
+      "field": "segment",
+      "title": "Segment",
+      "type": "nominal"
+    },
+    "xOffset": {
+      "field": "region",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "win_rate",
+      "scale": {
+        "zero": true
+      },
+      "title": "Win Rate (win rate)",
+      "type": "quantitative"
+    }
+  },
+  "height": 360,
+  "title": {
+    "text": "Enterprise win rate leads SMB in both regions.",
+    "subtitle": [
+      "Source: synthetic.pipeline_summary",
+      "Caveat: Observed pipeline summary; not a causal attribution statement."
+    ]
+  },
+  "width": 640,
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
+  "datasets": {
+    "data-eb06ab1a7eacc5baf1a04c35baca6b50": [
+      {
+        "segment": "SMB",
+        "region": "East",
+        "win_rate": 0.21
+      },
+      {
+        "segment": "SMB",
+        "region": "West",
+        "win_rate": 0.24
+      },
+      {
+        "segment": "Enterprise",
+        "region": "East",
+        "win_rate": 0.29
+      },
+      {
+        "segment": "Enterprise",
+        "region": "West",
+        "win_rate": 0.31
+      }
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "config": {
+    "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+    }
+  },
+  "layer": [
+    {
+      "data": {
+        "name": "data-89a6f5a0d51458e583a40d63981be75e"
+      },
+      "mark": {
+        "type": "line",
+        "point": true
+      },
+      "encoding": {
+        "tooltip": [
+          {
+            "field": "week",
+            "type": "temporal"
+          },
+          {
+            "field": "conversion_rate",
+            "type": "quantitative"
+          }
+        ],
+        "x": {
+          "field": "week",
+          "title": "Week",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "conversion_rate",
+          "title": "Conversion Rate (conversion rate)",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "data": {
+        "name": "data-cb09c0238c286cd711cb319ffbf98496"
+      },
+      "mark": {
+        "type": "rule",
+        "color": "#b03a2e",
+        "strokeDash": [
+          4,
+          4
+        ]
+      },
+      "encoding": {
+        "x": {
+          "field": "week",
+          "type": "temporal"
+        }
+      }
+    },
+    {
+      "data": {
+        "name": "data-cb09c0238c286cd711cb319ffbf98496"
+      },
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "color": "#b03a2e",
+        "dx": 6,
+        "dy": -6
+      },
+      "encoding": {
+        "text": {
+          "field": "label",
+          "type": "nominal"
+        },
+        "x": {
+          "field": "week",
+          "type": "temporal"
+        },
+        "y": {
+          "value": 12
+        }
+      }
+    }
+  ],
+  "height": 360,
+  "title": {
+    "text": "Conversion improved after the onboarding launch window.",
+    "subtitle": [
+      "Source: synthetic.funnel_events",
+      "Caveat: Observational trend; not causal proof."
+    ]
+  },
+  "width": 640,
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
+  "datasets": {
+    "data-89a6f5a0d51458e583a40d63981be75e": [
+      {
+        "week": "2026-05-01",
+        "conversion_rate": 0.12
+      },
+      {
+        "week": "2026-05-08",
+        "conversion_rate": 0.14
+      },
+      {
+        "week": "2026-05-15",
+        "conversion_rate": 0.15
+      },
+      {
+        "week": "2026-05-22",
+        "conversion_rate": 0.16
+      }
+    ],
+    "data-cb09c0238c286cd711cb319ffbf98496": [
+      {
+        "week": "2026-05-08",
+        "label": "Onboarding launch"
+      }
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "config": {
+    "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+    }
+  },
+  "data": {
+    "name": "data-8c4e9aa994fcc77756e77dbfefc5a8a9"
+  },
+  "mark": {
+    "type": "bar"
+  },
+  "encoding": {
+    "tooltip": [
+      {
+        "field": "segment",
+        "type": "nominal"
+      },
+      {
+        "field": "adoption",
+        "type": "quantitative"
+      }
+    ],
+    "x": {
+      "field": "adoption",
+      "scale": {
+        "zero": true
+      },
+      "title": "Adoption (accounts)",
+      "type": "quantitative"
+    },
+    "y": {
+      "field": "segment",
+      "sort": "-x",
+      "title": "Segment",
+      "type": "nominal"
+    }
+  },
+  "height": 360,
+  "title": {
+    "text": "Enterprise leads adoption volume across plans.",
+    "subtitle": [
+      "Source: synthetic.plan_adoption"
+    ]
+  },
+  "width": 640,
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
+  "datasets": {
+    "data-8c4e9aa994fcc77756e77dbfefc5a8a9": [
+      {
+        "segment": "Free",
+        "adoption": 120
+      },
+      {
+        "segment": "Starter",
+        "adoption": 210
+      },
+      {
+        "segment": "Pro",
+        "adoption": 185
+      },
+      {
+        "segment": "Enterprise",
+        "adoption": 260
+      }
+    ]
+  }
+}
