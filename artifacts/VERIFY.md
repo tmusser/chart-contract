@@ -1,5 +1,21 @@
 # VERIFY
 
+2026-06-10 - README hero image and dogfood note
+
+Commands:
+- `git diff --check` -> PASSED
+- README relative link/image check -> PASSED
+
+Changed files:
+- `README.md`
+- `artifacts/VERIFY.md`
+
+Remaining risks:
+- None for product behavior; this patch is README-only.
+
+Next safest task:
+- Tag v0.1.0 or move future work to v0.2.
+
 2026-06-10 - Single-point trend audit fix
 
 Environment:
