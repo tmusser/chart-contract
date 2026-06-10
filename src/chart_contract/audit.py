@@ -184,6 +184,22 @@ def audit_chart(chart: Any) -> AuditReport:
     else:
         report.add("data.not_empty", PASS, "Chart data is not empty.")
 
+    if chart.intent == "trend":
+        row_count = len(chart.data)
+        if row_count < 2:
+            report.add(
+                "data.trend.min_points",
+                FAIL,
+                f"Trend chart has {row_count} data point(s); a directional trend claim requires at least 2.",
+                suggestion="Add historical data covering at least two time periods.",
+            )
+        else:
+            report.add(
+                "data.trend.min_points",
+                PASS,
+                "Trend chart has enough data points to show direction.",
+            )
+
     if chart.intent == "trend" and chart.x in chart.data.columns:
         x_series = chart.data[chart.x]
         if is_datetime_like(x_series) or is_ordered_series(x_series):

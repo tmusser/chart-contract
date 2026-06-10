@@ -33,6 +33,9 @@
     "accessibility/readability",
     "Tufte-inspired visual integrity"
   ],
+  "notable_rules": [
+    "data.trend.min_points"
+  ],
   "docs": [
     "README.md",
     "AGENTS.md",
@@ -128,11 +131,12 @@
       }
     ],
     "status": "passed",
-    "pytest": "14 passed"
+    "pytest": "16 passed"
   },
   "remaining_risks": [
     "audit_spec is experimental and limited to deterministic Vega-Lite-like checks",
     "visual verification now includes committed static SVGs, but browser rendering remains unverified",
+    "percent-unit vs decimal-scale mismatch remains a v0.2 policy decision",
     "current dependency graph emits Altair-related deprecation warnings during tests"
   ],
   "non_goals": [

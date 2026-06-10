@@ -40,6 +40,10 @@
 - accessibility/readability
 - Tufte-inspired visual integrity
 
+## Notable Rules
+
+- `data.trend.min_points` fails single-point trend charts and passes when there are at least two observations.
+
 ## Examples
 
 - `examples/bad_to_good_chart.py`
@@ -82,7 +86,7 @@
 ## Verification Summary
 
 - Editable install passed
-- Full pytest suite passed (`14 passed`)
+- Full pytest suite passed (`16 passed`)
 - Hero demo emitted audit Markdown/JSON plus static SVG renders
 - `git diff --check` passed
 - Structural validation passed
@@ -92,6 +96,7 @@
 
 - `audit_spec()` is experimental and intentionally narrow.
 - Visual verification now includes committed static SVGs, but browser rendering remains unverified.
+- Percent-unit vs decimal-scale mismatch remains a v0.2 policy decision.
 - Current dependency set emits Altair-related deprecation warnings during tests.
 
 ## Release Note

@@ -1,5 +1,33 @@
 # VERIFY
 
+2026-06-10 - Single-point trend audit fix
+
+Environment:
+- Working directory: repo root
+- Python: `Python 3.12.4`
+
+Commands:
+- `python3 -m pytest` -> PASSED (`16 passed`)
+- `python3 examples/bad_to_good_chart.py` -> PASSED
+- `git diff --check` -> PASSED
+- local-path grep checks -> PASSED with no tracked leaks found
+- file-URL grep checks -> PASSED with no tracked leaks found
+- one-row trend smoke check -> PASSED (`data.trend.min_points: FAIL`, `passed: False`)
+
+Changed files:
+- `src/chart_contract/audit.py`
+- `tests/test_audit_rules.py`
+- `artifacts/VERIFY.md`
+- `artifacts/BUILD_MANIFEST.md`
+- `artifacts/build_manifest.json`
+
+Remaining risks:
+- Percent-unit vs decimal-scale mismatch remains a v0.2 policy decision.
+- `audit_spec()` remains intentionally experimental.
+
+Next safest task:
+- Declare v0.1 patched, then move future ergonomics work such as scaffold generation into v0.2.
+
 2026-06-10 - Final v0.1 first-impression polish
 
 Environment:

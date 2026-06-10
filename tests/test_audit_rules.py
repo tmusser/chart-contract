@@ -53,6 +53,39 @@ def test_causal_language_without_caveat_warns() -> None:
     assert severities["claim.causal_support"] == "WARN"
 
 
+def test_single_point_trend_fails() -> None:
+    df = pd.DataFrame({"week": ["2026-05-01"], "value": [0.14]})
+
+    report = Chart.trend(
+        data=df,
+        x="week",
+        y="value",
+        claim="Conversion improved steadily.",
+        source="warehouse.funnel",
+        unit="rate",
+    ).audit()
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert severities["data.trend.min_points"] == "FAIL"
+    assert report.passed is False
+
+
+def test_multi_point_trend_passes_min_points() -> None:
+    df = pd.DataFrame({"week": ["2026-05-01", "2026-05-08"], "value": [0.14, 0.16]})
+
+    report = Chart.trend(
+        data=df,
+        x="week",
+        y="value",
+        claim="Conversion improved steadily.",
+        source="warehouse.funnel",
+        unit="rate",
+    ).audit()
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert severities["data.trend.min_points"] == "PASS"
+
+
 def test_audit_report_to_markdown_includes_summary_and_findings() -> None:
     df = pd.DataFrame({"week": ["2026-05-01"], "value": [0.12]})
 
@@ -74,7 +107,7 @@ def test_audit_report_raise_on_fail_raises_for_failures() -> None:
 
 
 def test_audit_report_raise_on_fail_is_noop_without_failures() -> None:
-    df = pd.DataFrame({"week": ["2026-05-01"], "value": [0.12]})
+    df = pd.DataFrame({"week": ["2026-05-01", "2026-05-08"], "value": [0.12, 0.15]})
 
     report = Chart.trend(
         data=df,
@@ -84,5 +117,8 @@ def test_audit_report_raise_on_fail_is_noop_without_failures() -> None:
         source="warehouse.funnel_events",
         unit="conversion rate",
     ).audit()
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert severities["data.trend.min_points"] == "PASS"
 
     report.raise_on_fail()
