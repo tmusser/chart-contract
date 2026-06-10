@@ -20,10 +20,12 @@ The repo leads with a risky chart example because that is the point of the packa
 import pandas as pd
 from chart_contract import Chart, audit_spec
 
-df = pd.DataFrame({
-    "segment": ["SMB", "Enterprise", "Mid-Market", "Public", "Startup", "Partners", "Other"],
-    "conversion_rate": [0.09, 0.18, 0.14, 0.12, 0.16, 0.11, 0.08],
-})
+df = pd.DataFrame(
+    {
+        "segment": ["SMB", "Enterprise", "Mid-Market", "Public", "Startup", "Partners", "Other"],
+        "conversion_rate": [0.09, 0.18, 0.14, 0.12, 0.16, 0.11, 0.08],
+    }
+)
 
 bad_vega_lite_spec = {
     "mark": {"type": "arc", "innerRadius": 40},
@@ -86,10 +88,12 @@ pytest
 import pandas as pd
 from chart_contract import Chart
 
-df = pd.DataFrame({
-    "week": ["2026-05-01", "2026-05-08", "2026-05-15"],
-    "conversion_rate": [0.12, 0.14, 0.16],
-})
+df = pd.DataFrame(
+    {
+        "week": ["2026-05-01", "2026-05-08", "2026-05-15"],
+        "conversion_rate": [0.12, 0.14, 0.16],
+    }
+)
 
 chart = Chart.trend(
     data=df,
