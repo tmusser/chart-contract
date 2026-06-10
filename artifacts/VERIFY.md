@@ -1,5 +1,40 @@
 # VERIFY
 
+2026-06-10 - Final v0.1 first-impression polish
+
+Environment:
+- Working directory: repo root
+- Python: `Python 3.12.4`
+
+Commands:
+- `python3 -m pip install -e '.[dev]'` -> PASSED
+- `python3 examples/bad_to_good_chart.py` -> PASSED; static SVG export succeeded
+- `python3 -m pytest` -> PASSED (`14 passed`)
+- `git diff --check` -> PASSED
+- local-path grep check across public docs/source tree -> PASSED with no matches
+- `grep -R file-URL -n README.md docs artifacts src tests examples || true` -> PASSED with no matches
+- README link validation -> PASSED
+
+Changed files:
+- `README.md`
+- `examples/bad_to_good_chart.py`
+- `examples/output/bad_chart_audit.md`
+- `examples/output/bad_chart_audit.json`
+- `examples/output/bad_chart.svg`
+- `examples/output/corrected_chart.svg`
+- `examples/output/corrected_chart.vl.json`
+- `pyproject.toml`
+- `artifacts/BUILD_MANIFEST.md`
+- `artifacts/build_manifest.json`
+- `artifacts/VERIFY.md`
+
+Remaining risks:
+- Static SVG export is now committed, but browser-level rendering is still unverified.
+- `audit_spec()` remains intentionally experimental.
+
+Next safest task:
+- Keep v0.1 scope fixed and only revisit renderer/export compatibility if dependency drift changes the demo outputs.
+
 2026-06-10 - Proof artifact polish
 
 Environment:

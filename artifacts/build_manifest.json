@@ -46,6 +46,10 @@
     "examples/trend_claim.py",
     "examples/rank_claim.py",
     "examples/compare_claim.py",
+    "examples/output/bad_chart_audit.md",
+    "examples/output/bad_chart_audit.json",
+    "examples/output/bad_chart.svg",
+    "examples/output/corrected_chart.svg",
     "examples/output/corrected_chart.vl.json",
     "examples/output/trend_claim.vl.json",
     "examples/output/rank_claim.vl.json",
@@ -107,6 +111,18 @@
         "status": "passed"
       },
       {
+        "command": "local-path grep check across public docs/source tree",
+        "status": "passed"
+      },
+      {
+        "command": "file-URL grep checks",
+        "status": "passed"
+      },
+      {
+        "command": "README link validation inline python check",
+        "status": "passed"
+      },
+      {
         "command": "structural validation inline python check",
         "status": "passed"
       }
@@ -116,7 +132,7 @@
   },
   "remaining_risks": [
     "audit_spec is experimental and limited to deterministic Vega-Lite-like checks",
-    "visual verification stops at generated specs rather than browser rendering",
+    "visual verification now includes committed static SVGs, but browser rendering remains unverified",
     "current dependency graph emits Altair-related deprecation warnings during tests"
   ],
   "non_goals": [

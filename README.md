@@ -6,6 +6,10 @@ Charts should satisfy analytical contracts, not just render.
 
 `chart-contract` helps analysts and AI agents produce claim-first charts that can be audited before sharing. A chart should not just render; it should declare what it claims, what data supports it, and what could mislead the reader. Charts are reasoning artifacts, not decorations.
 
+## Why This Matters
+
+AI-generated charts can look plausible while hiding weak claims, missing units, missing sources, misleading visual forms, or causal overreach. `chart-contract` makes those assumptions explicit before the chart is shared.
+
 It is a chart-contract harness:
 
 `claim -> data contract -> visual choice -> audit -> render`
@@ -72,7 +76,15 @@ python examples/bad_to_good_chart.py
 
 It audits the risky pie-like chart, prints PASS/WARN/FAIL findings, and writes a corrected Vega-Lite spec to [examples/output/corrected_chart.vl.json](examples/output/corrected_chart.vl.json).
 
-Rendered README screenshots are deferred for now because this repo does not yet ship lightweight export tooling. The next step is tracked in [ROADMAP.md](ROADMAP.md).
+Outputs from the hero demo:
+
+- [Corrected Vega-Lite spec](examples/output/corrected_chart.vl.json)
+- [Audit report, Markdown](examples/output/bad_chart_audit.md)
+- [Audit report, JSON](examples/output/bad_chart_audit.json)
+- [Bad chart SVG](examples/output/bad_chart.svg)
+- [Corrected chart SVG](examples/output/corrected_chart.svg)
+
+The hero demo now commits lightweight rendered charts alongside the audit artifacts so the first impression is inspectable without extra tooling.
 
 ## Quickstart
 

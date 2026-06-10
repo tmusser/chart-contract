@@ -47,6 +47,11 @@
 - `examples/rank_claim.py`
 - `examples/compare_claim.py`
 - Generated outputs in `examples/output/`
+- `examples/output/bad_chart_audit.md`
+- `examples/output/bad_chart_audit.json`
+- `examples/output/bad_chart.svg`
+- `examples/output/corrected_chart.svg`
+- `examples/output/corrected_chart.vl.json`
 
 ## Docs
 
@@ -78,16 +83,17 @@
 
 - Editable install passed
 - Full pytest suite passed (`14 passed`)
-- All requested example scripts ran successfully
+- Hero demo emitted audit Markdown/JSON plus static SVG renders
 - `git diff --check` passed
 - Structural validation passed
+- Local path and file-URL grep checks passed
 
 ## Remaining Risks
 
 - `audit_spec()` is experimental and intentionally narrow.
-- Visual verification is limited to spec generation, not browser rendering.
+- Visual verification now includes committed static SVGs, but browser rendering remains unverified.
 - Current dependency set emits Altair-related deprecation warnings during tests.
 
 ## Release Note
 
-Created chart-contract, a lightweight Python harness for claim-first, audited analytical charts. The v0.1 package supports trend, rank, and compare intents, Altair/Vega-Lite output, deterministic audit findings, a bad-chart-to-contract demo, and build artifacts documenting how ai-engineering-skills was used to create the repo.
+Created chart-contract, a lightweight Python harness for claim-first, audited analytical charts. The v0.1 package supports trend, rank, and compare intents, Altair/Vega-Lite output, deterministic audit findings, a bad-chart-to-contract demo, and build artifacts documenting how ai-engineering-skills was used to create the repo. Final v0.1 polish adds committed hero SVGs and audit report artifacts for a stronger first impression.

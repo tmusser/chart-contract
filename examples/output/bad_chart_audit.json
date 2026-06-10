@@ -1,0 +1,56 @@
+{
+  "passed": false,
+  "has_failures": true,
+  "summary": "PASS=3 WARN=3 FAIL=1",
+  "findings": [
+    {
+      "rule_id": "contract.claim.present",
+      "severity": "PASS",
+      "message": "Claim is declared for the spec audit.",
+      "suggestion": null,
+      "field": null
+    },
+    {
+      "rule_id": "contract.source.present",
+      "severity": "WARN",
+      "message": "Spec is missing source/provenance metadata.",
+      "suggestion": "Add spec['usermeta']['source'] to preserve provenance.",
+      "field": "source"
+    },
+    {
+      "rule_id": "labels.title.quality",
+      "severity": "WARN",
+      "message": "Spec title is missing or generic.",
+      "suggestion": "Use a specific title tied to the claim.",
+      "field": "title"
+    },
+    {
+      "rule_id": "claim.causal_support",
+      "severity": "WARN",
+      "message": "Claim uses causal language without a caveat or causal evidence metadata.",
+      "suggestion": "Add a caveat or spec['usermeta']['causal_evidence']=True when justified.",
+      "field": "claim"
+    },
+    {
+      "rule_id": "visual.arc.category_count",
+      "severity": "FAIL",
+      "message": "Pie/arc chart uses 7 categories; use a sorted bar chart instead.",
+      "suggestion": "Switch to a rank chart with bars for easier comparisons.",
+      "field": "encoding.color"
+    },
+    {
+      "rule_id": "readability.color.category_count",
+      "severity": "PASS",
+      "message": "Color encoding category count is readable.",
+      "suggestion": null,
+      "field": null
+    },
+    {
+      "rule_id": "visual.integrity.decoration",
+      "severity": "PASS",
+      "message": "No decorative chartjunk-like spec fields detected.",
+      "suggestion": null,
+      "field": null
+    }
+  ]
+}
