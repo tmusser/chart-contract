@@ -16,34 +16,57 @@ A chart should declare:
 - visual intent
 - chart type
 
-## Good Contract
+## Examples
+
+### Good Contract
 
 ```yaml
-claim: "Enterprise win rate is higher than SMB in both regions."
-metric: "win_rate"
-grain: "segment x region"
-dimensions: ["segment", "region"]
-source: "warehouse.pipeline_summary"
-units: "win rate"
+claim: Enterprise and startup segments show the highest observed conversion rates.
+metric: conversion_rate
+grain: customer segment
+dimensions: [segment]
+source: synthetic.segment_conversion
+units: conversion rate
 filters:
-  quarter: "2026-Q2"
-caveat: "Observed pipeline summary; not causal attribution."
-visual_intent: "compare"
-chart_type: "grouped bar"
+  quarter: 2026-Q2
+time_window: latest synthetic snapshot
+caveats:
+  - Observational segment summary; not causal proof.
+visual_intent: rank
+chart_type: bar
 ```
 
-## Weak Contract
+Why this is strong:
+
+- The claim is specific.
+- The metric and grain are explicit.
+- The source and units are present.
+- The caveat prevents overclaiming causality.
+- The visual intent and chart type match a ranked comparison.
+
+### Weak Contract
 
 ```yaml
-claim: "The launch worked."
-metric: "conversion"
-source: ""
-units: ""
-filters: {}
-caveat: ""
-visual_intent: "chart"
-chart_type: "pie"
+claim: Conversion is better.
+metric: conversion_rate
+grain:
+dimensions: []
+source:
+units:
+filters:
+time_window:
+caveats: []
+visual_intent: show data
+chart_type: pie
 ```
+
+Why this is weak:
+
+- The claim is vague.
+- The grain, source, units, and time window are missing.
+- The visual intent is not analytical.
+- The chart type may not match the task.
+- There is no caveat despite a performance claim.
 
 ## v0.1 Intent Mapping
 

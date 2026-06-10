@@ -1,9 +1,36 @@
 # VERIFY
 
+2026-06-10 - Public path cleanup patch
+
+Environment:
+- Working directory: repo root
+- Python: `Python 3.12.4`
+
+Commands:
+- `grep -R "/Users/" -n README.md docs artifacts examples src tests || true` -> PASSED with no matches
+- `python3 -m pip install -e '.[dev]'` -> PASSED
+- `python3 examples/bad_to_good_chart.py` -> PASSED
+- `python3 -m pytest` -> PASSED (`14 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `README.md`
+- `docs/VISUAL_CONTRACT.md`
+- `artifacts/VERIFY.md`
+
+Deferred items:
+- Rendered README screenshots remain deferred because the patch intentionally avoids heavyweight export dependencies.
+
+Remaining risks:
+- The generated editable-install metadata can still be recreated transiently by `pip install -e`, but the tracked docs and source files no longer contain local filesystem paths.
+
+Next safest task:
+- Commit and push this cleanup patch if you want it published, then consider whether to keep or remove the earlier public-facing polish patch from the branch history.
+
 2026-06-10 - Public-facing polish patch
 
 Environment:
-- Working directory: `/Users/thomas.musser/code/chart-contract`
+- Working directory: repo root
 - Python: `Python 3.12.4`
 
 Commands:
@@ -37,7 +64,7 @@ Next safest task:
 2026-06-10 - Build `chart-contract` v0.1
 
 Environment:
-- Working directory: `/Users/thomas.musser/code/chart-contract`
+- Working directory: repo root
 - Python: `Python 3.12.4`
 
 Scope freezes used:

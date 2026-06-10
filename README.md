@@ -68,9 +68,9 @@ Run the full hero demo with:
 python examples/bad_to_good_chart.py
 ```
 
-It audits the risky pie-like chart, prints PASS/WARN/FAIL findings, and writes a corrected Vega-Lite spec to [examples/output/corrected_chart.vl.json](/Users/thomas.musser/code/chart-contract/examples/output/corrected_chart.vl.json).
+It audits the risky pie-like chart, prints PASS/WARN/FAIL findings, and writes a corrected Vega-Lite spec to [examples/output/corrected_chart.vl.json](examples/output/corrected_chart.vl.json).
 
-Rendered README screenshots are deferred for now because this repo does not yet ship lightweight export tooling. The next step is tracked in [ROADMAP.md](/Users/thomas.musser/code/chart-contract/ROADMAP.md).
+Rendered README screenshots are deferred for now because this repo does not yet ship lightweight export tooling. The next step is tracked in [ROADMAP.md](ROADMAP.md).
 
 ## Quickstart
 
