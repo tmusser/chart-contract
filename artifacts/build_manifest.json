@@ -111,7 +111,8 @@
         "status": "passed"
       }
     ],
-    "status": "passed"
+    "status": "passed",
+    "pytest": "14 passed"
   },
   "remaining_risks": [
     "audit_spec is experimental and limited to deterministic Vega-Lite-like checks",

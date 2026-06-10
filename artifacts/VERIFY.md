@@ -1,5 +1,31 @@
 # VERIFY
 
+2026-06-10 - Proof artifact polish
+
+Environment:
+- Working directory: repo root
+- Python: `Python 3.12.4`
+
+Commands:
+- `python3 -m pytest` -> PASSED (`14 passed`)
+- `git diff --check` -> PASSED
+- README/case-study/manifest link check -> PASSED
+- Manifest verification count sync check -> PASSED
+
+Changed files:
+- `README.md`
+- `docs/AGENT_WORKFLOW_CASE_STUDY.md`
+- `artifacts/BUILD_MANIFEST.md`
+- `artifacts/build_manifest.json`
+- `artifacts/VERIFY.md`
+
+Remaining risks:
+- Visual verification remains limited to spec generation unless rendered chart export is added later.
+- `audit_spec()` remains intentionally experimental.
+
+Next safest task:
+- Add the v0.2 CLI only after keeping v0.1 chart intents and renderer scope fixed.
+
 2026-06-10 - Public path cleanup patch
 
 Environment:

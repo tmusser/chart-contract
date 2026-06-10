@@ -77,7 +77,7 @@
 ## Verification Summary
 
 - Editable install passed
-- Full pytest suite passed (`11 passed`)
+- Full pytest suite passed (`14 passed`)
 - All requested example scripts ran successfully
 - `git diff --check` passed
 - Structural validation passed
