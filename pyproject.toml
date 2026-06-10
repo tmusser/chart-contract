@@ -9,7 +9,7 @@ description = "A lightweight Python harness for claim-first, audited analytical 
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "OpenAI Codex" }]
+authors = [{ name = "Thomas Musser" }]
 dependencies = [
   "altair>=5.0.0",
   "pandas>=2.0.0",

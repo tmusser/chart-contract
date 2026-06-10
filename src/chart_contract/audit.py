@@ -72,6 +72,22 @@ class AuditReport:
             "findings": [finding.to_dict() for finding in self.findings],
         }
 
+    def to_markdown(self) -> str:
+        lines = ["# Audit Report", "", f"Summary: `{self.summary()}`", ""]
+        for finding in self.findings:
+            line = f"- **{finding.severity}** `{finding.rule_id}`: {finding.message}"
+            if finding.suggestion:
+                line += f" Suggestion: {finding.suggestion}"
+            lines.append(line)
+        return "\n".join(lines)
+
+    def raise_on_fail(self) -> None:
+        failures = [finding for finding in self.findings if finding.severity == FAIL]
+        if not failures:
+            return
+        failure_lines = [f"{finding.rule_id}: {finding.message}" for finding in failures]
+        raise ValueError("Audit report contains failures:\n" + "\n".join(failure_lines))
+
     def add(
         self,
         rule_id: str,

@@ -4,13 +4,17 @@ A lightweight Python harness for claim-first, audited analytical charts.
 
 Charts should satisfy analytical contracts, not just render.
 
-`chart-contract` is not a full visualization library, not a dashboard tool, and not an AI chart generator. It is a chart-contract harness:
+`chart-contract` helps analysts and AI agents produce claim-first charts that can be audited before sharing. A chart should not just render; it should declare what it claims, what data supports it, and what could mislead the reader. Charts are reasoning artifacts, not decorations.
+
+It is a chart-contract harness:
 
 `claim -> data contract -> visual choice -> audit -> render`
 
+It is intentionally not a full visualization library, not a dashboard tool, and not an AI chart generator.
+
 ## Bad Chart -> Audit -> Corrected Chart
 
-The repo leads with a risky chart example because that is the point of the package.
+The repo leads with a risky chart example because that is the point of the package: catch weak analytical defaults before a chart gets shared.
 
 ```python
 import pandas as pd
@@ -47,13 +51,26 @@ corrected = Chart.rank(
 )
 ```
 
+Representative audit output from `python examples/bad_to_good_chart.py`:
+
+```text
+PASS contract.claim.present
+WARN contract.source.present
+WARN labels.title.quality
+WARN claim.causal_support
+FAIL visual.arc.category_count
+PASS readability.color.category_count
+```
+
 Run the full hero demo with:
 
 ```bash
 python examples/bad_to_good_chart.py
 ```
 
-It will audit the risky pie-like chart, print PASS/WARN/FAIL findings, and write a corrected Vega-Lite spec to `examples/output/corrected_chart.vl.json`.
+It audits the risky pie-like chart, prints PASS/WARN/FAIL findings, and writes a corrected Vega-Lite spec to [examples/output/corrected_chart.vl.json](/Users/thomas.musser/code/chart-contract/examples/output/corrected_chart.vl.json).
+
+Rendered README screenshots are deferred for now because this repo does not yet ship lightweight export tooling. The next step is tracked in [ROADMAP.md](/Users/thomas.musser/code/chart-contract/ROADMAP.md).
 
 ## Quickstart
 

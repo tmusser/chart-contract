@@ -1,5 +1,39 @@
 # VERIFY
 
+2026-06-10 - Public-facing polish patch
+
+Environment:
+- Working directory: `/Users/thomas.musser/code/chart-contract`
+- Python: `Python 3.12.4`
+
+Commands:
+- `python3 -m pip install -e '.[dev]'` -> PASSED
+- `python3 examples/bad_to_good_chart.py` -> PASSED
+- `python3 -m pytest` -> PASSED (`14 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `pyproject.toml`
+- `LICENSE`
+- `ROADMAP.md`
+- `README.md`
+- `docs/VISUAL_CONTRACT.md`
+- `src/chart_contract/audit.py`
+- `tests/test_audit_rules.py`
+- `.github/workflows/ci.yml`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Deferred items:
+- Rendered README chart artifact export was not added because lightweight SVG/PNG export tooling is not currently installed, and this patch intentionally avoids heavy new dependencies.
+
+Remaining risks:
+- CI currently exercises one Python version (`3.11`) rather than a broader compatibility matrix.
+- Altair-related deprecation warnings still appear in local pytest output.
+
+Next safest task:
+- Decide whether to commit and push this polish patch, then consider a small CI compatibility follow-up.
+
 2026-06-10 - Build `chart-contract` v0.1
 
 Environment:
