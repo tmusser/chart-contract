@@ -12,7 +12,7 @@ Stop beautiful AI charts from smuggling weak claims.
 
 AI-generated charts can look plausible while hiding weak claims, missing units, missing sources, misleading visual forms, or causal overreach. `chart-contract` makes those assumptions explicit before the chart is shared.
 
-> Pre-launch dogfooding caught a real blind spot: single-point `Chart.trend()` outputs were passing as valid directional trends. v0.1 now fails that case with `data.trend.min_points`, keeping the audit contract honest.
+The audit also catches single-point trend claims: a directional trend needs at least two observations, enforced by `data.trend.min_points`.
 
 It is a chart-contract harness:
 
@@ -41,7 +41,7 @@ Outputs from the hero demo:
 
 See [docs/AUDIT_RULES.md](docs/AUDIT_RULES.md) for the rule reference behind these findings.
 
-The hero demo now commits lightweight rendered charts alongside the audit artifacts so the first impression is inspectable without extra tooling.
+The hero demo includes lightweight rendered charts alongside the audit artifacts so the first impression is inspectable without extra tooling.
 
 ## Why not just Altair, Great Expectations, or a checklist?
 
