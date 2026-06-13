@@ -39,6 +39,8 @@ Outputs from the hero demo:
 - [Bad chart SVG](examples/output/bad_chart.svg)
 - [Corrected chart SVG](examples/output/corrected_chart.svg)
 
+See [docs/AUDIT_RULES.md](docs/AUDIT_RULES.md) for the rule reference behind these findings.
+
 The hero demo now commits lightweight rendered charts alongside the audit artifacts so the first impression is inspectable without extra tooling.
 
 ## Why not just Altair, Great Expectations, or a checklist?
@@ -59,6 +61,8 @@ python -m pip install -e ".[dev]"
 python examples/bad_to_good_chart.py
 pytest
 ```
+
+For agent-gated workflows, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md) and the runnable traps in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of v0.1.
 
 ## Bad Chart -> Audit -> Corrected Chart
 
