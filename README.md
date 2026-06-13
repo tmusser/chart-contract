@@ -182,3 +182,7 @@ The audit layer uses Tufte-inspired visual integrity checks. It does not claim t
 This repo was built using `ai-engineering-skills` and is intended as the software proof artifact companion to `ai-business-skills`.
 
 See the [agent workflow case study](docs/AGENT_WORKFLOW_CASE_STUDY.md) and [build manifest](artifacts/BUILD_MANIFEST.md) for the proof trail.
+
+## Part of the Suite
+
+See the [suite map](docs/SUITE_MAP.md) for how `chart-contract`, `ai-engineering-skills`, and `ai-business-skills` fit together as one story.
