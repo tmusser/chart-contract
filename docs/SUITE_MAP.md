@@ -4,24 +4,23 @@ A small set of repos for making AI-assisted work clearer, more bounded, and more
 
 ## ai-engineering-skills
 
-- audience: technical builders using coding agents.
-- job: clarify, constrain, verify, and hand off small software work.
+- Audience: technical builders using coding agents.
+- Job: clarify, constrain, verify, and hand off small software work.
 
 ## ai-business-skills
 
-- audience: PMs, managers, analysts, operators, and exec-adjacent ICs.
-- job: turn messy workplace context into clear asks, decisions, owners, updates, and follow-ups.
+- Audience: PMs, managers, analysts, operators, and exec-adjacent ICs.
+- Job: turn messy workplace context into clear asks, decisions, owners, updates, and follow-ups.
 
 ## chart-contract
 
-- audience: analysts, data scientists, and AI agents producing analytical charts.
-- job: audit claim, data, visual choice, source, unit, and caveat before sharing.
-- reference: see the [chart-contract README](../README.md).
+- Audience: analysts, data scientists, and AI agents producing analytical charts.
+- Job: audit claim, data, visual choice, source, unit, and caveat before sharing.
 
 ## Same operating philosophy
 
-- clarify first;
-- constrain scope;
-- expose assumptions;
-- verify before sharing;
-- preserve handoff state.
+- Clarify first.
+- Constrain scope.
+- Expose assumptions.
+- Verify before sharing.
+- Preserve handoff state.
