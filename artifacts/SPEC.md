@@ -2,65 +2,63 @@
 
 ## Objective
 
-Add a deterministic pre-share verdict layer to `chart-contract` so analysts and AI agents can tell whether a chart is ready to share without interpreting raw findings first.
+Build `chart-contract`, a lightweight Python harness for claim-first, audited analytical charts that turns analytical claims into inspected `trend`, `rank`, and `compare` charts with Altair/Vega-Lite output and deterministic PASS/WARN/FAIL audit findings.
 
-## User / Use Case
+## Audience
 
-- Analysts reviewing a draft chart before sharing it in a doc, deck, or Slack thread.
-- AI agents generating a draft chart that must stop, warn, or proceed based on audit output.
+- Analysts and analytics engineers who want auditable chart defaults.
+- AI-assisted builders who need a thin contract layer before sharing charts.
 
-## Acceptance Criteria
+## v0.1 Scope
 
-- A report with any `FAIL` finding yields a `BLOCK` verdict.
-- A report with no `FAIL` findings and at least one `WARN` finding yields a `REVIEW` verdict.
-- A report with only `PASS` findings yields a `READY` verdict.
-- The verdict output includes a short human-readable summary plus PASS/WARN/FAIL counts.
-- The underlying audit findings remain fully inspectable; the verdict is a thin layer, not a replacement.
-- The behavior is deterministic and covered by focused tests.
+- `Chart.trend()`, `Chart.rank()`, `Chart.compare()`
+- `chart.audit()`
+- `chart.to_altair()`
+- `chart.to_vega_lite()`
+- experimental `audit_spec()`
+- Altair/Vega-Lite as the only renderer
+- deterministic PASS/WARN/FAIL findings
+- docs, tests, examples, and build-proof artifacts
 
 ## Non-Goals
 
-- No new chart intents beyond `trend`, `rank`, and `compare`.
-- No UI, dashboard, CLI, or publishing workflow.
-- No LLM calls, auto-fix loops, or automatic chart correction.
-- No changes to renderer behavior beyond existing Altair/Vega-Lite output.
-- No replacement for human review on nuanced or domain-specific claims.
+- UI, dashboards, or Streamlit
+- automatic chart correction
+- renderers beyond Altair/Vega-Lite
+- additional chart intents beyond `trend`, `rank`, `compare`
+- external data fetching, LLM calls, telemetry, or theme systems
+
+## Acceptance Criteria
+
+- Public API supports the usage shown in the brief.
+- Audit layer catches required completeness, data-contract, visual-form, claim-support, provenance, and Tufte-inspired integrity checks.
+- `audit_spec()` flags non-zero bar baselines and overcrowded pie/arc charts.
+- Examples run on synthetic data and write Vega-Lite JSON into `examples/output/`.
+- README leads with the bad-chart to corrected-chart story.
+- Artifacts document the `ai-engineering-skills` workflow and verification evidence.
 
 ## Constraints
 
-- Preserve the v0.1 scope of `chart-contract` as a claim-first audit harness.
-- Keep warnings explainable and rule-driven.
-- Do not change `audit_spec()` semantics unless needed for consistency.
-- Do not fetch or mutate external data.
-- Prefer the smallest public surface that solves the pre-share decision problem.
+- Python 3.10+
+- Minimal dependencies: `pandas`, `altair`, `pytest`
+- Keep models simple and inspectable
+- Explainable warnings only; no unverifiable claims of compliance or certification
 
-## Run / Test / Verification Commands
+## Verification Commands
 
-- `python3 -m pytest`
-- `python3 examples/bad_to_good_chart.py`
+- `python -m pip install -e ".[dev]"`
+- `pytest`
+- `python examples/bad_to_good_chart.py`
+- `python examples/trend_claim.py`
+- `python examples/rank_claim.py`
+- `python examples/compare_claim.py`
 - `git diff --check`
-
-## Project Structure Sketch
-
-- `src/chart_contract/audit.py`
-  Add the verdict mapping close to `AuditReport` and finding summaries.
-- `tests/test_audit_rules.py`
-  Add deterministic verdict coverage for PASS-only, WARN-only, and FAIL cases.
-- `README.md` or `docs/`
-  Optional follow-up only if the new surface needs one short usage example.
 
 ## Smallest Verification Demo
 
-Show three reports:
-
-1. a clean chart audit that returns `READY`
-2. a warning-only chart audit that returns `REVIEW`
-3. a failing chart audit that returns `BLOCK`
-
-The demo is successful if the verdict and counts match the findings exactly.
+Run `python examples/bad_to_good_chart.py` to show a risky spec audited with failures and a corrected contract-driven chart emitted as Vega-Lite JSON.
 
 ## Open Questions
 
-- Should the verdict live as an `AuditReport` property or a small helper method on the report model?
-- Should `audit_spec()` reports get the same verdict surface immediately, or should v0.1 keep the first slice focused on chart audits?
-- What is the smallest wording that feels operational without sounding like compliance language?
+- Event annotations in Altair will be kept simple in v0.1 unless implementation complexity rises.
+- Subtitle/provenance handling may rely on chart metadata rather than full visual subtitles.
