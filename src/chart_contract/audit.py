@@ -28,6 +28,9 @@ PASS = "PASS"
 WARN = "WARN"
 FAIL = "FAIL"
 SEVERITIES = {PASS, WARN, FAIL}
+READY = "READY"
+REVIEW = "REVIEW"
+BLOCK = "BLOCK"
 
 
 @dataclass(slots=True)
@@ -55,8 +58,20 @@ class AuditReport:
         return not self.has_failures
 
     @property
+    def has_warnings(self) -> bool:
+        return any(finding.severity == WARN for finding in self.findings)
+
+    @property
     def has_failures(self) -> bool:
         return any(finding.severity == FAIL for finding in self.findings)
+
+    @property
+    def verdict(self) -> str:
+        if self.has_failures:
+            return BLOCK
+        if self.has_warnings:
+            return REVIEW
+        return READY
 
     def summary(self) -> str:
         counts = {severity: 0 for severity in (PASS, WARN, FAIL)}
@@ -64,16 +79,29 @@ class AuditReport:
             counts[finding.severity] += 1
         return f"PASS={counts[PASS]} WARN={counts[WARN]} FAIL={counts[FAIL]}"
 
+    def verdict_summary(self) -> str:
+        return f"{self.verdict}: {self.summary()}"
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "passed": self.passed,
             "has_failures": self.has_failures,
+            "has_warnings": self.has_warnings,
+            "verdict": self.verdict,
             "summary": self.summary(),
+            "verdict_summary": self.verdict_summary(),
             "findings": [finding.to_dict() for finding in self.findings],
         }
 
     def to_markdown(self) -> str:
-        lines = ["# Audit Report", "", f"Summary: `{self.summary()}`", ""]
+        lines = [
+            "# Audit Report",
+            "",
+            f"Verdict: `{self.verdict}`",
+            "",
+            f"Summary: `{self.summary()}`",
+            "",
+        ]
         for finding in self.findings:
             line = f"- **{finding.severity}** `{finding.rule_id}`: {finding.message}"
             if finding.suggestion:

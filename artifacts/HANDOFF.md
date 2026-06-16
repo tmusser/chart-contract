@@ -2,70 +2,53 @@
 
 RESUME PACKET
 
-- Goal: Keep `chart-contract` credible as a claim-first audited chart harness while applying small public-facing polish patches without scope expansion.
-- Workflow State: polish patch complete, next gate=`verify-contract` satisfied, context risk=low.
-- Branch: `main`, Commit: `7689daa`, Dirty: yes
-- Next task: commit and push the polish patch, then consider CI compatibility follow-up
-- Verification: `python3 -m pip install -e '.[dev]' && python3 examples/bad_to_good_chart.py && python3 -m pytest`
-- Read first: `artifacts/HANDOFF.md`, `artifacts/SPEC.md`, `artifacts/PLAN.md`, `artifacts/VERIFY.md`, then `README.md`
+- Goal: keep `chart-contract` within v0.1 scope while adding a deterministic pre-share verdict layer.
+- Workflow State: one implementation slice complete, next gate=`review or merge`, context risk=low.
+- Branch: `codex/pre-share-verdict-layer`, Base commit: `c90ca50`, Dirty: yes (tracked work is ready to commit; local untracked `.DS_Store`, `.venv/`, `scratch/` remain)
+- Next task: commit and push the verdict-layer slice, then decide whether one tiny docs example is worth adding later
+- Verification: `python3 -m pytest && python3 examples/bad_to_good_chart.py && git diff --check`
+- Read first: `artifacts/SPEC.md`, `artifacts/VERIFY.md`, `src/chart_contract/audit.py`, `tests/test_audit_rules.py`
 
 ## Current Goal
 
-The repository now includes a bounded credibility patch: clearer README positioning, packaging hygiene, MIT licensing, a disciplined roadmap, low-risk `AuditReport` helpers, and minimal GitHub Actions CI.
+Give analysts and AI agents a deterministic report-level answer to "can this chart be shared?" without replacing the underlying PASS/WARN/FAIL findings.
 
-## Completed Slices
+## Completed Slice
 
-- Package skeleton and packaging -> verified by editable install and import tests
-- Audit models and deterministic rules -> verified by focused pytest coverage
-- Trend, rank, and compare intents -> verified by chart intent tests and example runs
-- Experimental `audit_spec()` -> verified by spec audit tests and hero example
-- README, docs, manifests, and workflow case study -> verified by structural checks
-- Public-facing polish patch -> verified by editable install, hero example run, full pytest, and `git diff --check`
+- Added `AuditReport.verdict` with deterministic `READY` / `REVIEW` / `BLOCK` behavior.
+- Added `has_warnings`, `verdict_summary()`, and serialized verdict fields in `to_dict()`.
+- Updated markdown output to show the verdict alongside the counts.
+- Added focused tests for pass-only, warning-only, and failure reports.
+- Recorded verification evidence for the slice.
 
 ## Changed Files
 
-- `src/chart_contract/chart.py` -> front-door `Chart` dataclass and intent constructors
-- `src/chart_contract/audit.py` -> audit models, chart audits, experimental spec audit, and low-risk report helpers
-- `src/chart_contract/contracts.py` -> shared claim/title/filter/spec helper logic
-- `src/chart_contract/renderers/altair.py` -> Altair/Vega-Lite rendering helpers
-- `tests/` -> deterministic coverage for imports, audit rules, intents, spec auditing, and example execution
-- `examples/` -> synthetic-data demos and emitted Vega-Lite specs
-- `docs/` -> rationale, visual contract, principles, workflow case study, and stronger contract examples
-- `README.md` -> clearer public-facing positioning and audit-output scanability
-- `pyproject.toml` / `LICENSE` / `ROADMAP.md` / `.github/workflows/ci.yml` -> packaging hygiene, license, disciplined roadmap, and minimal CI
-- `artifacts/` -> spec, plan, todo, verification log, manifest, invocation log, and handoff state
+- `src/chart_contract/audit.py` -> report-level verdict helpers and serialization
+- `tests/test_audit_rules.py` -> focused verdict coverage and markdown assertion
+- `examples/output/bad_chart_audit.md` -> generated audit artifact now shows verdict
+- `examples/output/bad_chart_audit.json` -> generated audit artifact now serializes verdict fields
+- `artifacts/SPEC.md` -> verdict-layer mini-spec
+- `artifacts/TODO.md` -> task marked complete
+- `artifacts/VERIFY.md` -> implementation evidence
+- `artifacts/HANDOFF.md` -> refreshed resume state
 
 ## Working Commands
 
-- `python3 -m pip install -e '.[dev]'`
 - `python3 -m pytest`
 - `python3 examples/bad_to_good_chart.py`
-- `python3 examples/trend_claim.py`
-- `python3 examples/rank_claim.py`
-- `python3 examples/compare_claim.py`
+- `git diff --check`
 
 ## Important Decisions
 
-- Keep Altair/Vega-Lite as the only renderer in v0.1.
-- Keep `audit_spec()` experimental and deterministic rather than broad or AI-driven.
-- Treat causal-language checks as warnings unless evidence is explicitly declared.
-- Inline Vega-Lite data in the renderer to avoid local Altair/pandas dtype compatibility issues.
-- Defer rendered README screenshots rather than adding heavyweight export dependencies in this patch.
+- Kept the slice narrow by adding verdict behavior to `AuditReport` instead of inventing a new workflow object.
+- Preserved finding-level inspectability; the verdict is a thin deterministic layer on top.
+- Did not add docs or README changes in the implementation slice.
 
-## Open Decisions
+## Remaining Risks
 
-- Whether to pin dependency versions or add compatibility shims in CI for future maintenance.
-- Whether to add lightweight SVG/PNG export tooling for README visuals in a later release.
-
-## Traps
-
-- Do not expand beyond `trend`, `rank`, and `compare` without updating `artifacts/SPEC.md`.
-- Do not convert the repo into a dashboard or chart gallery project.
-- Preserve proof artifacts in `artifacts/` after any future changes.
+- The new surface may be discoverable mainly through code and tests until a later doc snippet is added.
+- `audit_spec()` inherits the verdict surface implicitly, but the docs do not call that out yet.
 
 ## Next Recommended Task
 
-Commit and push this polish patch, then decide whether the next step should be CI compatibility coverage or lightweight render export tooling.
-
-Verification command:
-- `python3 -m pip install -e '.[dev]' && python3 examples/bad_to_good_chart.py && python3 -m pytest`
+Push this branch for review, then choose whether to add one minimal usage example for `report.verdict` or leave it as an inspectable power-user feature for now.

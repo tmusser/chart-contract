@@ -12,3 +12,4 @@
 - [x] Write README and docs
 - [x] Create build manifests and verification record
 - [x] Finalize handoff state
+- [x] Add deterministic pre-share verdict layer

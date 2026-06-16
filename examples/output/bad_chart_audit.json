@@ -1,7 +1,10 @@
 {
   "passed": false,
   "has_failures": true,
+  "has_warnings": true,
+  "verdict": "BLOCK",
   "summary": "PASS=3 WARN=3 FAIL=1",
+  "verdict_summary": "BLOCK: PASS=3 WARN=3 FAIL=1",
   "findings": [
     {
       "rule_id": "contract.claim.present",

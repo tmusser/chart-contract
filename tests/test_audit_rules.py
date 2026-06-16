@@ -93,6 +93,7 @@ def test_audit_report_to_markdown_includes_summary_and_findings() -> None:
     markdown = report.to_markdown()
 
     assert "# Audit Report" in markdown
+    assert "Verdict:" in markdown
     assert "Summary:" in markdown
     assert "`contract.claim.present`" in markdown
 
@@ -122,3 +123,56 @@ def test_audit_report_raise_on_fail_is_noop_without_failures() -> None:
     assert severities["data.trend.min_points"] == "PASS"
 
     report.raise_on_fail()
+
+
+def test_audit_report_verdict_ready_for_pass_only_report() -> None:
+    df = pd.DataFrame({"week": ["2026-05-01", "2026-05-08"], "value": [0.12, 0.15]})
+
+    report = Chart.trend(
+        data=df,
+        x="week",
+        y="value",
+        claim="Conversion improved",
+        source="warehouse.funnel_events",
+        unit="conversion rate",
+        title="Weekly conversion rate improved",
+    ).audit()
+
+    assert report.verdict == "READY"
+    assert report.verdict_summary() == f"READY: {report.summary()}"
+    assert report.to_dict()["verdict"] == "READY"
+
+
+def test_audit_report_verdict_review_for_warning_only_report() -> None:
+    df = pd.DataFrame({"week": ["2026-05-01", "2026-05-08"], "value": [0.12, 0.15]})
+
+    report = Chart.trend(
+        data=df,
+        x="week",
+        y="value",
+        claim="Conversion improved",
+        unit="conversion rate",
+        title="Weekly conversion rate improved",
+    ).audit()
+
+    assert report.verdict == "REVIEW"
+    assert report.has_failures is False
+    assert report.has_warnings is True
+
+
+def test_audit_report_verdict_block_for_failure_report() -> None:
+    df = pd.DataFrame({"week": ["2026-05-01"], "value": [0.12]})
+
+    report = Chart.trend(
+        data=df,
+        x="week",
+        y="value",
+        claim="Conversion improved steadily.",
+        source="warehouse.funnel",
+        unit="rate",
+        title="Weekly conversion improved steadily",
+    ).audit()
+
+    assert report.verdict == "BLOCK"
+    assert report.verdict_summary() == f"BLOCK: {report.summary()}"
+    assert report.to_dict()["verdict_summary"] == report.verdict_summary()
