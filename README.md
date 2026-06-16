@@ -153,6 +153,8 @@ spec = chart.to_vega_lite()
 altair_chart = chart.to_altair()
 ```
 
+For a minimal pre-share gate, inspect `report.verdict` before you send the chart onward: `READY` means the audit found only `PASS` checks, `REVIEW` means warnings need human judgment, and `BLOCK` means at least one failure should stop sharing until fixed.
+
 Supported front-door intents in v0.1:
 
 - `Chart.trend()`

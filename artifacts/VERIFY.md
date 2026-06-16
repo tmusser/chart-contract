@@ -1,5 +1,26 @@
 # VERIFY
 
+2026-06-15 - Add README verdict usage note on main
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `grep -n "report.verdict\|READY means\|REVIEW means\|BLOCK means" README.md` -> PASSED
+- `git diff -- README.md` -> PASSED
+- `git diff --check` -> PASSED
+
+Changed files:
+- `README.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- This is a README-only discoverability patch; no product behavior changed.
+
+Next safest task:
+- Keep future verdict-layer documentation updates small and explicit now that the feature is already merged.
+
 2026-06-15 - Relocate verdict-layer planning artifacts
 
 Environment:
@@ -28,7 +49,7 @@ Remaining risks:
 - Altair/jsonschema deprecation warnings still appear during pytest, though tests pass.
 
 Next safest task:
-- Merge `codex/pre-share-verdict-layer`, or add one tiny public usage example for `report.verdict` before merge if discoverability matters more than branch cleanliness.
+- Add one tiny public usage example for `report.verdict` after merge if discoverability matters more than branch cleanliness.
 
 2026-06-10 - README hero image and dogfood note
 
