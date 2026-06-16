@@ -1,5 +1,35 @@
 # VERIFY
 
+2026-06-15 - Relocate verdict-layer planning artifacts
+
+Environment:
+- Working directory: repo root
+- Python: `Python 3.12.4`
+
+Commands:
+- `python3 -m pytest` -> PASSED (`19 passed`, `213 warnings`)
+- `python3 examples/bad_to_good_chart.py` -> PASSED
+- `git diff --check` -> PASSED
+
+Changed files:
+- `artifacts/features/verdict-layer/README.md`
+- `artifacts/features/verdict-layer/SPEC.md`
+- `artifacts/features/verdict-layer/TODO.md`
+- `artifacts/features/verdict-layer/VERIFY.md`
+- `artifacts/features/verdict-layer/HANDOFF.md`
+- `artifacts/features/verdict-layer/command-log.md`
+- `artifacts/SPEC.md`
+- `artifacts/TODO.md`
+- `artifacts/HANDOFF.md`
+- `artifacts/VERIFY.md`
+
+Remaining risks:
+- The feature artifact trail is now isolated, but the verdict surface is still not advertised in public docs.
+- Altair/jsonschema deprecation warnings still appear during pytest, though tests pass.
+
+Next safest task:
+- Merge `codex/pre-share-verdict-layer`, or add one tiny public usage example for `report.verdict` before merge if discoverability matters more than branch cleanliness.
+
 2026-06-10 - README hero image and dogfood note
 
 Commands:

@@ -1,5 +1,7 @@
 # Audit Report
 
+Verdict: `BLOCK`
+
 Summary: `PASS=3 WARN=3 FAIL=1`
 
 - **PASS** `contract.claim.present`: Claim is declared for the spec audit.
