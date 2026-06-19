@@ -15,6 +15,6 @@ This repository was built as a proof-oriented application artifact using the `ai
 - A scoped agent workflow can produce installable software, not just documentation.
 - The control layer preserved scope: no UI, no dashboard, no renderer sprawl, and no extra chart intents in v0.1.
 - Verification artifacts captured actual commands, results, remaining risks, and the next safest task.
-- The final package demonstrates the portfolio chain: method repo -> business companion repo -> working software proof artifact.
+- The final package demonstrates the portfolio chain: method repo -> `context-to-action-skills` repo -> working software proof artifact.
 
 The goal was not only to ship the code, but to leave a visible trail showing how disciplined agent workflow produced the repo.

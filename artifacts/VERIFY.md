@@ -1,5 +1,29 @@
 # VERIFY
 
+2026-06-19 - Suite reference cleanup for context-to-action-skills
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `grep -R "ai-business-skills\\|business-skills\\|ai business skills\\|context-to-action-skills" -n . --exclude-dir=.git --exclude-dir=__pycache__ --exclude="*.svg" --exclude="*.png" --exclude="*.gif" || true` -> PASSED; identified stale references in README.md, docs/SUITE_MAP.md, artifacts/VERIFY.md, docs/AGENT_WORKFLOW_CASE_STUDY.md, and generated metadata
+- `grep -R "Part of the Suite\\|Companion Artifact\\|suite map\\|companion" -n README.md docs artifacts examples .github 2>/dev/null || true` -> PASSED
+- `git diff --check` -> PASSED
+
+Changed files:
+- `README.md`
+- `docs/SUITE_MAP.md`
+- `docs/AGENT_WORKFLOW_CASE_STUDY.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- Historical verification entries still preserve the former repo name as an audit trail.
+- Generated package metadata may still carry the old name until a dedicated build-artifact refresh is warranted.
+
+Next safest task:
+- Keep future suite-branding edits paired between the README and suite map so the positioning stays consistent.
+
 2026-06-15 - Add README verdict usage note on main
 
 Environment:
