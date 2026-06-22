@@ -31,6 +31,9 @@ dev = [
   "vl-convert-python",
 ]
 
+[project.scripts]
+chart-contract = "chart_contract.cli:main"
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 

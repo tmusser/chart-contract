@@ -1,5 +1,30 @@
 # VERIFY
 
+2026-06-22 - Add CLI skeleton
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_cli.py` -> PASSED (`6 passed`)
+- `./.venv/bin/python -m pytest` -> PASSED (`29 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `pyproject.toml`
+- `src/chart_contract/cli.py`
+- `src/chart_contract/__main__.py`
+- `tests/test_cli.py`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The CLI still stubs out audit execution; it only parses the v0.2 surface for now.
+- Example output JSON files still have unrelated pre-existing working-tree drift from earlier runs.
+
+Next safest task:
+- Implement the `chart-contract audit spec` execution path in one small slice, starting with disk-based spec loading.
+
 2026-06-22 - Stabilize report serialization
 
 Environment:
