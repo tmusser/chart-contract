@@ -87,7 +87,7 @@ Exit behavior:
 - `REVIEW` exits `0` by default and `1` when `--warnings-as-errors` is set.
 - `BLOCK` exits `1`.
 
-For more agent-facing guidance, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md), the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of v0.1.
+For more agent-facing guidance on v0.2.0, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md), the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of the release.
 
 ## Bad Chart -> Audit -> Corrected Chart
 

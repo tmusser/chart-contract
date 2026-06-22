@@ -18,7 +18,8 @@ Release checklist:
 - [x] Report emitters: produce text, JSON, and Markdown audit reports from the same audit result.
 - [x] CI-friendly exit codes: map pass, warn, and fail outcomes to stable process exit codes for agents and CI.
 - [x] Runnable trap fixtures: add examples that exercise weak claims, missing provenance, and other audit failures.
-- [x] README and docs usage: add copy-paste examples that show the planned agent gate flow end to end.
+- [x] README and docs usage: add copy-paste examples that show the agent gate flow end to end.
+- [x] Release prep: bump the package version and add a v0.2.0 changelog entry.
 
 Explicit non-goals:
 

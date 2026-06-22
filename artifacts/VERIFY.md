@@ -1,5 +1,33 @@
 # VERIFY
 
+2026-06-22 - Prepare v0.2.0 release
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pip install -e ".[dev]"` -> PASSED (`chart-contract==0.2.0`)
+- `./.venv/bin/chart-contract --version` -> PASSED (`chart-contract 0.2.0`)
+- `./.venv/bin/python -m pytest` -> PASSED (`36 passed`)
+- `./.venv/bin/python examples/bad_to_good_chart.py` -> PASSED
+- `./.venv/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"` -> PASSED (`REVIEW`, exit 0)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `pyproject.toml`
+- `CHANGELOG.md`
+- `README.md`
+- `ROADMAP.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The example script rewrites tracked output artifacts, so the working tree still contains unrelated example-output drift.
+- The release prep does not add any new runtime behavior; it only packages and documents the v0.2.0 gate.
+
+Next safest task:
+- Commit the release prep and push it if the branch looks good.
+
 2026-06-22 - Document v0.2 agent gate workflow
 
 Environment:
