@@ -1,5 +1,44 @@
 # VERIFY
 
+2026-06-22 - Add runnable CLI trap fixtures
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m chart_contract audit spec examples/traps/too_many_pie_categories.vl.json --data examples/traps/too_many_pie_categories.csv --claim "$(cat examples/traps/too_many_pie_categories.claim.txt)"` -> PASSED (`BLOCK`, exit 1, `visual.arc.category_count`)
+- `./.venv/bin/python -m chart_contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"` -> PASSED (`REVIEW`, exit 0, `claim.causal_support`)
+- `./.venv/bin/python -m chart_contract audit spec examples/traps/single_point_trend.vl.json --data examples/traps/single_point_trend.csv --claim "$(cat examples/traps/single_point_trend.claim.txt)"` -> PASSED (`READY`, exit 0)
+- `./.venv/bin/python -m pytest tests/test_cli_traps.py` -> PASSED (`2 passed`)
+- `./.venv/bin/python -m pytest` -> PASSED (`36 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `README.md`
+- `examples/traps/README.md`
+- `examples/traps/too_many_pie_categories.vl.json`
+- `examples/traps/too_many_pie_categories.csv`
+- `examples/traps/too_many_pie_categories.claim.txt`
+- `examples/traps/causal_claim_missing_caveat.vl.json`
+- `examples/traps/causal_claim_missing_caveat.csv`
+- `examples/traps/causal_claim_missing_caveat.claim.txt`
+- `examples/traps/missing_source_or_unit.vl.json`
+- `examples/traps/missing_source_or_unit.csv`
+- `examples/traps/missing_source_or_unit.claim.txt`
+- `examples/traps/single_point_trend.vl.json`
+- `examples/traps/single_point_trend.csv`
+- `examples/traps/single_point_trend.claim.txt`
+- `tests/test_cli_traps.py`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The claim text still has to be passed explicitly on the CLI; the fixtures do not auto-wire claim files.
+- The traps are synthetic and only exercise the current gate rules, not new semantics.
+
+Next safest task:
+- Add any remaining v0.2 gate documentation or proceed to the next planned slice.
+
 2026-06-22 - CLI audit report outputs and exit codes
 
 Environment:

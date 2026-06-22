@@ -1,0 +1,14 @@
+{
+  "mark": "bar",
+  "title": "Conversion rate by segment",
+  "encoding": {
+    "x": {
+      "field": "segment",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "conversion_rate",
+      "type": "quantitative"
+    }
+  }
+}

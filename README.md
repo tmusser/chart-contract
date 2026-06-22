@@ -62,7 +62,7 @@ python examples/bad_to_good_chart.py
 pytest
 ```
 
-For agent-gated workflows, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md) for the planned v0.2.0 agent gate usage and the runnable traps in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of v0.1.
+For agent-gated workflows, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md) for the planned v0.2.0 agent gate usage, the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of v0.1.
 
 ## Bad Chart -> Audit -> Corrected Chart
 

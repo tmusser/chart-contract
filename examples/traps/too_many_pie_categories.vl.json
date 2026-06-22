@@ -1,0 +1,20 @@
+{
+  "mark": {
+    "type": "arc"
+  },
+  "title": "Customer segment conversion share",
+  "encoding": {
+    "theta": {
+      "field": "share",
+      "type": "quantitative"
+    },
+    "color": {
+      "field": "segment",
+      "type": "nominal"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.segment_share",
+    "unit": "share"
+  }
+}

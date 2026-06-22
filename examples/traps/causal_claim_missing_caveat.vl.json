@@ -1,0 +1,18 @@
+{
+  "mark": "line",
+  "title": "Weekly conversion rate after launch",
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "conversion_rate",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.launch_conversion",
+    "unit": "conversion rate"
+  }
+}
