@@ -21,6 +21,7 @@ Supported inputs:
 - `--out path/to/report.txt` to write the selected output to disk.
 - `--markdown path/to/report.md` to write Markdown output alongside the selected format.
 - `--warnings-as-errors` to make REVIEW exit nonzero.
+- `--fail-on READY|REVIEW|BLOCK` to set an explicit exit threshold; `READY` is mechanically valid but effectively means "always fail."
 
 Gate behavior:
 
@@ -32,6 +33,7 @@ Policy:
 
 - The agent must stop on `BLOCK`.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
+- `--fail-on` is available when you want an explicit threshold, but `BLOCK` is usually the practical gate.
 
 This command prints the selected format to stdout by default.
 When `--out` is supplied, the selected output is written to disk and stdout becomes a one-line verdict summary.

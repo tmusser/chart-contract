@@ -16,6 +16,7 @@ from .audit import BLOCK, READY, REVIEW, AuditReport, audit_spec
 SUPPORTED_REPORT_FORMATS = ("text", "json", "markdown")
 SUPPORTED_VERDICTS = (READY, REVIEW, BLOCK)
 VERDICT_RANK = {READY: 0, REVIEW: 1, BLOCK: 2}
+PACKAGE_VERSION_FALLBACK = "0.2.0"
 
 
 class CLIError(ValueError):
@@ -26,7 +27,7 @@ def _package_version() -> str:
     try:
         return package_version("chart-contract")
     except PackageNotFoundError:
-        return "0.1.0"
+        return PACKAGE_VERSION_FALLBACK
 
 
 def _load_json_spec(path: Path) -> dict[str, Any]:

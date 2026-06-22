@@ -3,11 +3,11 @@
 RESUME PACKET
 
 - Goal: keep `chart-contract` stable at v0.1 while building out the v0.2 agent gate in small, auditable slices.
-- Workflow State: v0.2.0 release prep is now in place; the CLI supports text, JSON, and Markdown report output, `--out`, `--markdown`, verdict-based exit codes, runnable CLI trap fixtures under `examples/traps/`, and the README/CI now point at the CLI gate as the front door.
+- Workflow State: the CLI docs now mention `--fail-on READY|REVIEW|BLOCK` in addition to `--warnings-as-errors`, and the wording stays careful about `READY` as an explicit threshold.
 - Branch: `main`
-- Next task: review the release prep, commit it, and push if the branch looks good.
-- Verification: `./.venv/bin/python -m pip install -e ".[dev]"`, `./.venv/bin/chart-contract --version`, `./.venv/bin/python examples/bad_to_good_chart.py`, `./.venv/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"`, and `./.venv/bin/python -m pytest`
-- Read first: `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `artifacts/VERIFY.md`
+- Next task: commit the docs cleanup and push it if the branch looks good.
+- Verification: `./.venv/bin/python -m pytest`, `./.venv/bin/chart-contract --version`, and `git diff --check`
+- Read first: `README.md`, `docs/AGENT_INTEGRATION.md`, `artifacts/VERIFY.md`
 
 ## Current Repo State
 
@@ -17,6 +17,10 @@ RESUME PACKET
 - Report serialization is hardened for CLI use, and the CLI now loads specs/data from disk, emits multiple report formats, and writes file outputs when requested.
 - The v0.2 trap fixtures are file-based and runnable from the CLI, with separate spec, data, and claim files for easy inspection.
 - The README now advertises the CLI audit gate, and CI runs a trap smoke check in addition to pytest.
+- The trend-spec audit now matches the chart-level trend rule for simple line specs, so the single-point trap is BLOCK again.
+- The CI workflow now explicitly checks that BLOCK exits 1 and that `--warnings-as-errors` turns REVIEW into a nonzero exit.
+- `report.verdict` is now spelled out in the README as the authoritative gate field, and `report.passed` is documented as a no-FAIL signal.
+- The `--fail-on` flag is now briefly documented so users do not have to discover it only through `--help`.
 
 ## Working Commands
 
@@ -37,6 +41,10 @@ RESUME PACKET
 - Keep trap fixtures tiny and synthetic so they stay inspectable and easy to copy-paste.
 - Keep the CI smoke check on a REVIEW fixture so it stays a passing gate while still exercising the CLI front door.
 - Keep the release notes aligned with the actual CLI behavior so `0.2.0` stays a truthful cut.
+- Mirror chart-level trend completeness checks in spec-audit code whenever line specs are treated as trend-like.
+- When adding CI smoke checks, assert the exit code explicitly instead of relying on output alone.
+- Keep docs wording version-neutral when the release version has already advanced.
+- Keep public CLI flags like `--fail-on` documented in the agent guidance when they are exposed in `--help`.
 
 ## Next Recommended Task
 

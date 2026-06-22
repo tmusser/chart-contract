@@ -86,6 +86,7 @@ Exit behavior:
 - `READY` exits `0`.
 - `REVIEW` exits `0` by default and `1` when `--warnings-as-errors` is set.
 - `BLOCK` exits `1`.
+- `--fail-on READY|REVIEW|BLOCK` is also available for explicit thresholds; `READY` is mechanically valid but means the command will fail for any verdict.
 
 For more agent-facing guidance on v0.2.0, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md), the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of the release.
 
@@ -178,9 +179,9 @@ spec = chart.to_vega_lite()
 altair_chart = chart.to_altair()
 ```
 
-For a minimal pre-share gate, inspect `report.verdict` before you send the chart onward: `READY` means the audit found only `PASS` checks, `REVIEW` means warnings need human judgment, and `BLOCK` means at least one failure should stop sharing until fixed.
+For a minimal pre-share gate, inspect `report.verdict` before you send the chart onward: `READY` means the audit found only `PASS` checks, `REVIEW` means warnings need human judgment, and `BLOCK` means at least one failure should stop sharing until fixed. `report.verdict` is the authoritative gate field; `report.passed` only means there are no `FAIL` findings, so a `REVIEW` report can still have `passed=True`.
 
-Supported front-door intents in v0.1:
+Supported Python API front-door intents:
 
 - `Chart.trend()`
 - `Chart.rank()`
@@ -192,7 +193,7 @@ Supported front-door intents in v0.1:
 - Not a full visualization library
 - Not a dashboard tool
 - Not an AI chart generator
-- No automatic chart correction in v0.1
+- No automatic chart correction
 
 ## Design Principles
 

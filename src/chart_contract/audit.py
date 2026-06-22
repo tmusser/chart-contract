@@ -360,6 +360,7 @@ def audit_spec(
     caveat = declared_caveat_from_spec(spec)
     evidence_flag = declared_evidence_from_spec(spec)
     resolved_claim = (claim or "").strip()
+    resolved_data = _coerce_records(spec, data)
 
     if resolved_claim:
         report.add("contract.claim.present", PASS, "Claim is declared for the spec audit.")
@@ -417,6 +418,22 @@ def audit_spec(
     elif resolved_claim:
         report.add("claim.causal_support", PASS, "Claim support language is acceptable for the audited spec.")
 
+    if mark == "line" and x_encoding and y_encoding and resolved_data is not None:
+        row_count = len(resolved_data)
+        if row_count < 2:
+            report.add(
+                "data.trend.min_points",
+                FAIL,
+                f"Trend spec has {row_count} data point(s) and needs at least 2.",
+                suggestion="Add historical data covering at least two time periods.",
+            )
+        else:
+            report.add(
+                "data.trend.min_points",
+                PASS,
+                "Trend spec has enough data points to show direction.",
+            )
+
     if mark == "bar":
         if _quantitative_axis_uses_nonzero_baseline(x_encoding):
             report.add(
@@ -437,7 +454,6 @@ def audit_spec(
         else:
             report.add("scale.bar.nonzero_baseline", PASS, "Bar chart baseline behavior is acceptable.")
 
-    resolved_data = _coerce_records(spec, data)
     if mark == "arc":
         category_count = _category_count(resolved_data, color_encoding)
         if category_count is not None and category_count > 6:

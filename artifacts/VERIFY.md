@@ -1,5 +1,102 @@
 # VERIFY
 
+2026-06-22 - Document `--fail-on` in CLI guidance
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest` -> PASSED (`40 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `README.md`
+- `docs/AGENT_INTEGRATION.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The new `--fail-on` note is documentation-only and intentionally avoids changing gate behavior.
+- The working tree still has unrelated example-output drift from earlier runs.
+
+Next safest task:
+- Commit the docs cleanup and push it if the branch looks good.
+
+2026-06-22 - Version/docs consistency cleanup
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_cli.py -q` -> PASSED (`12 passed`)
+- `./.venv/bin/chart-contract --version` -> PASSED (`chart-contract 0.2.0`)
+- `./.venv/bin/python -m pytest` -> PASSED (`40 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `src/chart_contract/cli.py`
+- `README.md`
+- `tests/test_cli.py`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The version fallback now matches the release version, but any future bump should update the shared fallback constant too.
+- The working tree still has unrelated example-output drift from earlier runs.
+
+Next safest task:
+- Commit the cleanup and push it if the branch looks good.
+
+2026-06-22 - Strengthen GitHub Actions CLI smoke checks
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/chart-contract audit spec examples/traps/too_many_pie_categories.vl.json --data examples/traps/too_many_pie_categories.csv --claim "$(cat examples/traps/too_many_pie_categories.claim.txt)"` wrapped in `set +e` / `test "$exit_code" -eq 1` -> PASSED (`BLOCK`, exit 1)
+- `./.venv/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"` wrapped in `set +e` / `test "$exit_code" -eq 0` -> PASSED (`REVIEW`, exit 0)
+- `./.venv/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)" --warnings-as-errors` wrapped in `set +e` / `test "$exit_code" -ne 0` -> PASSED (`REVIEW`, exit 1)
+- `./.venv/bin/python -m pytest` -> PASSED (`39 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `.github/workflows/ci.yml`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The workflow smoke checks depend on the trap fixtures remaining in sync with the audit semantics.
+- The working tree still has unrelated example-output drift from earlier runs.
+
+Next safest task:
+- Commit the CI workflow update and push it if the branch looks good.
+
+2026-06-22 - Fix single-point trend spec audits
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_audit_spec.py tests/test_cli_traps.py -q` -> PASSED (`7 passed`)
+- `./.venv/bin/chart-contract audit spec examples/traps/single_point_trend.vl.json --data examples/traps/single_point_trend.csv --claim "$(cat examples/traps/single_point_trend.claim.txt)"` -> PASSED (`BLOCK`, exit 1, `data.trend.min_points`)
+- `./.venv/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"` -> PASSED (`REVIEW`, exit 0, `data.trend.min_points` PASS)
+- `./.venv/bin/python -m pytest` -> PASSED (`39 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `src/chart_contract/audit.py`
+- `tests/test_audit_spec.py`
+- `tests/test_cli_traps.py`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The release branch still has unrelated example-output drift in the working tree from earlier runs.
+- The trend detection only covers simple line specs with explicit x and y encodings; that is intentional for the v0.2 gate.
+
+Next safest task:
+- Commit the trend-spec fix and push it if the branch looks good.
+
 2026-06-22 - Prepare v0.2.0 release
 
 Environment:

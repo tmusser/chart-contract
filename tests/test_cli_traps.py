@@ -24,6 +24,7 @@ def invoke(argv: list[str], capsys: pytest.CaptureFixture[str]) -> tuple[int, st
     [
         ("too_many_pie_categories", "BLOCK", "visual.arc.category_count", 1),
         ("causal_claim_missing_caveat", "REVIEW", "claim.causal_support", 0),
+        ("single_point_trend", "BLOCK", "data.trend.min_points", 1),
     ],
 )
 def test_cli_trap_fixtures(

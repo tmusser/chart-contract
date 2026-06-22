@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+from importlib.metadata import PackageNotFoundError
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+import chart_contract.cli as cli_module
 from chart_contract.cli import main
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "cli"
@@ -40,6 +42,15 @@ def test_version_surface_parses(capsys: pytest.CaptureFixture[str]) -> None:
 
     assert excinfo.value.code == 0
     assert capsys.readouterr().out.startswith("chart-contract ")
+
+
+def test_package_version_falls_back_when_metadata_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    def raise_not_found(_: str) -> str:
+        raise PackageNotFoundError
+
+    monkeypatch.setattr(cli_module, "package_version", raise_not_found)
+
+    assert cli_module._package_version() == "0.2.0"
 
 
 def test_json_output_is_valid(capsys: pytest.CaptureFixture[str]) -> None:

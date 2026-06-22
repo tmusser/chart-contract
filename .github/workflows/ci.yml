@@ -21,9 +21,32 @@ jobs:
       - name: Run pytest
         run: python -m pytest
 
-      - name: Run CLI trap smoke check
+      - name: Run CLI REVIEW smoke check
         run: |
           claim="$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
           chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
             --data examples/traps/causal_claim_missing_caveat.csv \
             --claim "$claim"
+
+      - name: Run CLI BLOCK smoke check
+        run: |
+          set +e
+          claim="$(cat examples/traps/too_many_pie_categories.claim.txt)"
+          chart-contract audit spec examples/traps/too_many_pie_categories.vl.json \
+            --data examples/traps/too_many_pie_categories.csv \
+            --claim "$claim"
+          exit_code=$?
+          set -e
+          test "$exit_code" -eq 1
+
+      - name: Run CLI REVIEW smoke check with warnings as errors
+        run: |
+          set +e
+          claim="$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
+          chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
+            --data examples/traps/causal_claim_missing_caveat.csv \
+            --claim "$claim" \
+            --warnings-as-errors
+          exit_code=$?
+          set -e
+          test "$exit_code" -ne 0
