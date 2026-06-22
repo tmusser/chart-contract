@@ -4,7 +4,7 @@ Use `chart-contract` as a gate before a chart is shared.
 
 ## v0.2.0 — Agent Gate
 
-Planned copy-paste CLI shape:
+Current copy-paste CLI shape:
 
 ```bash
 chart-contract audit \
@@ -13,18 +13,20 @@ chart-contract audit \
   --claim "The launch improved conversion"
 ```
 
-Planned inputs:
+Supported inputs:
 
 - `--data path/to/data.csv` for CSV input.
 - `--data path/to/data.json` for JSON input.
 - `--claim "..."` for the chart claim being audited.
 - `--format text|json|markdown` for the desired report shape.
 
-Planned gate behavior:
+Gate behavior:
 
 - `READY`: continue.
 - `REVIEW`: summarize warnings and ask a human whether to proceed.
 - `BLOCK`: stop and fix the spec or data contract before sharing.
+
+This command currently prints a text report to stdout. `--out` and `--markdown` are reserved for a later file-output slice.
 
 This is a gate, not a publisher. It is meant to keep the agent inside a bounded audit loop before anything is shared.
 

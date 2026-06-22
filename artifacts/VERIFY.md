@@ -1,5 +1,36 @@
 # VERIFY
 
+2026-06-22 - Audit Vega-Lite specs from disk
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_cli.py` -> PASSED (`10 passed`)
+- `./.venv/bin/python -m pytest` -> PASSED (`33 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `pyproject.toml`
+- `src/chart_contract/cli.py`
+- `src/chart_contract/__main__.py`
+- `tests/test_cli.py`
+- `tests/fixtures/cli/ready_chart.vl.json`
+- `tests/fixtures/cli/review_chart.vl.json`
+- `tests/fixtures/cli/bad_arc_chart.vl.json`
+- `tests/fixtures/cli/segments.csv`
+- `tests/fixtures/cli/segments.json`
+- `docs/AGENT_INTEGRATION.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- `--out` and `--markdown` are still parsed but not wired to file output.
+- Existing example output JSON/Markdown files still have unrelated working-tree drift from earlier pytest runs.
+
+Next safest task:
+- Wire `--out` and `--markdown` to write reports to disk, keeping stdout text output as the default.
+
 2026-06-22 - Add CLI skeleton
 
 Environment:

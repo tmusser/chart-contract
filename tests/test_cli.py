@@ -2,10 +2,19 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
 from chart_contract.cli import main
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures" / "cli"
+
+
+def invoke(argv: list[str], capsys: pytest.CaptureFixture[str]) -> tuple[int, str, str]:
+    exit_code = main(argv)
+    captured = capsys.readouterr()
+    return exit_code, captured.out, captured.err
 
 
 @pytest.mark.parametrize(
@@ -32,29 +41,103 @@ def test_version_surface_parses(capsys: pytest.CaptureFixture[str]) -> None:
     assert capsys.readouterr().out.startswith("chart-contract ")
 
 
-def test_audit_spec_parses_full_stub_invocation() -> None:
-    exit_code = main(
+def test_missing_claim_produces_block(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code, stdout, stderr = invoke(
         [
             "audit",
             "spec",
-            "spec.vl.json",
+            str(FIXTURES / "ready_chart.vl.json"),
             "--data",
-            "data.csv",
+            str(FIXTURES / "segments.csv"),
+        ],
+        capsys,
+    )
+
+    assert exit_code == 1
+    assert stderr == ""
+    assert "Verdict: BLOCK" in stdout
+    assert "Summary:" in stdout
+    assert "- FAIL contract.claim.present:" in stdout
+
+
+def test_bad_arc_fixture_produces_block(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code, stdout, stderr = invoke(
+        [
+            "audit",
+            "spec",
+            str(FIXTURES / "bad_arc_chart.vl.json"),
+            "--data",
+            str(FIXTURES / "segments.json"),
             "--claim",
             "The launch improved conversion",
-            "--format",
-            "markdown",
-            "--out",
-            "report.txt",
-            "--markdown",
-            "report.md",
-            "--warnings-as-errors",
-            "--fail-on",
-            "REVIEW",
-        ]
+        ],
+        capsys,
+    )
+
+    assert exit_code == 1
+    assert stderr == ""
+    assert "Verdict: BLOCK" in stdout
+    assert "- FAIL visual.arc.category_count:" in stdout
+
+
+def test_corrected_fixture_is_ready(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code, stdout, stderr = invoke(
+        [
+            "audit",
+            "spec",
+            str(FIXTURES / "ready_chart.vl.json"),
+            "--data",
+            str(FIXTURES / "segments.csv"),
+            "--claim",
+            "Enterprise and SMB segments differ in conversion rate.",
+        ],
+        capsys,
     )
 
     assert exit_code == 0
+    assert stderr == ""
+    assert "Verdict: READY" in stdout
+    assert "- PASS contract.claim.present:" in stdout
+
+
+def test_warnings_as_errors_promotes_review_to_failure(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code, stdout, stderr = invoke(
+        [
+            "audit",
+            "spec",
+            str(FIXTURES / "review_chart.vl.json"),
+            "--data",
+            str(FIXTURES / "segments.csv"),
+            "--claim",
+            "Enterprise and SMB segments differ in conversion rate.",
+            "--warnings-as-errors",
+        ],
+        capsys,
+    )
+
+    assert exit_code == 1
+    assert stderr == ""
+    assert "Verdict: REVIEW" in stdout
+    assert "- WARN contract.source.present:" in stdout
+
+
+def test_unsupported_data_extension_errors(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        main(
+            [
+                "audit",
+                "spec",
+                str(FIXTURES / "ready_chart.vl.json"),
+                "--data",
+                str(FIXTURES / "segments.txt"),
+                "--claim",
+                "Enterprise and SMB segments differ in conversion rate.",
+            ]
+        )
+
+    assert excinfo.value.code == 2
+    captured = capsys.readouterr()
+    assert "Unsupported data file extension: .txt" in captured.err
 
 
 def test_module_entrypoint_version_smoke() -> None:

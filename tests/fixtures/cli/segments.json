@@ -1,0 +1,30 @@
+[
+  {
+    "segment": "SMB",
+    "conversion_rate": 0.09
+  },
+  {
+    "segment": "Enterprise",
+    "conversion_rate": 0.18
+  },
+  {
+    "segment": "Mid-Market",
+    "conversion_rate": 0.14
+  },
+  {
+    "segment": "Public",
+    "conversion_rate": 0.12
+  },
+  {
+    "segment": "Startup",
+    "conversion_rate": 0.16
+  },
+  {
+    "segment": "Partners",
+    "conversion_rate": 0.11
+  },
+  {
+    "segment": "Other",
+    "conversion_rate": 0.08
+  }
+]

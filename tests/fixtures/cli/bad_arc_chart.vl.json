@@ -1,0 +1,20 @@
+{
+  "mark": {
+    "type": "arc"
+  },
+  "title": "Segment share by plan",
+  "encoding": {
+    "theta": {
+      "field": "conversion_rate",
+      "type": "quantitative"
+    },
+    "color": {
+      "field": "segment",
+      "type": "nominal"
+    }
+  },
+  "usermeta": {
+    "source": "warehouse.segment_share",
+    "unit": "share"
+  }
+}
