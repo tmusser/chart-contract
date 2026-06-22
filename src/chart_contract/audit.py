@@ -31,6 +31,7 @@ SEVERITIES = {PASS, WARN, FAIL}
 READY = "READY"
 REVIEW = "REVIEW"
 BLOCK = "BLOCK"
+REPORT_SCHEMA_VERSION = "0.2"
 
 
 @dataclass(slots=True)
@@ -84,6 +85,7 @@ class AuditReport:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "schema_version": REPORT_SCHEMA_VERSION,
             "passed": self.passed,
             "has_failures": self.has_failures,
             "has_warnings": self.has_warnings,
@@ -101,12 +103,17 @@ class AuditReport:
             "",
             f"Summary: `{self.summary()}`",
             "",
+            "## Findings",
+            "",
         ]
-        for finding in self.findings:
-            line = f"- **{finding.severity}** `{finding.rule_id}`: {finding.message}"
-            if finding.suggestion:
-                line += f" Suggestion: {finding.suggestion}"
-            lines.append(line)
+        if not self.findings:
+            lines.append("- None")
+        else:
+            for finding in self.findings:
+                line = f"- **{finding.severity}** `{finding.rule_id}`: {finding.message}"
+                if finding.suggestion:
+                    line += f" Suggestion: {finding.suggestion}"
+                lines.append(line)
         return "\n".join(lines)
 
     def raise_on_fail(self) -> None:

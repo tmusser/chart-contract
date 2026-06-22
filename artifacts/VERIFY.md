@@ -1,5 +1,27 @@
 # VERIFY
 
+2026-06-22 - Stabilize report serialization
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_audit_report.py tests/test_audit_rules.py tests/test_import.py` -> PASSED (`17 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `src/chart_contract/audit.py`
+- `tests/test_audit_report.py`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- Example output JSON files still have unrelated pre-existing working-tree drift from earlier runs.
+- CLI output and exit-code behavior are still future work for the v0.2 gate slice.
+
+Next safest task:
+- Start the v0.2 CLI slice with disk-based spec loading and explicit claim input.
+
 2026-06-22 - Define v0.2.0 agent gate scope
 
 Environment:
