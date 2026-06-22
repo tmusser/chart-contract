@@ -19,6 +19,9 @@ Supported inputs:
 - `--data path/to/data.json` for JSON input.
 - `--claim "..."` for the chart claim being audited.
 - `--format text|json|markdown` for the desired report shape.
+- `--out path/to/report.txt` to write the selected output to disk.
+- `--markdown path/to/report.md` to write Markdown output alongside the selected format.
+- `--warnings-as-errors` to make REVIEW exit nonzero.
 
 Gate behavior:
 
@@ -26,7 +29,9 @@ Gate behavior:
 - `REVIEW`: summarize warnings and ask a human whether to proceed.
 - `BLOCK`: stop and fix the spec or data contract before sharing.
 
-This command currently prints a text report to stdout. `--out` and `--markdown` are reserved for a later file-output slice.
+This command prints the selected format to stdout by default.
+When `--out` is supplied, the selected output is written to disk and stdout becomes a one-line verdict summary.
+When `--markdown` is supplied, Markdown is also written to the requested path.
 
 This is a gate, not a publisher. It is meant to keep the agent inside a bounded audit loop before anything is shared.
 

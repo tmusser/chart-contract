@@ -1,5 +1,29 @@
 # VERIFY
 
+2026-06-22 - CLI audit report outputs and exit codes
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_cli.py` -> PASSED (`11 passed`)
+- `./.venv/bin/python -m pytest` -> PASSED (`34 passed`)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `src/chart_contract/cli.py`
+- `tests/test_cli.py`
+- `docs/AGENT_INTEGRATION.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The CLI does not auto-create output directories; file writes still require valid parent paths.
+- Existing example output JSON/Markdown files still have unrelated working-tree drift from earlier runs.
+
+Next safest task:
+- Decide whether to keep this CLI slice focused or add copy-paste README examples for `--out` and `--markdown`.
+
 2026-06-22 - Audit Vega-Lite specs from disk
 
 Environment:

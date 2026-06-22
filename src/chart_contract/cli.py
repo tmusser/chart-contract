@@ -118,6 +118,14 @@ def _render_report(report: AuditReport, format_name: str) -> str:
     return _format_text_report(report)
 
 
+def _summary_line(report: AuditReport) -> str:
+    return f"Verdict: {report.verdict} | Summary: {report.summary()}"
+
+
+def _write_report(path: Path, content: str) -> None:
+    path.write_text(content if content.endswith("\n") else content + "\n", encoding="utf-8")
+
+
 def _should_fail(report_verdict: str, fail_on: str, warnings_as_errors: bool) -> bool:
     threshold = fail_on
     if warnings_as_errors and VERDICT_RANK[threshold] > VERDICT_RANK[REVIEW]:
@@ -131,7 +139,18 @@ def _run_audit_spec(args: argparse.Namespace) -> int:
     spec = _load_json_spec(Path(args.spec_path))
     data = _load_data(args.data_path)
     report = audit_spec(spec=spec, data=data, claim=args.claim)
-    print(_render_report(report, args.format))
+    selected_output = _render_report(report, args.format)
+    if args.out_path:
+        # When the full report is written to disk, keep stdout to a one-line status
+        # summary so CI and agents still get a quick verdict without parsing files.
+        _write_report(Path(args.out_path), selected_output)
+        print(_summary_line(report))
+    else:
+        print(selected_output)
+
+    if args.markdown_path:
+        _write_report(Path(args.markdown_path), report.to_markdown())
+
     return 1 if _should_fail(report.verdict, args.fail_on, args.warnings_as_errors) else 0
 
 

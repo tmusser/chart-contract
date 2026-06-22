@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -41,7 +42,7 @@ def test_version_surface_parses(capsys: pytest.CaptureFixture[str]) -> None:
     assert capsys.readouterr().out.startswith("chart-contract ")
 
 
-def test_missing_claim_produces_block(capsys: pytest.CaptureFixture[str]) -> None:
+def test_json_output_is_valid(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code, stdout, stderr = invoke(
         [
             "audit",
@@ -49,18 +50,60 @@ def test_missing_claim_produces_block(capsys: pytest.CaptureFixture[str]) -> Non
             str(FIXTURES / "ready_chart.vl.json"),
             "--data",
             str(FIXTURES / "segments.csv"),
+            "--claim",
+            "Enterprise and SMB segments differ in conversion rate.",
+            "--format",
+            "json",
         ],
         capsys,
     )
 
-    assert exit_code == 1
+    payload = json.loads(stdout)
+
+    assert exit_code == 0
     assert stderr == ""
-    assert "Verdict: BLOCK" in stdout
-    assert "Summary:" in stdout
-    assert "- FAIL contract.claim.present:" in stdout
+    assert payload["schema_version"] == "0.2"
+    assert payload["verdict"] == "READY"
+    assert isinstance(payload["findings"], list)
+    assert "contract.claim.present" in {finding["rule_id"] for finding in payload["findings"]}
 
 
-def test_bad_arc_fixture_produces_block(capsys: pytest.CaptureFixture[str]) -> None:
+def test_out_and_markdown_write_files(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    out_path = tmp_path / "report.json"
+    markdown_path = tmp_path / "report.md"
+
+    exit_code, stdout, stderr = invoke(
+        [
+            "audit",
+            "spec",
+            str(FIXTURES / "ready_chart.vl.json"),
+            "--data",
+            str(FIXTURES / "segments.csv"),
+            "--claim",
+            "Enterprise and SMB segments differ in conversion rate.",
+            "--format",
+            "json",
+            "--out",
+            str(out_path),
+            "--markdown",
+            str(markdown_path),
+        ],
+        capsys,
+    )
+
+    payload = json.loads(out_path.read_text(encoding="utf-8"))
+    markdown = markdown_path.read_text(encoding="utf-8")
+
+    assert exit_code == 0
+    assert stderr == ""
+    assert stdout.startswith("Verdict: READY | Summary:")
+    assert payload["schema_version"] == "0.2"
+    assert payload["verdict"] == "READY"
+    assert markdown.startswith("# Audit Report")
+    assert "Verdict: `READY`" in markdown
+
+
+def test_block_exits_nonzero(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code, stdout, stderr = invoke(
         [
             "audit",
@@ -80,12 +123,12 @@ def test_bad_arc_fixture_produces_block(capsys: pytest.CaptureFixture[str]) -> N
     assert "- FAIL visual.arc.category_count:" in stdout
 
 
-def test_corrected_fixture_is_ready(capsys: pytest.CaptureFixture[str]) -> None:
+def test_review_exits_zero_by_default(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code, stdout, stderr = invoke(
         [
             "audit",
             "spec",
-            str(FIXTURES / "ready_chart.vl.json"),
+            str(FIXTURES / "review_chart.vl.json"),
             "--data",
             str(FIXTURES / "segments.csv"),
             "--claim",
@@ -96,11 +139,11 @@ def test_corrected_fixture_is_ready(capsys: pytest.CaptureFixture[str]) -> None:
 
     assert exit_code == 0
     assert stderr == ""
-    assert "Verdict: READY" in stdout
-    assert "- PASS contract.claim.present:" in stdout
+    assert "Verdict: REVIEW" in stdout
+    assert "- WARN contract.source.present:" in stdout
 
 
-def test_warnings_as_errors_promotes_review_to_failure(capsys: pytest.CaptureFixture[str]) -> None:
+def test_review_exits_nonzero_with_warnings_as_errors(capsys: pytest.CaptureFixture[str]) -> None:
     exit_code, stdout, stderr = invoke(
         [
             "audit",
