@@ -1,5 +1,31 @@
 # VERIFY
 
+2026-06-22 - Document v0.2 agent gate workflow
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pip install -e ".[dev]"` -> PASSED
+- `./.venv/bin/python -m pytest` -> PASSED (`36 passed`)
+- `./.venv/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json --data examples/traps/causal_claim_missing_caveat.csv --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"` -> PASSED (`REVIEW`, exit 0)
+- `git diff --check` -> PASSED
+
+Changed files:
+- `README.md`
+- `docs/AGENT_INTEGRATION.md`
+- `ROADMAP.md`
+- `.github/workflows/ci.yml`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The CI smoke step exercises a REVIEW trap, not a BLOCK trap; the pytest suite covers the BLOCK path.
+- Existing example output files still have unrelated working-tree drift from earlier runs.
+
+Next safest task:
+- Push the docs/CI update and then move on to the next planned slice.
+
 2026-06-22 - Add runnable CLI trap fixtures
 
 Environment:

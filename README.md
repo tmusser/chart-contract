@@ -62,7 +62,32 @@ python examples/bad_to_good_chart.py
 pytest
 ```
 
-For agent-gated workflows, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md) for the planned v0.2.0 agent gate usage, the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of v0.1.
+## CLI Audit Gate
+
+Use the CLI as the front door for agent-gated chart checks:
+
+```bash
+chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
+  --data examples/traps/causal_claim_missing_caveat.csv \
+  --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
+```
+
+Representative output:
+
+```text
+Verdict: REVIEW
+Summary: PASS=5 WARN=1 FAIL=0
+Findings:
+- WARN claim.causal_support: Claim uses causal language without a caveat or causal evidence metadata. Suggestion: Add a caveat or spec['usermeta']['causal_evidence']=True when justified.
+```
+
+Exit behavior:
+
+- `READY` exits `0`.
+- `REVIEW` exits `0` by default and `1` when `--warnings-as-errors` is set.
+- `BLOCK` exits `1`.
+
+For more agent-facing guidance, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md), the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of v0.1.
 
 ## Bad Chart -> Audit -> Corrected Chart
 

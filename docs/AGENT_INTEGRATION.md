@@ -7,8 +7,7 @@ Use `chart-contract` as a gate before a chart is shared.
 Current copy-paste CLI shape:
 
 ```bash
-chart-contract audit \
-  --spec path/to/spec.vl.json \
+chart-contract audit spec path/to/spec.vl.json \
   --data path/to/data.csv \
   --claim "The launch improved conversion"
 ```
@@ -26,8 +25,13 @@ Supported inputs:
 Gate behavior:
 
 - `READY`: continue.
-- `REVIEW`: summarize warnings and ask a human whether to proceed.
-- `BLOCK`: stop and fix the spec or data contract before sharing.
+- `REVIEW`: summarize warnings, stop, and ask a human whether to proceed.
+- `BLOCK`: stop immediately and fix the spec or data contract before sharing.
+
+Policy:
+
+- The agent must stop on `BLOCK`.
+- `REVIEW` means summarize the warnings and ask for human review before continuing.
 
 This command prints the selected format to stdout by default.
 When `--out` is supplied, the selected output is written to disk and stdout becomes a one-line verdict summary.

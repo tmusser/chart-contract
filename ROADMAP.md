@@ -11,14 +11,14 @@
 
 Goal: make `chart-contract` usable as a deterministic CLI gate for chart audits from disk before any code changes spill into v0.3.
 
-Commit-sized slices:
+Release checklist:
 
-- CLI entrypoint and spec loader: audit a Vega-Lite spec from disk and accept an explicit claim argument.
-- Optional data input: support CSV and JSON data files with deterministic parse and file errors.
-- Report emitters: produce text, JSON, and Markdown audit reports from the same audit result.
-- CI-friendly exit codes: map pass, warn, and fail outcomes to stable process exit codes for agents and CI.
-- Runnable trap fixtures: add examples that exercise weak claims, missing provenance, and other audit failures.
-- README and docs usage: add copy-paste examples that show the planned agent gate flow end to end.
+- [x] CLI entrypoint and spec loader: audit a Vega-Lite spec from disk and accept an explicit claim argument.
+- [x] Optional data input: support CSV and JSON data files with deterministic parse and file errors.
+- [x] Report emitters: produce text, JSON, and Markdown audit reports from the same audit result.
+- [x] CI-friendly exit codes: map pass, warn, and fail outcomes to stable process exit codes for agents and CI.
+- [x] Runnable trap fixtures: add examples that exercise weak claims, missing provenance, and other audit failures.
+- [x] README and docs usage: add copy-paste examples that show the planned agent gate flow end to end.
 
 Explicit non-goals:
 
@@ -33,3 +33,4 @@ Explicit non-goals:
 - More visual intents only after the audit contract is strong
 - Optional renderer and export improvements
 - More annotation primitives
+- v0.3 starts only after the gate is stable enough to trust
