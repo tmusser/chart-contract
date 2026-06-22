@@ -2,29 +2,31 @@
 
 RESUME PACKET
 
-- Goal: keep `chart-contract` stable at v0.1 while keeping suite references aligned with `context-to-action-skills`.
-- Workflow State: README, suite map, and case-study wording now use the current suite language; historical verification entries still preserve older terminology where it was part of the audit trail.
+- Goal: keep `chart-contract` stable at v0.1 while making the v0.2.0 agent gate scope explicit before implementation starts.
+- Workflow State: the roadmap now names `v0.2.0 — Agent Gate`, and the agent-integration docs describe the planned CLI surface, report formats, and exit-code intent.
 - Branch: `main`
-- Next task: decide whether the generated package metadata should be refreshed in a separate build-artifact pass, or left as archival output.
-- Verification: `git diff --check` plus grep-based suite-reference checks
-- Read first: `README.md`, `docs/SUITE_MAP.md`, `docs/AGENT_WORKFLOW_CASE_STUDY.md`, `artifacts/VERIFY.md`
+- Next task: implement the CLI in the smallest possible slice, starting with spec loading from disk.
+- Verification: `git diff --check` and targeted docs inspection
+- Read first: `ROADMAP.md`, `docs/AGENT_INTEGRATION.md`, `artifacts/VERIFY.md`
 
 ## Current Repo State
 
-- Public-facing docs now point to `context-to-action-skills` as the companion repo.
 - The v0.1 scope in `artifacts/SPEC.md` remains unchanged.
-- Generated build metadata was intentionally left untouched.
+- The v0.2.0 roadmap is now explicit and commit-shaped.
+- No code changes were made yet.
 
 ## Working Commands
 
 - `git diff --check`
-- `grep -R "ai-business-skills\\|business-skills\\|ai business skills\\|context-to-action-skills" -n README.md docs artifacts examples .github 2>/dev/null || true`
+- `sed -n '1,260p' ROADMAP.md`
+- `sed -n '1,220p' docs/AGENT_INTEGRATION.md`
 
 ## Important Decisions
 
-- Keep README and suite map in sync whenever suite positioning changes.
-- Do not rewrite build artifacts unless a validation step explicitly requires it.
+- Keep v0.2.0 concrete enough that each slice can become a commit.
+- Preserve the v0.1 and later-roadmap context while avoiding v0.3 drift.
+- Do not add ChartContract, auto-correction, or extra chart intents in this slice.
 
 ## Next Recommended Task
 
-If the generated metadata should also be normalized, do that in a dedicated artifact refresh so the docs cleanup stays isolated.
+Use the roadmap and agent-integration docs as the source of truth for the next implementation slice.

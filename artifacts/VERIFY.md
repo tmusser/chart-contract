@@ -1,5 +1,29 @@
 # VERIFY
 
+2026-06-22 - Define v0.2.0 agent gate scope
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `sed -n '1,260p' ROADMAP.md` -> PASSED
+- `sed -n '1,220p' docs/AGENT_INTEGRATION.md` -> PASSED
+- `git diff --check` -> PASSED
+
+Changed files:
+- `ROADMAP.md`
+- `README.md`
+- `docs/AGENT_INTEGRATION.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The v0.2.0 gate is now explicit in docs, but the CLI itself is still future work.
+- Exit-code mappings and fixture details remain to be implemented in code.
+
+Next safest task:
+- Implement the v0.2.0 CLI in one small slice at a time, starting with disk-based spec loading.
+
 2026-06-19 - Suite reference cleanup for context-to-action-skills
 
 Environment:
