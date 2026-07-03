@@ -1,4 +1,5 @@
 {
+  "schema_version": "0.2",
   "passed": false,
   "has_failures": true,
   "has_warnings": true,

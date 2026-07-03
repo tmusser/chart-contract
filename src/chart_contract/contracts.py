@@ -82,6 +82,11 @@ def is_numeric_series(series: pd.Series) -> bool:
 def is_datetime_like(series: pd.Series) -> bool:
     if pd.api.types.is_datetime64_any_dtype(series):
         return True
+    if pd.api.types.is_numeric_dtype(series):
+        # pd.to_datetime() does not raise on plain numbers; it silently
+        # coerces them to nanoseconds-since-epoch, which would otherwise
+        # cause a false positive here.
+        return False
     try:
         pd.to_datetime(series.dropna(), errors="raise")
         return True

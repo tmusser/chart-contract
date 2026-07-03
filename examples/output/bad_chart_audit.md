@@ -4,6 +4,8 @@ Verdict: `BLOCK`
 
 Summary: `PASS=3 WARN=3 FAIL=1`
 
+## Findings
+
 - **PASS** `contract.claim.present`: Claim is declared for the spec audit.
 - **WARN** `contract.source.present`: Spec is missing source/provenance metadata. Suggestion: Add spec['usermeta']['source'] to preserve provenance.
 - **WARN** `labels.title.quality`: Spec title is missing or generic. Suggestion: Use a specific title tied to the claim.
