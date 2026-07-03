@@ -1,0 +1,177 @@
+{
+  "config": {
+    "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+    }
+  },
+  "data": {
+    "name": "data-3a1cad260c715f65215a6ae77c2d0135"
+  },
+  "mark": {
+    "type": "bar"
+  },
+  "encoding": {
+    "tooltip": [
+      {
+        "bin": {
+          "maxbins": 12
+        },
+        "field": "amount",
+        "title": "Amount (count)",
+        "type": "quantitative"
+      },
+      {
+        "aggregate": "count",
+        "title": "Count",
+        "type": "quantitative"
+      }
+    ],
+    "x": {
+      "bin": {
+        "maxbins": 12
+      },
+      "field": "amount",
+      "title": "Amount (count)",
+      "type": "quantitative"
+    },
+    "y": {
+      "aggregate": "count",
+      "title": "Count",
+      "type": "quantitative"
+    }
+  },
+  "height": 360,
+  "title": {
+    "text": "Amount distribution",
+    "subtitle": [
+      "Source: synthetic.amounts"
+    ]
+  },
+  "width": 640,
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "datasets": {
+    "data-3a1cad260c715f65215a6ae77c2d0135": [
+      {
+        "segment": "SMB",
+        "amount": 4
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 7
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "SMB",
+        "amount": 4
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 7
+      },
+      {
+        "segment": "SMB",
+        "amount": 8
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "SMB",
+        "amount": 7
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 4
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 15
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 14
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 16
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 14
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 15
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 14
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 15
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      }
+    ]
+  }
+}

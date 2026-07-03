@@ -186,6 +186,9 @@ Supported Python API front-door intents:
 - `Chart.trend()`
 - `Chart.rank()`
 - `Chart.compare()`
+- `Chart.histogram()`
+- `Chart.boxplot()`
+- `Chart.violin()`
 - experimental `audit_spec()`
 
 ## Scope and Non-Goals
@@ -204,6 +207,22 @@ Supported Python API front-door intents:
 - Provenance and caveats visible
 
 The audit layer uses Tufte-inspired visual integrity checks. It does not claim to be Tufte-compliant or Tufte-certified.
+
+## Distribution Charts
+
+Use distribution intents when the claim is about spread, shape, outliers, or typical values rather than a trend or rank.
+
+- Histograms are good for one metric's distribution.
+- Boxplots are good for robust summaries and outliers.
+- Violin plots are good for shape, but they need more observations to stay readable.
+
+Run `python examples/distribution_charts.py` to write:
+
+- `examples/output/histogram_chart.vl.json`
+- `examples/output/boxplot_chart.vl.json`
+- `examples/output/violin_chart.vl.json`
+
+These charts stay inside the same claim-first audit flow and are not a full visualization library.
 
 ## Companion Artifact
 

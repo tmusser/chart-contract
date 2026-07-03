@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from chart_contract import audit_spec
+from chart_contract import Chart, audit_spec
 
 TRAPS = Path(__file__).resolve().parent.parent / "examples" / "traps"
 
@@ -78,3 +78,38 @@ def test_two_point_line_trend_passes_min_points() -> None:
 
     severities = {finding.rule_id: finding.severity for finding in report.findings}
     assert severities["data.trend.min_points"] == "PASS"
+
+
+def test_histogram_spec_audit_detects_distribution_rules() -> None:
+    df = pd.DataFrame(
+        {
+            "amount": list(range(20)),
+            "segment": ["A"] * 10 + ["B"] * 10,
+        }
+    )
+
+    spec = Chart.histogram(
+        data=df,
+        value="amount",
+        claim="The amount distribution is spread across the observed range.",
+        source="synthetic.amounts",
+        unit="count",
+        title="Amount distribution by segment",
+        bins=12,
+        group="segment",
+    ).to_vega_lite()
+
+    report = audit_spec(
+        spec=spec,
+        data=df,
+        claim="The amount distribution is spread across the observed range.",
+    )
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert report.verdict == "REVIEW"
+    assert severities["contract.source.present"] == "WARN"
+    assert severities["labels.unit.present"] == "WARN"
+    assert severities["data.distribution.value.numeric"] == "PASS"
+    assert severities["data.distribution.sample_size"] == "PASS"
+    assert severities["data.distribution.group_sample_size"] == "PASS"
+    assert severities["readability.histogram.bins"] == "PASS"

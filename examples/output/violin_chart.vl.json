@@ -1,0 +1,194 @@
+{
+  "config": {
+    "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+    }
+  },
+  "data": {
+    "name": "data-3a1cad260c715f65215a6ae77c2d0135"
+  },
+  "mark": {
+    "type": "area",
+    "opacity": 0.6,
+    "orient": "horizontal"
+  },
+  "encoding": {
+    "color": {
+      "field": "segment",
+      "title": "Segment",
+      "type": "nominal"
+    },
+    "tooltip": [
+      {
+        "field": "segment",
+        "type": "nominal"
+      },
+      {
+        "field": "value",
+        "title": "Amount (count)",
+        "type": "quantitative"
+      },
+      {
+        "field": "density",
+        "title": "Density",
+        "type": "quantitative"
+      }
+    ],
+    "x": {
+      "field": "density",
+      "title": "Density",
+      "type": "quantitative"
+    },
+    "y": {
+      "field": "value",
+      "title": "Amount (count)",
+      "type": "quantitative"
+    }
+  },
+  "height": 360,
+  "title": {
+    "text": "Amount density by segment",
+    "subtitle": [
+      "Source: synthetic.amounts"
+    ]
+  },
+  "transform": [
+    {
+      "density": "amount",
+      "groupby": [
+        "segment"
+      ],
+      "as": [
+        "value",
+        "density"
+      ]
+    }
+  ],
+  "width": 640,
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "datasets": {
+    "data-3a1cad260c715f65215a6ae77c2d0135": [
+      {
+        "segment": "SMB",
+        "amount": 4
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 7
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "SMB",
+        "amount": 4
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 7
+      },
+      {
+        "segment": "SMB",
+        "amount": 8
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "SMB",
+        "amount": 7
+      },
+      {
+        "segment": "SMB",
+        "amount": 6
+      },
+      {
+        "segment": "SMB",
+        "amount": 4
+      },
+      {
+        "segment": "SMB",
+        "amount": 5
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 15
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 14
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 16
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 14
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 15
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 14
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 15
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 13
+      },
+      {
+        "segment": "Enterprise",
+        "amount": 12
+      }
+    ]
+  }
+}
