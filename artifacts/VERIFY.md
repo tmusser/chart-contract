@@ -1,5 +1,44 @@
 # VERIFY
 
+2026-07-03 - Add distribution chart intents
+
+Environment:
+- Working directory: repo root
+
+Commands:
+- `./.venv/bin/python -m pytest tests/test_distribution_intents.py -q` -> PASSED (`11 passed`)
+- `./.venv/bin/python -m pytest tests/test_audit_spec.py -q` -> PASSED (`5 passed`)
+- `./.venv/bin/python -m pytest tests/test_chart_intents.py -q` -> PASSED (`4 passed`)
+- `./.venv/bin/python -m pytest -q` -> PASSED (`52 passed`)
+- `./.venv/bin/python examples/distribution_charts.py` -> PASSED
+- `./.venv/bin/python examples/bad_to_good_chart.py` -> PASSED
+- `./.venv/bin/chart-contract --help` -> PASSED
+- `git diff --check` -> PASSED
+
+Changed files:
+- `src/chart_contract/chart.py`
+- `src/chart_contract/renderers/altair.py`
+- `src/chart_contract/audit.py`
+- `tests/test_distribution_intents.py`
+- `tests/test_audit_spec.py`
+- `tests/test_chart_intents.py`
+- `examples/distribution_charts.py`
+- `examples/output/histogram_chart.vl.json`
+- `examples/output/boxplot_chart.vl.json`
+- `examples/output/violin_chart.vl.json`
+- `README.md`
+- `docs/AUDIT_RULES.md`
+- `ROADMAP.md`
+- `artifacts/SPEC.md`
+- `artifacts/HANDOFF.md`
+
+Remaining risks:
+- The example scripts rewrite tracked output artifacts, so the working tree will still show those diffs until they are reviewed or intentionally committed.
+- The distribution preview is intentionally separate from the v0.1 scope, so any follow-up work should keep that boundary explicit.
+
+Next safest task:
+- Review the generated output artifacts and decide whether to commit or keep iterating on the distribution preview.
+
 2026-06-22 - Document `--fail-on` in CLI guidance
 
 Environment:

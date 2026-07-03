@@ -15,8 +15,10 @@ from .audit import AuditReport, audit_chart
 class Chart:
     intent: str
     data: pd.DataFrame
-    x: str
-    y: str
+    x: str | None = None
+    y: str | None = None
+    value: str | None = None
+    bins: int | str | None = None
     category: str | None = None
     group: str | None = None
     claim: str = ""
@@ -115,6 +117,101 @@ class Chart:
             x=x,
             y=y,
             category=x,
+            group=group,
+            claim=claim,
+            source=source,
+            unit=unit,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def histogram(
+        cls,
+        *,
+        data: pd.DataFrame,
+        value: str,
+        claim: str,
+        source: str | None = None,
+        unit: str | None = None,
+        title: str | None = None,
+        bins: int | str | None = None,
+        group: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        return cls(
+            intent="histogram",
+            data=data,
+            value=value,
+            bins=bins,
+            group=group,
+            claim=claim,
+            source=source,
+            unit=unit,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def boxplot(
+        cls,
+        *,
+        data: pd.DataFrame,
+        x: str | None = None,
+        y: str,
+        claim: str,
+        source: str | None = None,
+        unit: str | None = None,
+        title: str | None = None,
+        group: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        return cls(
+            intent="boxplot",
+            data=data,
+            x=x,
+            y=y,
+            category=x or group,
+            group=group,
+            claim=claim,
+            source=source,
+            unit=unit,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def violin(
+        cls,
+        *,
+        data: pd.DataFrame,
+        x: str | None = None,
+        y: str,
+        claim: str,
+        source: str | None = None,
+        unit: str | None = None,
+        title: str | None = None,
+        group: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        return cls(
+            intent="violin",
+            data=data,
+            x=x,
+            y=y,
+            category=x or group,
             group=group,
             claim=claim,
             source=source,

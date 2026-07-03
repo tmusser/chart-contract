@@ -78,6 +78,7 @@ def test_examples_execute_and_write_specs() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     scripts = [
         "bad_to_good_chart.py",
+        "distribution_charts.py",
         "trend_claim.py",
         "rank_claim.py",
         "compare_claim.py",
@@ -88,6 +89,9 @@ def test_examples_execute_and_write_specs() -> None:
 
     output_dir = repo_root / "examples" / "output"
     assert (output_dir / "corrected_chart.vl.json").exists()
+    assert (output_dir / "histogram_chart.vl.json").exists()
+    assert (output_dir / "boxplot_chart.vl.json").exists()
+    assert (output_dir / "violin_chart.vl.json").exists()
     assert (output_dir / "trend_claim.vl.json").exists()
     assert (output_dir / "rank_claim.vl.json").exists()
     assert (output_dir / "compare_claim.vl.json").exists()

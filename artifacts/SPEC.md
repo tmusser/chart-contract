@@ -20,6 +20,12 @@ Build `chart-contract`, a lightweight Python harness for claim-first, audited an
 - deterministic PASS/WARN/FAIL findings
 - docs, tests, examples, and build-proof artifacts
 
+## v0.3 Preview
+
+- `Chart.histogram()`, `Chart.boxplot()`, `Chart.violin()`
+- distribution-specific audit rules for numeric value fields, sample size, grouped categories, histogram bins, and violin density warnings
+- `examples/distribution_charts.py`
+
 ## Non-Goals
 
 - UI, dashboards, or Streamlit

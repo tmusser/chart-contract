@@ -8,7 +8,7 @@
   "layer": [
     {
       "data": {
-        "name": "data-89a6f5a0d51458e583a40d63981be75e"
+        "name": "data-f7ae7c7116813c8ce173f7a8e96e6a11"
       },
       "mark": {
         "type": "line",
@@ -39,7 +39,7 @@
     },
     {
       "data": {
-        "name": "data-cb09c0238c286cd711cb319ffbf98496"
+        "name": "data-30c96721cf7dfaa86848adb2762b6597"
       },
       "mark": {
         "type": "rule",
@@ -58,7 +58,7 @@
     },
     {
       "data": {
-        "name": "data-cb09c0238c286cd711cb319ffbf98496"
+        "name": "data-30c96721cf7dfaa86848adb2762b6597"
       },
       "mark": {
         "type": "text",
@@ -91,9 +91,9 @@
     ]
   },
   "width": 640,
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
   "datasets": {
-    "data-89a6f5a0d51458e583a40d63981be75e": [
+    "data-f7ae7c7116813c8ce173f7a8e96e6a11": [
       {
         "week": "2026-05-01",
         "conversion_rate": 0.12
@@ -111,7 +111,7 @@
         "conversion_rate": 0.16
       }
     ],
-    "data-cb09c0238c286cd711cb319ffbf98496": [
+    "data-30c96721cf7dfaa86848adb2762b6597": [
       {
         "week": "2026-05-08",
         "label": "Onboarding launch"

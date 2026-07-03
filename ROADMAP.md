@@ -29,6 +29,12 @@ Explicit non-goals:
 - Do not add auto-correction.
 - Do not build a dashboard or chart generator.
 
+## v0.3 distribution preview
+
+- Chart intents: `Chart.histogram()`, `Chart.boxplot()`, `Chart.violin()`
+- Distribution audit rules: numeric metric checks, sample-size thresholds, grouped category thresholds, histogram bins, violin density warnings
+- Example artifact: `examples/distribution_charts.py`
+
 ## Later
 
 - More visual intents only after the audit contract is strong
