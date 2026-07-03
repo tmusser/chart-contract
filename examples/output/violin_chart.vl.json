@@ -25,7 +25,8 @@
         "type": "nominal"
       },
       {
-        "field": "amount",
+        "field": "value",
+        "title": "Amount (count)",
         "type": "quantitative"
       },
       {

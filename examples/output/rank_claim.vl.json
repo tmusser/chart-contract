@@ -6,7 +6,7 @@
     }
   },
   "data": {
-    "name": "data-2dbdc06c1874e60e0fa223517c655205"
+    "name": "data-8c4e9aa994fcc77756e77dbfefc5a8a9"
   },
   "mark": {
     "type": "bar"
@@ -45,9 +45,9 @@
     ]
   },
   "width": 640,
-  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "datasets": {
-    "data-2dbdc06c1874e60e0fa223517c655205": [
+    "data-8c4e9aa994fcc77756e77dbfefc5a8a9": [
       {
         "segment": "Free",
         "adoption": 120

@@ -6,7 +6,7 @@
     }
   },
   "data": {
-    "name": "data-afe65d1ce3efc3888320aa3197894a6c"
+    "name": "data-eb06ab1a7eacc5baf1a04c35baca6b50"
   },
   "mark": {
     "type": "bar"
@@ -57,9 +57,9 @@
     ]
   },
   "width": 640,
-  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "datasets": {
-    "data-afe65d1ce3efc3888320aa3197894a6c": [
+    "data-eb06ab1a7eacc5baf1a04c35baca6b50": [
       {
         "segment": "SMB",
         "region": "East",

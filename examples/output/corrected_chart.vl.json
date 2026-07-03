@@ -6,7 +6,7 @@
     }
   },
   "data": {
-    "name": "data-78ac950c7395f02241a48f28d1f28140"
+    "name": "data-b111a15c207abcdf7297dcd503c0405a"
   },
   "mark": {
     "type": "bar"
@@ -46,9 +46,9 @@
     ]
   },
   "width": 640,
-  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "datasets": {
-    "data-78ac950c7395f02241a48f28d1f28140": [
+    "data-b111a15c207abcdf7297dcd503c0405a": [
       {
         "segment": "Enterprise",
         "conversion_rate": 0.18

@@ -192,7 +192,7 @@ def _render_violin(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         color=alt.Color(f"{category_field}:N", title=category_field.replace("_", " ").title()),
         tooltip=[
             alt.Tooltip(field=category_field, type="nominal"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field="value", type="quantitative", title=_metric_title(chart.y, chart.unit)),
             alt.Tooltip("density:Q", title="Density"),
         ],
     )
