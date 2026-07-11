@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -33,6 +33,14 @@ REVIEW = "REVIEW"
 BLOCK = "BLOCK"
 REPORT_SCHEMA_VERSION = "0.2"
 DISTRIBUTION_INTENTS = {"histogram", "boxplot", "violin"}
+SUPPORTED_CHART_INTENTS = {"trend", "rank", "compare", *DISTRIBUTION_INTENTS}
+ENCODING_TYPE_CODES = {
+    "Q": "quantitative",
+    "N": "nominal",
+    "O": "ordinal",
+    "T": "temporal",
+    "G": "geojson",
+}
 
 
 @dataclass(slots=True)
@@ -225,26 +233,26 @@ def audit_chart(chart: Any) -> AuditReport:
         report.add("data.not_empty", PASS, "Chart data is not empty.")
 
     if distribution_intent:
-        _audit_distribution_sample_size(report, chart, category_field)
+        _audit_distribution_sample_size(report, chart, category_field, metric_field)
         if chart.intent == "histogram":
             _audit_histogram_bins(report, chart)
         if chart.intent == "violin":
-            _audit_violin_sample_size(report, chart)
+            _audit_violin_sample_size(report, chart, metric_field)
 
     if chart.intent == "trend":
-        row_count = len(chart.data)
-        if row_count < 2:
+        point_count = _complete_observation_count(chart.data, (chart.x, chart.y))
+        if point_count < 2:
             report.add(
                 "data.trend.min_points",
                 FAIL,
-                f"Trend chart has {row_count} data point(s); a directional trend claim requires at least 2.",
-                suggestion="Add historical data covering at least two time periods.",
+                f"Trend chart has {point_count} complete data point(s); a directional trend claim requires at least 2.",
+                suggestion="Add at least two observations with non-null x and y values.",
             )
         else:
             report.add(
                 "data.trend.min_points",
                 PASS,
-                "Trend chart has enough data points to show direction.",
+                "Trend chart has at least two complete data points to show direction.",
             )
 
     if chart.intent == "trend" and chart.x in chart.data.columns:
@@ -326,11 +334,20 @@ def audit_chart(chart: Any) -> AuditReport:
     else:
         report.add("labels.title.quality", PASS, "Title is specific enough to support interpretation.")
 
-    report.add(
-        "visual.intent.match",
-        PASS,
-        f"{chart.intent.title()} visual form matches the declared chart intent.",
-    )
+    if chart.intent in SUPPORTED_CHART_INTENTS:
+        report.add(
+            "visual.intent.match",
+            PASS,
+            f"{chart.intent.title()} visual form matches the declared chart intent.",
+        )
+    else:
+        report.add(
+            "visual.intent.match",
+            FAIL,
+            f"Unsupported chart intent: {chart.intent!r}.",
+            suggestion="Use one of the supported Chart constructors instead of setting intent directly.",
+            field="intent",
+        )
 
     decorative_terms = find_decorative_terms(chart.metadata or {})
     if decorative_terms:
@@ -361,8 +378,9 @@ def audit_spec(
     """
 
     report = AuditReport()
-    mark = _mark_type(spec)
-    encoding = spec.get("encoding", {})
+    analytical_spec = _primary_analytical_spec(spec)
+    mark = _mark_type(analytical_spec)
+    encoding = analytical_spec.get("encoding", {})
     x_encoding = encoding.get("x", {}) if isinstance(encoding, Mapping) else {}
     y_encoding = encoding.get("y", {}) if isinstance(encoding, Mapping) else {}
     color_encoding = encoding.get("color", {}) if isinstance(encoding, Mapping) else {}
@@ -397,7 +415,7 @@ def audit_spec(
             field="source",
         )
 
-    if _has_quantitative_axis(x_encoding) or _has_quantitative_axis(y_encoding):
+    if _has_quantitative_encoding(encoding):
         if unit:
             report.add("labels.unit.present", PASS, "Spec declares a unit for a quantitative field.")
         else:
@@ -408,6 +426,8 @@ def audit_spec(
                 suggestion="Add spec['usermeta']['unit'] or a clear axis title with units.",
                 field="unit",
             )
+
+    _audit_spec_encoding_fields(report, encoding, resolved_frame)
 
     if is_generic_title(title):
         report.add(
@@ -431,20 +451,25 @@ def audit_spec(
     elif resolved_claim:
         report.add("claim.causal_support", PASS, "Claim support language is acceptable for the audited spec.")
 
-    if mark == "line" and x_encoding and y_encoding and resolved_data is not None:
-        row_count = len(resolved_data)
-        if row_count < 2:
+    if mark == "line" and x_encoding and y_encoding and resolved_frame is not None:
+        x_field = _encoding_field(x_encoding)
+        y_field = _encoding_field(y_encoding)
+        if x_field and y_field:
+            point_count = _complete_observation_count(resolved_frame, (x_field, y_field))
+        else:
+            point_count = len(resolved_frame)
+        if point_count < 2:
             report.add(
                 "data.trend.min_points",
                 FAIL,
-                f"Trend spec has {row_count} data point(s) and needs at least 2.",
-                suggestion="Add historical data covering at least two time periods.",
+                f"Trend spec has {point_count} complete data point(s) and needs at least 2.",
+                suggestion="Add at least two observations with non-null x and y values.",
             )
         else:
             report.add(
                 "data.trend.min_points",
                 PASS,
-                "Trend spec has enough data points to show direction.",
+                "Trend spec has at least two complete data points to show direction.",
             )
 
     if mark == "bar":
@@ -517,6 +542,27 @@ def audit_spec(
     return report
 
 
+def _primary_analytical_spec(spec: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Return the first data-bearing analytical view from a layered spec."""
+    if _mark_type(spec) and isinstance(spec.get("encoding"), Mapping):
+        return spec
+
+    layers = spec.get("layer")
+    if isinstance(layers, list):
+        for layer in layers:
+            if not isinstance(layer, Mapping):
+                continue
+            mark = _mark_type(layer)
+            encoding = layer.get("encoding")
+            if mark in {"line", "bar", "arc", "area", "boxplot"} and isinstance(encoding, Mapping):
+                return layer
+            nested = _primary_analytical_spec(layer)
+            if nested is not layer and _mark_type(nested):
+                return nested
+
+    return spec
+
+
 def _mark_type(spec: Mapping[str, Any]) -> str:
     mark = spec.get("mark")
     if isinstance(mark, str):
@@ -537,11 +583,17 @@ def _title_text(title: Any) -> str:
 
 
 def _has_quantitative_axis(encoding: Any) -> bool:
-    return isinstance(encoding, Mapping) and encoding.get("type") == "quantitative"
+    return _encoding_type(encoding) == "quantitative"
+
+
+def _has_quantitative_encoding(encoding: Any) -> bool:
+    if not isinstance(encoding, Mapping):
+        return False
+    return any(_has_quantitative_axis(item) for _, item in _iter_encoding_definitions(encoding))
 
 
 def _quantitative_axis_uses_nonzero_baseline(encoding: Any) -> bool:
-    if not _has_quantitative_axis(encoding):
+    if not _has_quantitative_axis(encoding) or not isinstance(encoding, Mapping):
         return False
     scale = encoding.get("scale", {})
     return isinstance(scale, Mapping) and scale.get("zero") is False
@@ -558,11 +610,70 @@ def _coerce_records(
     return extract_inline_values(spec)
 
 
+def _audit_spec_encoding_fields(report: AuditReport, encoding: Any, frame: pd.DataFrame | None) -> None:
+    if frame is None or not isinstance(encoding, Mapping):
+        return
+
+    encoded_fields: set[str] = set()
+    quantitative_fields: set[str] = set()
+    for _, definition in _iter_encoding_definitions(encoding):
+        field = _encoding_field(definition)
+        if not field:
+            continue
+        encoded_fields.add(field)
+        if _encoding_type(definition) == "quantitative":
+            quantitative_fields.add(field)
+
+    if not encoded_fields:
+        return
+
+    missing_fields = sorted(field for field in encoded_fields if field not in frame.columns)
+    if missing_fields:
+        report.add(
+            "data.encoding.fields",
+            FAIL,
+            f"Encoded field(s) are missing from the data: {', '.join(missing_fields)}.",
+            suggestion="Add the missing columns or update the spec encodings.",
+            field=missing_fields[0],
+        )
+    else:
+        report.add("data.encoding.fields", PASS, "All encoded fields are present in the data.")
+
+    non_numeric = sorted(
+        field
+        for field in quantitative_fields
+        if field in frame.columns and not is_numeric_series(frame[field])
+    )
+    if non_numeric:
+        report.add(
+            "data.encoding.quantitative",
+            FAIL,
+            f"Quantitative encoded field(s) are not numeric: {', '.join(non_numeric)}.",
+            suggestion="Convert quantitative fields to numeric data or change their encoding type.",
+            field=non_numeric[0],
+        )
+    elif quantitative_fields and not missing_fields:
+        report.add(
+            "data.encoding.quantitative",
+            PASS,
+            "Quantitative encoded fields are numeric.",
+        )
+
+
+def _iter_encoding_definitions(encoding: Mapping[str, Any]) -> Iterator[tuple[str, Any]]:
+    for channel, definition in encoding.items():
+        if isinstance(definition, list):
+            for item in definition:
+                yield channel, item
+        else:
+            yield channel, definition
+
+
 def _category_count(records: list[dict[str, Any]] | None, encoding: Any) -> int | None:
-    if not records or not isinstance(encoding, Mapping):
+    if not records:
         return None
-    field = encoding.get("field")
-    if not isinstance(field, str):
+    field = _encoding_field(encoding)
+    if not field:
         return None
     values = {record.get(field) for record in records if field in record}
     return len(values)
@@ -622,7 +733,8 @@ def _audit_distribution_spec(
             field=metric_field,
         )
 
-    row_count = len(resolved_frame)
+    valid_frame = _valid_metric_frame(resolved_frame, metric_field)
+    row_count = len(valid_frame)
     if row_count < 5:
         report.add(
             "data.distribution.sample_size",
@@ -645,8 +757,8 @@ def _audit_distribution_spec(
         )
 
     category_field = _distribution_spec_category_field(kind, x_encoding, color_encoding)
-    if category_field and category_field in resolved_frame.columns:
-        group_counts = resolved_frame[category_field].dropna().value_counts()
+    if category_field and category_field in valid_frame.columns:
+        group_counts = valid_frame[category_field].dropna().value_counts()
         if not group_counts.empty:
             if (group_counts < 10).any():
                 smallest = int(group_counts.min())
@@ -743,7 +855,34 @@ def _encoding_field(encoding: Any) -> str | None:
         field = encoding.get("field")
         if isinstance(field, str) and field:
             return field
-    return None
+    shorthand = _encoding_shorthand(encoding)
+    return shorthand[0] if shorthand else None
+
+
+def _encoding_type(encoding: Any) -> str | None:
+    if isinstance(encoding, Mapping):
+        encoding_type = encoding.get("type")
+        if isinstance(encoding_type, str) and encoding_type:
+            return ENCODING_TYPE_CODES.get(encoding_type.upper(), encoding_type.lower())
+    shorthand = _encoding_shorthand(encoding)
+    return shorthand[1] if shorthand else None
+
+
+def _encoding_shorthand(encoding: Any) -> tuple[str | None, str | None, str | None] | None:
+    if not isinstance(encoding, str):
+        return None
+    expression, separator, type_code = encoding.rpartition(":")
+    if not separator or not expression:
+        return None
+    encoding_type = ENCODING_TYPE_CODES.get(type_code.upper())
+    if not encoding_type:
+        return None
+    aggregate = None
+    field = expression
+    if expression.endswith(")") and "(" in expression:
+        aggregate, _, argument = expression[:-1].partition("(")
+        field = argument or None
+    return field, encoding_type, aggregate or None
 
 
 def _encoding_bin_config(encoding: Any) -> Any:
@@ -757,7 +896,8 @@ def _encoding_aggregate(encoding: Any) -> str | None:
         aggregate = encoding.get("aggregate")
         if isinstance(aggregate, str) and aggregate:
             return aggregate
-    return None
+    shorthand = _encoding_shorthand(encoding)
+    return shorthand[2] if shorthand else None
 
 
 def _contains_density_transform(payload: Any) -> bool:
@@ -768,6 +908,22 @@ def _contains_density_transform(payload: Any) -> bool:
     if isinstance(payload, list):
         return any(_contains_density_transform(item) for item in payload)
     return False
+
+
+def _complete_observation_count(frame: pd.DataFrame, fields: Sequence[str | None]) -> int:
+    required = [field for field in fields if isinstance(field, str) and field]
+    if not required or any(field not in frame.columns for field in required):
+        return 0
+    return int(frame[required].notna().all(axis=1).sum())
+
+
+def _valid_metric_frame(frame: pd.DataFrame, metric_field: str | None) -> pd.DataFrame:
+    if not metric_field or metric_field not in frame.columns:
+        return frame.iloc[0:0]
+    metric = frame[metric_field]
+    if not is_numeric_series(metric):
+        return frame.iloc[0:0]
+    return frame.loc[metric.notna()]
 
 
 def _chart_metric_field(chart: Any) -> str | None:
@@ -853,8 +1009,14 @@ def _audit_distribution_value(report: AuditReport, chart: Any, metric_field: str
     )
 
 
-def _audit_distribution_sample_size(report: AuditReport, chart: Any, category_field: str | None) -> None:
-    row_count = len(chart.data)
+def _audit_distribution_sample_size(
+    report: AuditReport,
+    chart: Any,
+    category_field: str | None,
+    metric_field: str | None,
+) -> None:
+    valid_frame = _valid_metric_frame(chart.data, metric_field)
+    row_count = len(valid_frame)
     if row_count < 5:
         report.add(
             "data.distribution.sample_size",
@@ -876,10 +1038,10 @@ def _audit_distribution_sample_size(report: AuditReport, chart: Any, category_fi
             f"{chart.intent.title()} chart has {row_count} observations.",
         )
 
-    if not category_field or category_field not in chart.data.columns:
+    if not category_field or category_field not in valid_frame.columns:
         return
 
-    group_counts = chart.data[category_field].dropna().value_counts()
+    group_counts = valid_frame[category_field].dropna().value_counts()
     if group_counts.empty:
         return
 
@@ -940,8 +1102,8 @@ def _audit_histogram_bins(report: AuditReport, chart: Any) -> None:
     )
 
 
-def _audit_violin_sample_size(report: AuditReport, chart: Any) -> None:
-    row_count = len(chart.data)
+def _audit_violin_sample_size(report: AuditReport, chart: Any, metric_field: str | None) -> None:
+    row_count = len(_valid_metric_frame(chart.data, metric_field))
     if row_count < 30:
         report.add(
             "visual.violin.sample_size",

@@ -1,5 +1,44 @@
 # VERIFY
 
+2026-07-11 - Close audit blind spots
+
+Environment:
+- Working directory: isolated reconstruction of the current `main` package sources
+- Python: system Python with current pandas/Altair and pytest
+
+Commands:
+- `PYTHONPATH=src pytest -q tests/test_audit_spec.py tests/test_hidden_regressions.py` -> PASSED (`16 passed`)
+- randomized malformed/spec-shape audit probe across 2,000 inputs -> PASSED (no exceptions)
+- `python -m py_compile src/chart_contract/*.py src/chart_contract/renderers/*.py` -> PASSED
+- full GitHub Actions suite -> PENDING until the draft PR branch is published
+
+Changed files:
+- `src/chart_contract/audit.py`
+- `src/chart_contract/contracts.py`
+- `src/chart_contract/renderers/altair.py`
+- `tests/test_audit_spec.py`
+- `tests/test_hidden_regressions.py`
+- `docs/AUDIT_RULES.md`
+- `CHANGELOG.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Verified fixes:
+- missing or non-numeric encoded fields now block spec audits, including shorthand encodings
+- trend and distribution sample gates count complete/valid observations rather than raw rows
+- the package's own layered trend specs receive trend completeness checks
+- generated specs preserve audit metadata in `usermeta`
+- numeric trend axes remain quantitatively spaced
+- unsupported direct intents block before renderer failure
+- data hashes and provenance text do not create false decoration warnings
+
+Remaining risks:
+- Layered spec inspection intentionally selects the first supported analytical layer rather than fully evaluating arbitrary multi-view composition.
+- Browser-level visual rendering was not inspected in the isolated local reconstruction.
+
+Next safest task:
+- Run the repository's full CI suite on the published branch, update this evidence entry with the result, and review the draft PR diff.
+
 2026-07-03 - Add distribution chart intents
 
 Environment:

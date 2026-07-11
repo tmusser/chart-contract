@@ -80,7 +80,7 @@ def test_two_point_line_trend_passes_min_points() -> None:
     assert severities["data.trend.min_points"] == "PASS"
 
 
-def test_histogram_spec_audit_detects_distribution_rules() -> None:
+def test_histogram_spec_audit_preserves_distribution_contract() -> None:
     df = pd.DataFrame(
         {
             "amount": list(range(20)),
@@ -106,9 +106,11 @@ def test_histogram_spec_audit_detects_distribution_rules() -> None:
     )
 
     severities = {finding.rule_id: finding.severity for finding in report.findings}
-    assert report.verdict == "REVIEW"
-    assert severities["contract.source.present"] == "WARN"
-    assert severities["labels.unit.present"] == "WARN"
+    assert report.verdict == "READY"
+    assert severities["contract.source.present"] == "PASS"
+    assert severities["labels.unit.present"] == "PASS"
+    assert severities["data.encoding.fields"] == "PASS"
+    assert severities["data.encoding.quantitative"] == "PASS"
     assert severities["data.distribution.value.numeric"] == "PASS"
     assert severities["data.distribution.sample_size"] == "PASS"
     assert severities["data.distribution.group_sample_size"] == "PASS"

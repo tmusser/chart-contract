@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -107,20 +108,36 @@ def is_ordered_series(series: pd.Series) -> bool:
 
 def find_decorative_terms(payload: Any) -> list[str]:
     found: set[str] = set()
+    ignored_value_keys = {
+        "causal_evidence",
+        "caveat",
+        "data",
+        "datasets",
+        "filters",
+        "source",
+        "unit",
+        "values",
+    }
+
+    def tokens(value: Any) -> set[str]:
+        text = re.sub(r"(?i)\b3[\s_-]*d\b", " 3d ", str(value))
+        text = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text)
+        return set(re.findall(r"[a-z0-9]+", text.lower()))
 
     def visit(value: Any) -> None:
         if isinstance(value, Mapping):
             for key, nested in value.items():
-                lowered_key = str(key).lower()
-                found.update(term for term in DECORATIVE_TERMS if term in lowered_key)
-                visit(nested)
+                key_tokens = tokens(key)
+                found.update(term for term in DECORATIVE_TERMS if term in key_tokens)
+                if str(key).lower() not in ignored_value_keys:
+                    visit(nested)
             return
         if isinstance(value, list):
             for item in value:
                 visit(item)
             return
-        lowered_value = str(value).lower()
-        found.update(term for term in DECORATIVE_TERMS if term in lowered_value)
+        value_tokens = tokens(value)
+        found.update(term for term in DECORATIVE_TERMS if term in value_tokens)
 
     visit(payload)
     return sorted(found)
