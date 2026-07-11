@@ -7,7 +7,7 @@ from typing import Any
 import altair as alt
 import pandas as pd
 
-from ..contracts import is_datetime_like
+from ..contracts import is_datetime_like, is_numeric_series
 
 
 def render_chart(chart: Any) -> alt.Chart:
@@ -20,6 +20,15 @@ def render_chart(chart: Any) -> alt.Chart:
     if chart.filters:
         subtitle.append(f"Filters: {chart.filters}")
 
+    usermeta = dict(chart.metadata or {})
+    for key, value in {
+        "source": chart.source,
+        "unit": chart.unit,
+        "caveat": chart.caveat,
+        "filters": chart.filters,
+    }.items():
+        if value not in (None, ""):
+            usermeta[key] = value
     properties: dict[str, Any] = {
         "width": 640,
         "height": 360,
@@ -27,6 +36,7 @@ def render_chart(chart: Any) -> alt.Chart:
             "text": chart.title or chart.claim or "Chart",
             "subtitle": subtitle,
         },
+        "usermeta": usermeta,
     }
 
     if chart.intent == "trend":
@@ -49,12 +59,21 @@ def render_chart(chart: Any) -> alt.Chart:
 
 def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
     base = alt.Chart(alt.InlineData(values=records))
-    x_type = "T" if is_datetime_like(chart.data[chart.x]) else "O"
+    x_series = chart.data[chart.x]
+    if is_datetime_like(x_series):
+        x_type = "T"
+        tooltip_type = "temporal"
+    elif is_numeric_series(x_series):
+        x_type = "Q"
+        tooltip_type = "quantitative"
+    else:
+        x_type = "O"
+        tooltip_type = "nominal"
     line = base.mark_line(point=True).encode(
         x=alt.X(f"{chart.x}:{x_type}", title=chart.x.replace("_", " ").title()),
         y=alt.Y(f"{chart.y}:Q", title=_y_title(chart)),
         tooltip=[
-            alt.Tooltip(field=chart.x, type="temporal" if x_type == "T" else "nominal"),
+            alt.Tooltip(field=chart.x, type=tooltip_type),
             alt.Tooltip(field=chart.y, type="quantitative"),
         ],
     )

@@ -2,44 +2,36 @@
 
 RESUME PACKET
 
-- Goal: add first-class distribution intents without breaking the existing trend/rank/compare contract or CLI behavior.
-- Workflow State: `Chart.histogram()`, `Chart.boxplot()`, `Chart.violin()`, distribution renderers, distribution audit rules, tests, docs, and `examples/distribution_charts.py` are all in place.
-- Branch: `codex/distribution-chart-intents`
-- Next task: review the diff, then stage/commit or keep iterating if a follow-up is needed.
-- Verification: `./.venv/bin/python -m pytest -q`, `./.venv/bin/python examples/distribution_charts.py`, `./.venv/bin/python examples/bad_to_good_chart.py`, `./.venv/bin/chart-contract --help`, and `git diff --check`
-- Read first: `README.md`, `ROADMAP.md`, `docs/AUDIT_RULES.md`, `artifacts/VERIFY.md`
+- Goal: close deterministic audit blind spots without adding chart intents or widening product scope.
+- Workflow State: runtime fixes, regression tests, audit-rule docs, changelog, and verification evidence are published in draft PR #3; GitHub Actions CI passed on the published PR branch.
+- Branch: `agent/close-audit-blind-spots`
+- Pull request: #3 (`fix: close audit blind spots`)
+- Next task: review the draft PR diff and decide whether the documented layered-spec boundary is acceptable for merge.
+- Verification: targeted regression suite (`16 passed`), 2,000 malformed/spec-shape probes without exceptions, Python bytecode compilation, and GitHub Actions CI passed.
+- Read first: `src/chart_contract/audit.py`, `src/chart_contract/contracts.py`, `src/chart_contract/renderers/altair.py`, `tests/test_hidden_regressions.py`, `artifacts/VERIFY.md`
 
 ## Current Repo State
 
-- The v0.1 scope in `artifacts/SPEC.md` remains intact, and the new distribution intents live in a separate v0.3 preview section.
-- The v0.2.0 agent gate is still intact: CLI loading, report serialization, trap fixtures, and CI smoke checks remain in place.
-- Distribution intents now exist as `Chart.histogram()`, `Chart.boxplot()`, and `Chart.violin()` with matching Altair renderers.
-- `audit_chart()` and `audit_spec()` now enforce distribution-specific checks for numeric metrics, sample sizes, grouped categories, histogram bins, and violin density warnings.
-- `examples/distribution_charts.py` writes histogram, boxplot, and violin Vega-Lite specs into `examples/output/`.
-- README, `docs/AUDIT_RULES.md`, `ROADMAP.md`, and `artifacts/SPEC.md` now describe the distribution preview and keep the claim-first framing explicit.
-- The repo still has tracked example-output drift whenever the example scripts are run, so those artifacts need review before any commit.
-
-## Working Commands
-
-- `git diff --check`
-- `./.venv/bin/python -m pytest tests/test_distribution_intents.py -q`
-- `./.venv/bin/python -m pytest tests/test_audit_spec.py -q`
-- `./.venv/bin/python -m pytest tests/test_chart_intents.py -q`
-- `./.venv/bin/python -m pytest -q`
-- `./.venv/bin/python examples/distribution_charts.py`
-- `./.venv/bin/python examples/bad_to_good_chart.py`
-- `./.venv/bin/chart-contract --help`
-- `sed -n '1,260p' ROADMAP.md`
-- `sed -n '1,220p' docs/AUDIT_RULES.md`
+- Spec audits validate encoded-field presence and quantitative dtypes for object and shorthand Vega-Lite encodings.
+- Trend completeness uses non-null x/y pairs for both chart and simple/layered line-spec audits.
+- Distribution thresholds use non-null numeric metric observations and valid per-group rows.
+- Generated Vega-Lite specs retain source, unit, caveat, filters, and custom metadata in top-level `usermeta`.
+- Numeric trend x fields render as quantitative axes.
+- Unsupported direct chart intents produce `visual.intent.match` FAIL instead of an audit PASS followed by a renderer exception.
+- Decoration detection is token-aware and ignores data payloads, dataset hashes, and provenance values.
 
 ## Important Decisions
 
-- Keep the distribution slice claim-first and deterministic; avoid turning the package into a full visualization library.
-- Keep v0.1 scope in `artifacts/SPEC.md` stable while using a separate preview section for new intents.
-- Keep the existing trend/rank/compare API and CLI behavior unchanged.
-- Keep the distribution audits focused on numeric metrics, sample size, grouping, bins, and violin density warnings.
-- Keep example outputs synthetic and inspectable so they stay easy to review.
+- Preserve the v0.1 and v0.3-preview intent boundaries; this is a correctness-only change.
+- Prefer deterministic failures for invalid data contracts over permissive READY verdicts.
+- Audit the first supported analytical layer in layered specs rather than pretending arbitrary composition is fully understood.
+- Preserve metadata at render time so chart-to-spec round trips do not lose audit evidence.
+
+## Remaining Risks
+
+- Complex layered/concatenated/faceted Vega-Lite specs remain only partially inspected.
+- Visual browser rendering is not part of the deterministic gate.
 
 ## Next Recommended Task
 
-Use the roadmap, SPEC, and audit-rules docs as the source of truth for any follow-up slice.
+Use the draft PR changed-file review and the documented layered-spec boundary as the final merge gate.
