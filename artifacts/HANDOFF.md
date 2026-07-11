@@ -3,10 +3,10 @@
 RESUME PACKET
 
 - Goal: close deterministic audit blind spots without adding chart intents or widening product scope.
-- Workflow State: runtime fixes, regression tests, audit-rule docs, changelog, and verification evidence are prepared for a draft PR.
+- Workflow State: runtime fixes, regression tests, audit-rule docs, changelog, and verification evidence are published in draft PR #3; GitHub Actions CI passed.
 - Branch: `agent/close-audit-blind-spots`
-- Next task: inspect GitHub Actions, update `artifacts/VERIFY.md` with the full-suite result, and review the PR diff.
-- Verification: targeted regression suite (`16 passed`), 2,000 malformed/spec-shape probes without exceptions, and Python bytecode compilation.
+- Next task: review the draft PR diff and decide whether the documented layered-spec boundary is acceptable for merge.
+- Verification: targeted regression suite (`16 passed`), 2,000 malformed/spec-shape probes without exceptions, Python bytecode compilation, and GitHub Actions CI run #41 passed.
 - Read first: `src/chart_contract/audit.py`, `src/chart_contract/contracts.py`, `src/chart_contract/renderers/altair.py`, `tests/test_hidden_regressions.py`, `artifacts/VERIFY.md`
 
 ## Current Repo State
@@ -33,4 +33,4 @@ RESUME PACKET
 
 ## Next Recommended Task
 
-Use the draft PR's CI result and changed-file review as the final merge gate.
+Use the draft PR changed-file review and the documented layered-spec boundary as the final merge gate.
