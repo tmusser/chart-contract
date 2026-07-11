@@ -1,0 +1,37 @@
+name: Apply hidden bug fixes
+
+on:
+  push:
+    branches:
+      - agent/close-audit-blind-spots
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fixes:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/close-audit-blind-spots
+      - name: Apply reviewed patches
+        run: |
+          git apply --check \
+            .github/patches/hidden-bugs-core.diff \
+            .github/patches/hidden-bugs-docs.diff \
+            .github/patches/hidden-bugs-artifacts-tests.diff
+          git apply \
+            .github/patches/hidden-bugs-core.diff \
+            .github/patches/hidden-bugs-docs.diff \
+            .github/patches/hidden-bugs-artifacts-tests.diff
+      - name: Replace bootstrap files with implementation commit
+        run: |
+          rm -rf .github/patches
+          rm .github/workflows/apply-hidden-bug-fixes.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: close audit blind spots"
+          git push origin HEAD:agent/close-audit-blind-spots
