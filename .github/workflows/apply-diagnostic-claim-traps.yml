@@ -29,7 +29,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/chart_contract/audit.py \
             src/chart_contract/renderers/altair.py \
-            README.md \
-            .github/workflows/ci.yml
+            README.md
           git commit -m "feat: harden diagnostic claim audits"
           git push origin HEAD:agent/diagnostic-claim-traps
