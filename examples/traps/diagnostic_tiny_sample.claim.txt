@@ -1,0 +1,1 @@
+This four-point residual diagnostic is sufficient to rule out meaningful model problems.
