@@ -2,36 +2,36 @@
 
 RESUME PACKET
 
-- Goal: close deterministic audit blind spots without adding chart intents or widening product scope.
-- Workflow State: runtime fixes, regression tests, audit-rule docs, changelog, and verification evidence are published in draft PR #3; GitHub Actions CI passed on the published PR branch.
-- Branch: `agent/close-audit-blind-spots`
-- Pull request: #3 (`fix: close audit blind spots`)
-- Next task: review the draft PR diff and decide whether the documented layered-spec boundary is acceptable for merge.
-- Verification: targeted regression suite (`16 passed`), 2,000 malformed/spec-shape probes without exceptions, Python bytecode compilation, and GitHub Actions CI passed.
-- Read first: `src/chart_contract/audit.py`, `src/chart_contract/contracts.py`, `src/chart_contract/renderers/altair.py`, `tests/test_hidden_regressions.py`, `artifacts/VERIFY.md`
+- Goal: add first-class QQ, ECDF, and residual plots without introducing SciPy or widening into a general plotting library.
+- Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, docs, and a draft PR are being assembled on one feature branch.
+- Branch: `agent/statistical-diagnostic-plots`
+- Next task: run the full GitHub Actions suite, inspect generated Vega-Lite structures, and review the draft PR boundary.
+- Verification: local pure-helper tests passed (`5 passed`); full repository CI is pending branch publication.
+- Read first: `src/chart_contract/statistics.py`, `src/chart_contract/statistical_audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/renderers/altair.py`, `tests/test_statistical_intents.py`, `artifacts/VERIFY.md`
 
 ## Current Repo State
 
-- Spec audits validate encoded-field presence and quantitative dtypes for object and shorthand Vega-Lite encodings.
-- Trend completeness uses non-null x/y pairs for both chart and simple/layered line-spec audits.
-- Distribution thresholds use non-null numeric metric observations and valid per-group rows.
-- Generated Vega-Lite specs retain source, unit, caveat, filters, and custom metadata in top-level `usermeta`.
-- Numeric trend x fields render as quantitative axes.
-- Unsupported direct chart intents produce `visual.intent.match` FAIL instead of an audit PASS followed by a renderer exception.
-- Decoration detection is token-aware and ignores data payloads, dataset hashes, and provenance values.
+- `Chart.qq()` compares sample quantiles with a deterministic normal reference and fitted reference line.
+- `Chart.ecdf()` renders cumulative probability without histogram bin choices.
+- `Chart.residual()` renders fitted-versus-residual points with a zero reference line.
+- QQ and ECDF reuse the established distribution audit contract for numeric values, valid sample sizes, and grouped sample sizes.
+- QQ adds explicit normal-reference and tie-density findings.
+- Residual audits add fitted-value typing, complete-pair sample thresholds, residual-variation checks, and a zero-reference guarantee.
+- Statistical preparation stays inside pandas and Python's standard library.
 
 ## Important Decisions
 
-- Preserve the v0.1 and v0.3-preview intent boundaries; this is a correctness-only change.
-- Prefer deterministic failures for invalid data contracts over permissive READY verdicts.
-- Audit the first supported analytical layer in layered specs rather than pretending arbitrary composition is fully understood.
-- Preserve metadata at render time so chart-to-spec round trips do not lose audit evidence.
+- Support only the normal QQ reference distribution in this slice; unsupported references fail audit and rendering explicitly.
+- Prefer ECDF over adding more density estimators or smoothing parameters.
+- Treat residual plots as deterministic diagnostic surfaces, not as proof of model adequacy.
+- Keep `audit_spec()` generic; first-party statistical semantics live on the `Chart` intent audit path.
 
 ## Remaining Risks
 
-- Complex layered/concatenated/faceted Vega-Lite specs remain only partially inspected.
-- Visual browser rendering is not part of the deterministic gate.
+- Grouped QQ plots can become visually busy with many groups; the existing color-category warning is the guardrail.
+- QQ interpretation with discrete or heavily rounded values still requires human judgment.
+- Statistical diagnostics do not replace hypothesis tests, calibration tests, or domain review.
 
 ## Next Recommended Task
 
-Use the draft PR changed-file review and the documented layered-spec boundary as the final merge gate.
+Use CI, the generated spec structure, and the documented no-SciPy boundary as the final merge gate.
