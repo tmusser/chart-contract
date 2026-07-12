@@ -1,0 +1,15 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "QQ diagnostic without a reference line",
+  "usermeta": {
+    "source": "synthetic.qq_missing_reference",
+    "unit": "observed value",
+    "chart_contract_intent": "qq",
+    "qq_reference_distribution": "normal"
+  },
+  "mark": {"type": "point", "filled": true},
+  "encoding": {
+    "x": {"field": "_theoretical_quantile", "type": "quantitative", "title": "Theoretical normal quantile"},
+    "y": {"field": "_sample_quantile", "type": "quantitative", "title": "Observed quantile"}
+  }
+}
