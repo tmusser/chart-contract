@@ -539,6 +539,10 @@ def audit_spec(
     else:
         report.add("visual.integrity.decoration", PASS, "No decorative chartjunk-like spec fields detected.")
 
+    from .statistical_audit import audit_statistical_spec
+
+    audit_statistical_spec(report, spec, resolved_frame, resolved_claim)
+
     return report
 
 
@@ -554,7 +558,7 @@ def _primary_analytical_spec(spec: Mapping[str, Any]) -> Mapping[str, Any]:
                 continue
             mark = _mark_type(layer)
             encoding = layer.get("encoding")
-            if mark in {"line", "bar", "arc", "area", "boxplot"} and isinstance(encoding, Mapping):
+            if mark in {"line", "bar", "arc", "area", "boxplot", "point"} and isinstance(encoding, Mapping):
                 return layer
             nested = _primary_analytical_spec(layer)
             if nested is not layer and _mark_type(nested):
