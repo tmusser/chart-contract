@@ -21,8 +21,8 @@ jobs:
           ref: agent/diagnostic-claim-traps
       - name: Apply reviewed patch
         run: |
-          git apply --check .github/patches/diagnostic-claim-traps.diff
-          git apply .github/patches/diagnostic-claim-traps.diff
+          git apply --recount --check .github/patches/diagnostic-claim-traps.diff
+          git apply --recount .github/patches/diagnostic-claim-traps.diff
       - name: Replace bootstrap files with implementation commit
         run: |
           rm -rf .github/patches
