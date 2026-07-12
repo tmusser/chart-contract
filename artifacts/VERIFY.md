@@ -1,5 +1,62 @@
 # VERIFY
 
+2026-07-12 - Harden diagnostic claim audits
+
+Environment:
+- Branch: `agent/diagnostic-claim-traps`
+- Pull request: #5 (`feat: harden diagnostic claim audits`)
+- Python: 3.12 on GitHub Actions Ubuntu runner
+
+Commands and gates:
+- `python -m pytest` -> PASSED (full repository suite)
+- legacy CLI REVIEW smoke check -> PASSED
+- legacy CLI BLOCK smoke check -> PASSED
+- legacy warnings-as-errors smoke check -> PASSED
+- `qq_heavy_tails` -> PASSED (`REVIEW`, `claim.qq.normality_support`)
+- `qq_missing_reference_line` -> PASSED (`BLOCK`, `visual.qq.reference_line`)
+- `residual_obvious_pattern` -> PASSED (`REVIEW`, `claim.residual.pattern_support`)
+- `diagnostic_tiny_sample` -> PASSED (`BLOCK`, `data.residual.sample_size`)
+- GitHub Actions CI run #155 -> PASSED
+
+Changed areas:
+- `src/chart_contract/statistical_audit.py`
+- `src/chart_contract/audit.py`
+- `src/chart_contract/renderers/altair.py`
+- `tests/test_statistical_intents.py`
+- `examples/traps/qq_heavy_tails.*`
+- `examples/traps/qq_missing_reference_line.*`
+- `examples/traps/residual_obvious_pattern.*`
+- `examples/traps/diagnostic_tiny_sample.*`
+- `examples/traps/README.md`
+- `docs/DIAGNOSTIC_CLAIMS.md`
+- `docs/AUDIT_RULES.md`
+- `README.md`
+- `.github/workflows/ci.yml`
+- `CHANGELOG.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Verified behavior:
+- first-party QQ specs require a supported fitted reference line
+- severe QQ outer-tail departure warns against overconfident normality wording
+- obvious monotonic or broad curved residual structure warns against “no pattern” claims
+- fewer than five complete diagnostic observations block interpretation
+- nonnumeric fitted values fail without entering residual correlation calculations
+- statistical intent metadata is limited to QQ, ECDF, and residual specs, preserving older `usermeta` contracts
+
+Deterministic boundaries:
+- QQ tail warning: maximum outer-20% departure at least 0.8 sample standard deviations
+- residual warning: absolute fitted/residual correlation at least 0.5 or ordered-thirds mean shift at least 1 residual standard deviation
+- diagnostic sample gate: FAIL below 5, WARN for 5-19, PASS at 20+
+
+Remaining risks:
+- thresholds catch obvious tail, monotonic, and broad curved structure but do not exhaust heteroskedasticity, autocorrelation, leverage, or every model diagnostic failure
+- QQ checks are visual-contract guardrails, not formal normality tests
+- first-party statistical spec semantics require `usermeta.chart_contract_intent`
+
+Next safest task:
+- Review draft PR #5 and squash-merge if the thresholds and REVIEW-versus-BLOCK split are acceptable.
+
 2026-07-12 - Add statistical diagnostic plots
 
 Environment:
