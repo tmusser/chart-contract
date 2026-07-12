@@ -8,6 +8,15 @@ import altair as alt
 import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series
+from ..statistics import (
+    ECDF_PROBABILITY_FIELD,
+    ECDF_VALUE_FIELD,
+    QQ_REFERENCE_FIELD,
+    QQ_SAMPLE_FIELD,
+    QQ_THEORETICAL_FIELD,
+    ecdf_records,
+    qq_records,
+)
 
 
 def render_chart(chart: Any) -> alt.Chart:
@@ -51,6 +60,12 @@ def render_chart(chart: Any) -> alt.Chart:
         rendered = _render_boxplot(chart, records)
     elif chart.intent == "violin":
         rendered = _render_violin(chart, records)
+    elif chart.intent == "qq":
+        rendered = _render_qq(chart)
+    elif chart.intent == "ecdf":
+        rendered = _render_ecdf(chart)
+    elif chart.intent == "residual":
+        rendered = _render_residual(chart, records)
     else:
         raise ValueError(f"Unsupported chart intent: {chart.intent}")
 
@@ -216,6 +231,92 @@ def _render_violin(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         ],
     )
     return violin
+
+
+def _render_qq(chart: Any) -> alt.Chart:
+    if not chart.value:
+        raise ValueError("QQ charts require a value field.")
+    point_records, reference_records = qq_records(
+        chart.data,
+        value=chart.value,
+        group=chart.group,
+        distribution=chart.distribution,
+    )
+    point_encoding: dict[str, Any] = {
+        "x": alt.X(f"{QQ_THEORETICAL_FIELD}:Q", title="Theoretical normal quantile"),
+        "y": alt.Y(f"{QQ_SAMPLE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+        "tooltip": [
+            alt.Tooltip(f"{QQ_THEORETICAL_FIELD}:Q", title="Theoretical quantile"),
+            alt.Tooltip(f"{QQ_SAMPLE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+        ],
+    }
+    line_encoding: dict[str, Any] = {
+        "x": alt.X(f"{QQ_THEORETICAL_FIELD}:Q"),
+        "y": alt.Y(f"{QQ_REFERENCE_FIELD}:Q"),
+    }
+    if chart.group:
+        point_encoding["color"] = alt.Color(f"{chart.group}:N", title=chart.group.replace("_", " ").title())
+        point_encoding["tooltip"] = [
+            alt.Tooltip(field=chart.group, type="nominal"),
+            *point_encoding["tooltip"],
+        ]
+        line_encoding["color"] = alt.Color(f"{chart.group}:N", legend=None)
+        line_encoding["detail"] = alt.Detail(f"{chart.group}:N")
+
+    points = alt.Chart(alt.InlineData(values=point_records)).mark_point(filled=True, size=55).encode(**point_encoding)
+    reference = (
+        alt.Chart(alt.InlineData(values=reference_records))
+        .mark_line(strokeDash=[5, 4])
+        .encode(**line_encoding)
+    )
+    return points + reference
+
+
+def _render_ecdf(chart: Any) -> alt.Chart:
+    if not chart.value:
+        raise ValueError("ECDF charts require a value field.")
+    records = ecdf_records(chart.data, value=chart.value, group=chart.group)
+    encoding: dict[str, Any] = {
+        "x": alt.X(f"{ECDF_VALUE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+        "y": alt.Y(
+            f"{ECDF_PROBABILITY_FIELD}:Q",
+            title="Cumulative probability",
+            scale=alt.Scale(domain=[0, 1]),
+            axis=alt.Axis(format=".0%"),
+        ),
+        "tooltip": [
+            alt.Tooltip(f"{ECDF_VALUE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+            alt.Tooltip(f"{ECDF_PROBABILITY_FIELD}:Q", title="Cumulative probability", format=".1%"),
+        ],
+    }
+    if chart.group:
+        encoding["color"] = alt.Color(f"{chart.group}:N", title=chart.group.replace("_", " ").title())
+        encoding["detail"] = alt.Detail(f"{chart.group}:N")
+        encoding["tooltip"] = [alt.Tooltip(field=chart.group, type="nominal"), *encoding["tooltip"]]
+    return alt.Chart(alt.InlineData(values=records)).mark_line(interpolate="step-after", point=True).encode(**encoding)
+
+
+def _render_residual(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
+    if not chart.x or not chart.y:
+        raise ValueError("Residual charts require fitted and residual fields.")
+    encoding: dict[str, Any] = {
+        "x": alt.X(f"{chart.x}:Q", title=chart.x.replace("_", " ").title()),
+        "y": alt.Y(f"{chart.y}:Q", title=_metric_title(chart.y, chart.unit)),
+        "tooltip": [
+            alt.Tooltip(field=chart.x, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative"),
+        ],
+    }
+    if chart.group:
+        encoding["color"] = alt.Color(f"{chart.group}:N", title=chart.group.replace("_", " ").title())
+        encoding["tooltip"] = [alt.Tooltip(field=chart.group, type="nominal"), *encoding["tooltip"]]
+    points = alt.Chart(alt.InlineData(values=records)).mark_point(filled=True, size=55).encode(**encoding)
+    zero = (
+        alt.Chart(alt.InlineData(values=[{}]))
+        .mark_rule(strokeDash=[5, 4])
+        .encode(y=alt.Y(datum=0, type="quantitative"))
+    )
+    return points + zero
 
 
 def _metric_title(field_name: str | None, unit: str | None) -> str:

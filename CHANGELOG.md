@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- First-class `Chart.qq()`, `Chart.ecdf()`, and `Chart.residual()` statistical diagnostic intents.
+- Deterministic normal-reference QQ quantiles and empirical-CDF preparation without adding SciPy or external data dependencies.
+- Statistical audit rules for QQ reference support, tie density, fitted-value types, residual sample size, and residual variation.
+- A runnable `examples/statistical_diagnostics.py` artifact for QQ, ECDF, and residual Vega-Lite specs.
+
 ### Fixed
 
 - Spec audits now fail when encoded fields are missing or quantitative encodings point to non-numeric data, including Vega-Lite shorthand encodings.

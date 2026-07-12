@@ -29,14 +29,18 @@ Explicit non-goals:
 - Do not add auto-correction.
 - Do not build a dashboard or chart generator.
 
-## v0.3 distribution preview
+## v0.3 distribution and diagnostics preview
 
-- Chart intents: `Chart.histogram()`, `Chart.boxplot()`, `Chart.violin()`
+- Distribution intents: `Chart.histogram()`, `Chart.boxplot()`, `Chart.violin()`
+- Statistical diagnostic intents: `Chart.qq()`, `Chart.ecdf()`, `Chart.residual()`
 - Distribution audit rules: numeric metric checks, sample-size thresholds, grouped category thresholds, histogram bins, violin density warnings
-- Example artifact: `examples/distribution_charts.py`
+- Diagnostic audit rules: QQ reference support and tie density, fitted-value types, residual sample size, residual variation, zero-reference guarantee
+- Deterministic normal quantiles and ECDF preparation using only the standard library plus pandas
+- Example artifacts: `examples/distribution_charts.py`, `examples/statistical_diagnostics.py`
 
 ## Later
 
+- Additional reference distributions only after their semantics and tests are explicit
 - More visual intents only after the audit contract is strong
 - Optional renderer and export improvements
 - More annotation primitives

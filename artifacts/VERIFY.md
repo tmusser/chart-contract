@@ -1,5 +1,44 @@
 # VERIFY
 
+2026-07-12 - Add statistical diagnostic plots
+
+Environment:
+- Working directory: isolated statistical helper reconstruction plus GitHub branch publication
+- Python: system Python with pandas and pytest for pure preparation helpers
+
+Commands:
+- `PYTHONPATH=src pytest -q tests/test_statistics.py` -> PASSED (`5 passed` in the local helper reconstruction)
+- `python -m py_compile src/chart_contract/statistics.py src/chart_contract/statistical_audit.py src/chart_contract/chart.py src/chart_contract/renderers/altair.py` -> PASSED for locally available sources
+- GitHub Actions CI -> PASSED (pytest and all three CLI gate smoke checks)
+
+Changed files:
+- `src/chart_contract/chart.py`
+- `src/chart_contract/statistics.py`
+- `src/chart_contract/statistical_audit.py`
+- `src/chart_contract/renderers/altair.py`
+- `tests/test_statistical_intents.py`
+- `examples/statistical_diagnostics.py`
+- `README.md`
+- `docs/AUDIT_RULES.md`
+- `ROADMAP.md`
+- `CHANGELOG.md`
+- `artifacts/SPEC.md`
+- `artifacts/VERIFY.md`
+- `artifacts/HANDOFF.md`
+
+Verified locally:
+- normal-reference QQ points are ordered and include fitted reference endpoints
+- grouped QQ preparation preserves group identity
+- ECDF records start at zero and reach one for each group
+- unsupported QQ reference distributions fail deterministically
+
+Remaining risks:
+- GitHub Actions exercised the Altair rendering paths and full repository suite successfully.
+- The slice intentionally supports only a normal QQ reference distribution.
+
+Next safest task:
+- Review draft PR #4 and keep the normal-reference-only QQ boundary explicit before merge.
+
 2026-07-11 - Close audit blind spots
 
 Environment:
