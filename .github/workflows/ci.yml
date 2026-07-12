@@ -50,3 +50,52 @@ jobs:
           exit_code=$?
           set -e
           test "$exit_code" -ne 0
+
+      - name: Run statistical diagnostic trap checks
+        shell: bash
+        run: |
+          set +e
+          qq_output=$(chart-contract audit spec examples/traps/qq_heavy_tails.vl.json \
+            --data examples/traps/qq_heavy_tails.csv \
+            --claim "$(cat examples/traps/qq_heavy_tails.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          qq_exit=$?
+          set -e
+          echo "$qq_output"
+          test "$qq_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$qq_output"
+          grep -q "claim.qq.normality_support" <<<"$qq_output"
+
+          set +e
+          qq_line_output=$(chart-contract audit spec examples/traps/qq_missing_reference_line.vl.json \
+            --data examples/traps/qq_missing_reference_line.csv \
+            --claim "$(cat examples/traps/qq_missing_reference_line.claim.txt)" 2>&1)
+          qq_line_exit=$?
+          set -e
+          echo "$qq_line_output"
+          test "$qq_line_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$qq_line_output"
+          grep -q "visual.qq.reference_line" <<<"$qq_line_output"
+
+          set +e
+          residual_output=$(chart-contract audit spec examples/traps/residual_obvious_pattern.vl.json \
+            --data examples/traps/residual_obvious_pattern.csv \
+            --claim "$(cat examples/traps/residual_obvious_pattern.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          residual_exit=$?
+          set -e
+          echo "$residual_output"
+          test "$residual_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$residual_output"
+          grep -q "claim.residual.pattern_support" <<<"$residual_output"
+
+          set +e
+          tiny_output=$(chart-contract audit spec examples/traps/diagnostic_tiny_sample.vl.json \
+            --data examples/traps/diagnostic_tiny_sample.csv \
+            --claim "$(cat examples/traps/diagnostic_tiny_sample.claim.txt)" 2>&1)
+          tiny_exit=$?
+          set -e
+          echo "$tiny_output"
+          test "$tiny_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$tiny_output"
+          grep -q "data.residual.sample_size" <<<"$tiny_output"

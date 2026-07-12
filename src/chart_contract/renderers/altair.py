@@ -30,6 +30,10 @@ def render_chart(chart: Any) -> alt.Chart:
         subtitle.append(f"Filters: {chart.filters}")
 
     usermeta = dict(chart.metadata or {})
+    if chart.intent in {"qq", "ecdf", "residual"}:
+        usermeta.setdefault("chart_contract_intent", chart.intent)
+    if chart.intent == "qq":
+        usermeta.setdefault("qq_reference_distribution", chart.distribution)
     for key, value in {
         "source": chart.source,
         "unit": chart.unit,

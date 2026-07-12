@@ -1,0 +1,26 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Normal QQ diagnostic with severe tail departure",
+  "usermeta": {
+    "source": "synthetic.qq_heavy_tails",
+    "unit": "standardized value",
+    "chart_contract_intent": "qq",
+    "qq_reference_distribution": "normal"
+  },
+  "layer": [
+    {
+      "mark": {"type": "point", "filled": true},
+      "encoding": {
+        "x": {"field": "_theoretical_quantile", "type": "quantitative", "title": "Theoretical normal quantile"},
+        "y": {"field": "_sample_quantile", "type": "quantitative", "title": "Observed quantile"}
+      }
+    },
+    {
+      "mark": {"type": "line", "strokeDash": [5, 4]},
+      "encoding": {
+        "x": {"field": "_theoretical_quantile", "type": "quantitative"},
+        "y": {"field": "_reference_quantile", "type": "quantitative"}
+      }
+    }
+  ]
+}

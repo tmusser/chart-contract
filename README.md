@@ -237,7 +237,25 @@ Use the statistical intents when the claim is about distribution fit, cumulative
 
 Run `python examples/statistical_diagnostics.py` to write QQ, ECDF, and residual Vega-Lite specs into `examples/output/`.
 
-These diagnostics audit data and rendering contracts; they do not certify normality or model adequacy.
+These diagnostics audit data and rendering contracts; they do not certify normality or model adequacy. See [diagnostic claim guidance](docs/DIAGNOSTIC_CLAIMS.md) for agent-ready wording patterns.
+
+### Diagnostic claim guidance
+
+Diagnostic claims are often absence claims, so they should be narrower than ordinary descriptive claims.
+
+- Weak QQ claim: “The data are normal.”
+- Stronger QQ claim: “Observed quantiles broadly track the fitted normal reference through the center, while the outer tails depart from the line.”
+- Weak residual claim: “There is no pattern in the residuals.”
+- Stronger residual claim: “Residuals remain centered near zero across the observed fitted-value range, with no large monotonic or curved structure at the audit thresholds.”
+
+Good diagnostic claims:
+
+- describe observed alignment or departure rather than certify a distribution or model;
+- name tail, trend, curvature, tie, crossing, or sample-size limitations;
+- keep the required fitted or zero reference line visible;
+- use wording such as “broadly consistent,” “appears,” or “within the observed range” when the evidence is visual and finite.
+
+The diagnostic CLI traps under `examples/traps/` show the difference between a structurally invalid chart (`BLOCK`) and a complete chart whose claim overstates the evidence (`REVIEW`).
 
 ## Companion Artifact
 

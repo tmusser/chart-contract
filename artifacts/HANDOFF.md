@@ -2,37 +2,38 @@
 
 RESUME PACKET
 
-- Goal: add first-class QQ, ECDF, and residual plots without introducing SciPy or widening into a general plotting library.
-- Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, and docs are published in draft PR #4; GitHub Actions CI passed.
-- Branch: `agent/statistical-diagnostic-plots`
-- Pull request: #4 (`feat: add statistical diagnostic plots`)
-- Next task: review draft PR #4 and decide whether the normal-reference-only QQ boundary is acceptable for merge.
-- Verification: local pure-helper tests passed (`5 passed`); GitHub Actions passed pytest and all three CLI gate smoke checks.
-- Read first: `src/chart_contract/statistics.py`, `src/chart_contract/statistical_audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/renderers/altair.py`, `tests/test_statistical_intents.py`, `artifacts/VERIFY.md`
+- Goal: harden QQ and residual diagnostics with claim-support traps, reference-line contracts, and agent-facing claim guidance.
+- Workflow State: runtime rules, first-party spec semantics, four trap triplets, tests, docs, and CI are published in draft PR #5; the full permanent GitHub Actions suite passed.
+- Branch: `agent/diagnostic-claim-traps`
+- Pull request: #5 (`feat: harden diagnostic claim audits`)
+- Next task: review the deterministic thresholds and trap verdicts, then squash-merge if the boundaries are acceptable.
+- Verification: full pytest, all legacy CLI smoke checks, and all four diagnostic trap checks passed in GitHub Actions run #155.
+- Read first: `src/chart_contract/statistical_audit.py`, `src/chart_contract/audit.py`, `src/chart_contract/renderers/altair.py`, `tests/test_statistical_intents.py`, `docs/DIAGNOSTIC_CLAIMS.md`, `artifacts/VERIFY.md`
 
 ## Current Repo State
 
-- `Chart.qq()` compares sample quantiles with a deterministic normal reference and fitted reference line.
-- `Chart.ecdf()` renders cumulative probability without histogram bin choices.
-- `Chart.residual()` renders fitted-versus-residual points with a zero reference line.
-- QQ and ECDF reuse the established distribution audit contract for numeric values, valid sample sizes, and grouped sample sizes.
-- QQ adds explicit normal-reference and tie-density findings.
-- Residual audits add fitted-value typing, complete-pair sample thresholds, residual-variation checks, and a zero-reference guarantee.
-- Statistical preparation stays inside pandas and Python's standard library.
+- First-party QQ specs declare `chart_contract_intent=qq` and `qq_reference_distribution=normal`; residual and ECDF specs preserve their statistical intent without changing metadata for older chart types.
+- QQ audits require a fitted normal reference line and warn when outer-tail departure reaches 0.8 sample standard deviations.
+- Residual audits warn when absolute fitted/residual correlation reaches 0.5 or ordered-thirds mean shift reaches one residual standard deviation.
+- Nonnumeric fitted values fail deterministically without entering the pattern calculation.
+- `audit_spec()` applies these semantics only when first-party statistical intent metadata is declared.
+- Trap fixtures distinguish complete-but-overstated diagnostics (`REVIEW`) from structurally invalid or undersampled diagnostics (`BLOCK`).
 
 ## Important Decisions
 
-- Support only the normal QQ reference distribution in this slice; unsupported references fail audit and rendering explicitly.
-- Prefer ECDF over adding more density estimators or smoothing parameters.
-- Treat residual plots as deterministic diagnostic surfaces, not as proof of model adequacy.
-- Keep `audit_spec()` generic; first-party statistical semantics live on the `Chart` intent audit path.
+- Treat reference lines as visual evidence contracts, not optional decoration.
+- Keep obvious-pattern detection deterministic and explainable rather than adding opaque tests or smoothing.
+- Use `REVIEW` for claims contradicted by visible tail/pattern evidence; reserve `BLOCK` for missing reference layers, invalid fields, or fewer than five complete observations.
+- Preserve the existing `usermeta` contract for trend, rank, compare, histogram, boxplot, and violin charts.
+- Keep normality and model-adequacy language explicitly non-certifying.
 
 ## Remaining Risks
 
-- Grouped QQ plots can become visually busy with many groups; the existing color-category warning is the guardrail.
-- QQ interpretation with discrete or heavily rounded values still requires human judgment.
-- Statistical diagnostics do not replace hypothesis tests, calibration tests, or domain review.
+- The thresholds catch obvious tail, monotonic, and broad curved structure; they do not exhaust every residual failure mode such as heteroskedasticity or autocorrelation.
+- QQ tail checks use a fitted normal location-scale line and are intentionally not a formal normality test.
+- First-party spec semantics depend on `usermeta.chart_contract_intent`; arbitrary external specs remain under the generic audit contract.
+- The branch history is noisy from connector-assisted publication, so squash merge is recommended.
 
 ## Next Recommended Task
 
-Use the draft PR diff, CI result, and documented no-SciPy boundary as the final merge gate.
+Review draft PR #5 with special attention to the 0.8-SD QQ threshold, the residual correlation/thirds thresholds, and the REVIEW-versus-BLOCK trap split.
