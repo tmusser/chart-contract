@@ -1,0 +1,24 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Residual diagnostic with four observations",
+  "usermeta": {
+    "source": "synthetic.tiny_residual_sample",
+    "unit": "dollars",
+    "chart_contract_intent": "residual"
+  },
+  "layer": [
+    {
+      "mark": {"type": "point", "filled": true},
+      "encoding": {
+        "x": {"field": "fitted", "type": "quantitative", "title": "Fitted value"},
+        "y": {"field": "residual", "type": "quantitative", "title": "Residual"}
+      }
+    },
+    {
+      "mark": {"type": "rule", "strokeDash": [5, 4]},
+      "encoding": {
+        "y": {"datum": 0, "type": "quantitative"}
+      }
+    }
+  ]
+}
