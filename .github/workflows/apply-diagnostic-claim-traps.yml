@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/diagnostic-claim-traps
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
