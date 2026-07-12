@@ -9,7 +9,7 @@ Environment:
 Commands:
 - `PYTHONPATH=src pytest -q tests/test_statistics.py` -> PASSED (`5 passed` in the local helper reconstruction)
 - `python -m py_compile src/chart_contract/statistics.py src/chart_contract/statistical_audit.py src/chart_contract/chart.py src/chart_contract/renderers/altair.py` -> PASSED for locally available sources
-- full GitHub Actions suite -> PENDING after draft PR publication
+- GitHub Actions CI -> PASSED (pytest and all three CLI gate smoke checks)
 
 Changed files:
 - `src/chart_contract/chart.py`
@@ -33,11 +33,11 @@ Verified locally:
 - unsupported QQ reference distributions fail deterministically
 
 Remaining risks:
-- Altair rendering and the full repository suite still require GitHub Actions verification.
+- GitHub Actions exercised the Altair rendering paths and full repository suite successfully.
 - The slice intentionally supports only a normal QQ reference distribution.
 
 Next safest task:
-- Open a draft PR, run CI, inspect the generated Vega-Lite structures, and update this entry with the branch result.
+- Review draft PR #4 and keep the normal-reference-only QQ boundary explicit before merge.
 
 2026-07-11 - Close audit blind spots
 

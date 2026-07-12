@@ -3,10 +3,10 @@
 RESUME PACKET
 
 - Goal: add first-class QQ, ECDF, and residual plots without introducing SciPy or widening into a general plotting library.
-- Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, docs, and a draft PR are being assembled on one feature branch.
+- Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, and docs are published in draft PR #4; GitHub Actions CI passed.
 - Branch: `agent/statistical-diagnostic-plots`
-- Next task: run the full GitHub Actions suite, inspect generated Vega-Lite structures, and review the draft PR boundary.
-- Verification: local pure-helper tests passed (`5 passed`); full repository CI is pending branch publication.
+- Next task: review draft PR #4 and decide whether the normal-reference-only QQ boundary is acceptable for merge.
+- Verification: local pure-helper tests passed (`5 passed`); GitHub Actions passed pytest and all three CLI gate smoke checks.
 - Read first: `src/chart_contract/statistics.py`, `src/chart_contract/statistical_audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/renderers/altair.py`, `tests/test_statistical_intents.py`, `artifacts/VERIFY.md`
 
 ## Current Repo State
