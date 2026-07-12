@@ -425,6 +425,8 @@ def _audit_residual_claim_support(
         or residual not in complete.columns
     ):
         return
+    if not is_numeric_series(complete[fitted]) or not is_numeric_series(complete[residual]):
+        return
 
     correlation, thirds_shift = _residual_pattern_strength(complete, fitted, residual)
     strong_pattern = correlation >= RESIDUAL_CORRELATION_WARN or thirds_shift >= RESIDUAL_THIRDS_SHIFT_WARN
