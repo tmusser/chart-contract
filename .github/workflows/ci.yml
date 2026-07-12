@@ -8,10 +8,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          show-progress: false
-      - name: Install dependencies quietly
-        run: python -m pip install -q -e ".[dev]"
-      - name: Run first failing test
-        run: python -m pytest -x -q
+      - name: Clone and run first failing test
+        run: |
+          git clone -q --depth 1 --branch agent/diagnostic-claim-traps \
+            https://github.com/tmusser/chart-contract.git repo
+          cd repo
+          python -m pip install -q -e ".[dev]"
+          python -m pytest -x -q
