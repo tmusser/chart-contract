@@ -5,6 +5,7 @@ RESUME PACKET
 - Goal: add first-class QQ, ECDF, and residual plots without introducing SciPy or widening into a general plotting library.
 - Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, and docs are published in draft PR #4; GitHub Actions CI passed.
 - Branch: `agent/statistical-diagnostic-plots`
+- Pull request: #4 (`feat: add statistical diagnostic plots`)
 - Next task: review draft PR #4 and decide whether the normal-reference-only QQ boundary is acceptable for merge.
 - Verification: local pure-helper tests passed (`5 passed`); GitHub Actions passed pytest and all three CLI gate smoke checks.
 - Read first: `src/chart_contract/statistics.py`, `src/chart_contract/statistical_audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/renderers/altair.py`, `tests/test_statistical_intents.py`, `artifacts/VERIFY.md`
@@ -34,4 +35,4 @@ RESUME PACKET
 
 ## Next Recommended Task
 
-Use CI, the generated spec structure, and the documented no-SciPy boundary as the final merge gate.
+Use the draft PR diff, CI result, and documented no-SciPy boundary as the final merge gate.
