@@ -8,6 +8,14 @@
 - Deterministic normal-reference QQ quantiles and empirical-CDF preparation without adding SciPy or external data dependencies.
 - Statistical audit rules for QQ reference support, tie density, fitted-value types, residual sample size, and residual variation.
 - A runnable `examples/statistical_diagnostics.py` artifact for QQ, ECDF, and residual Vega-Lite specs.
+- CLI trap fixtures for severe QQ tail departure, missing QQ reference lines, obvious residual structure, and tiny diagnostic samples.
+- Diagnostic claim guidance with weak/strong QQ, residual, and ECDF wording examples.
+
+### Changed
+
+- First-party statistical Vega-Lite specs now preserve intent metadata so `audit_spec()` can apply QQ and residual semantics.
+- QQ audits now require an appropriate fitted reference line and test whether severe tail departure contradicts normality-oriented claims.
+- Residual audits now test whether deterministic fitted-value structure contradicts “no pattern” or random-scatter claims.
 
 ### Fixed
 
