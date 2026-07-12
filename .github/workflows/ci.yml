@@ -4,48 +4,7 @@ on:
   push:
   pull_request:
 
-permissions:
-  contents: write
-
 jobs:
-  apply-residual-guard:
-    if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: agent/diagnostic-claim-traps
-      - name: Guard nonnumeric residual inputs
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path("src/chart_contract/statistical_audit.py")
-          text = path.read_text()
-          old = '''    ):
-        return
-
-    correlation, thirds_shift = _residual_pattern_strength(complete, fitted, residual)
-'''
-          new = '''    ):
-        return
-    if not is_numeric_series(complete[fitted]) or not is_numeric_series(complete[residual]):
-        return
-
-    correlation, thirds_shift = _residual_pattern_strength(complete, fitted, residual)
-'''
-          if old not in text:
-              raise SystemExit("expected residual claim-support block not found")
-          path.write_text(text.replace(old, new, 1))
-          PY
-      - name: Commit guard
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/chart_contract/statistical_audit.py
-          git commit -m "fix: guard nonnumeric residual patterns"
-          git push origin HEAD:agent/diagnostic-claim-traps
-
   test:
     runs-on: ubuntu-latest
 
