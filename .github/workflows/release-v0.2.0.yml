@@ -1,0 +1,32 @@
+name: Release v0.2.0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .release/v0.2.0.md
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.repository == 'tmusser/chart-contract'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v0.2.0 >/dev/null 2>&1; then
+            echo "v0.2.0 already exists; nothing to publish."
+            exit 0
+          fi
+
+          gh release create v0.2.0 \
+            --target "$GITHUB_SHA" \
+            --title "chart-contract v0.2.0" \
+            --notes-file .release/v0.2.0.md
