@@ -255,7 +255,16 @@ Good diagnostic claims:
 - keep the required fitted or zero reference line visible;
 - use wording such as “broadly consistent,” “appears,” or “within the observed range” when the evidence is visual and finite.
 
-The diagnostic CLI traps under `examples/traps/` show the difference between a structurally invalid chart (`BLOCK`) and a complete chart whose claim overstates the evidence (`REVIEW`).
+### Try the diagnostic traps
+
+The runnable fixtures in [examples/traps/README.md](examples/traps/README.md) make the diagnostic boundaries concrete:
+
+- [Severe QQ tail departure](examples/traps/qq_heavy_tails.vl.json) → `REVIEW` because the normality claim overstates the evidence.
+- [QQ plot without a reference line](examples/traps/qq_missing_reference_line.vl.json) → `BLOCK` because the visual contract is incomplete.
+- [Residuals with an obvious fitted-value pattern](examples/traps/residual_obvious_pattern.vl.json) → `REVIEW` because “no pattern” contradicts the data.
+- [Four-point residual diagnostic](examples/traps/diagnostic_tiny_sample.vl.json) → `BLOCK` because the sample cannot support interpretation.
+
+Each fixture includes a Vega-Lite spec, CSV data, and separate claim text so the verdict can be reproduced directly through the CLI.
 
 ## Companion Artifact
 
