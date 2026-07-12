@@ -1,0 +1,1 @@
+Residuals show no pattern and are randomly scattered around zero.
