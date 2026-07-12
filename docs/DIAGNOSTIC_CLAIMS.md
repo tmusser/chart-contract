@@ -91,4 +91,6 @@ Before emitting a diagnostic claim, an agent should ask:
 - Do tails, fitted-value trends, curvature, ties, or crossings contradict the claim?
 - Can the wording be narrowed from “is” to “appears,” “broadly tracks,” or “within the observed range”?
 
+The runnable fixtures in `examples/traps/` show these distinctions as explicit `REVIEW` and `BLOCK` outcomes.
+
 The audit rules provide deterministic guardrails. They do not replace model diagnostics, hypothesis tests, or domain review.
