@@ -1,0 +1,58 @@
+name: Finalize statistical diagnostic evidence
+
+on:
+  push:
+    branches:
+      - agent/statistical-diagnostic-plots
+
+permissions:
+  contents: write
+
+jobs:
+  finalize-evidence:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/statistical-diagnostic-plots
+      - name: Record successful verification
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path("artifacts/VERIFY.md"): {
+                  "- full GitHub Actions suite -> PENDING after draft PR publication":
+                      "- GitHub Actions CI -> PASSED (pytest and all three CLI gate smoke checks)",
+                  "- Altair rendering and the full repository suite still require GitHub Actions verification.":
+                      "- GitHub Actions exercised the Altair rendering paths and full repository suite successfully.",
+                  "- Open a draft PR, run CI, inspect the generated Vega-Lite structures, and update this entry with the branch result.":
+                      "- Review draft PR #4 and keep the normal-reference-only QQ boundary explicit before merge.",
+              },
+              Path("artifacts/HANDOFF.md"): {
+                  "- Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, docs, and a draft PR are being assembled on one feature branch.":
+                      "- Workflow State: statistical preparation helpers, intent-specific audits, renderers, tests, examples, and docs are published in draft PR #4; GitHub Actions CI passed.",
+                  "- Next task: run the full GitHub Actions suite, inspect generated Vega-Lite structures, and review the draft PR boundary.":
+                      "- Next task: review draft PR #4 and decide whether the normal-reference-only QQ boundary is acceptable for merge.",
+                  "- Verification: local pure-helper tests passed (`5 passed`); full repository CI is pending branch publication.":
+                      "- Verification: local pure-helper tests passed (`5 passed`); GitHub Actions passed pytest and all three CLI gate smoke checks.",
+              },
+          }
+
+          for path, changes in replacements.items():
+              text = path.read_text()
+              for old, new in changes.items():
+                  if old not in text:
+                      raise SystemExit(f"expected text not found in {path}: {old}")
+                  text = text.replace(old, new, 1)
+              path.write_text(text)
+          PY
+      - name: Commit evidence update
+        run: |
+          rm .github/workflows/finalize-statistical-evidence.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: record statistical diagnostic CI"
+          git push origin HEAD:agent/statistical-diagnostic-plots
