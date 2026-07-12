@@ -189,6 +189,9 @@ Supported Python API front-door intents:
 - `Chart.histogram()`
 - `Chart.boxplot()`
 - `Chart.violin()`
+- `Chart.qq()`
+- `Chart.ecdf()`
+- `Chart.residual()`
 - experimental `audit_spec()`
 
 ## Scope and Non-Goals
@@ -223,6 +226,18 @@ Run `python examples/distribution_charts.py` to write:
 - `examples/output/violin_chart.vl.json`
 
 These charts stay inside the same claim-first audit flow and are not a full visualization library.
+
+## Statistical Diagnostic Plots
+
+Use the statistical intents when the claim is about distribution fit, cumulative shape, or model residual behavior.
+
+- `Chart.qq()` compares observed quantiles with a fitted normal reference line. The normal reference is the only supported distribution in this slice.
+- `Chart.ecdf()` shows cumulative probability without choosing histogram bins.
+- `Chart.residual()` plots residuals against fitted values and always includes a zero reference line.
+
+Run `python examples/statistical_diagnostics.py` to write QQ, ECDF, and residual Vega-Lite specs into `examples/output/`.
+
+These diagnostics audit data and rendering contracts; they do not certify normality or model adequacy.
 
 ## Companion Artifact
 

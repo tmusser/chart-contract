@@ -19,6 +19,7 @@ class Chart:
     y: str | None = None
     value: str | None = None
     bins: int | str | None = None
+    distribution: str = "normal"
     category: str | None = None
     group: str | None = None
     claim: str = ""
@@ -222,7 +223,102 @@ class Chart:
             metadata=metadata,
         )
 
+    @classmethod
+    def qq(
+        cls,
+        *,
+        data: pd.DataFrame,
+        value: str,
+        claim: str,
+        distribution: str = "normal",
+        group: str | None = None,
+        source: str | None = None,
+        unit: str | None = None,
+        title: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        return cls(
+            intent="qq",
+            data=data,
+            value=value,
+            distribution=distribution,
+            group=group,
+            claim=claim,
+            source=source,
+            unit=unit,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def ecdf(
+        cls,
+        *,
+        data: pd.DataFrame,
+        value: str,
+        claim: str,
+        group: str | None = None,
+        source: str | None = None,
+        unit: str | None = None,
+        title: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        return cls(
+            intent="ecdf",
+            data=data,
+            value=value,
+            group=group,
+            claim=claim,
+            source=source,
+            unit=unit,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def residual(
+        cls,
+        *,
+        data: pd.DataFrame,
+        fitted: str,
+        residual: str,
+        claim: str,
+        group: str | None = None,
+        source: str | None = None,
+        unit: str | None = None,
+        title: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        return cls(
+            intent="residual",
+            data=data,
+            x=fitted,
+            y=residual,
+            group=group,
+            claim=claim,
+            source=source,
+            unit=unit,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
     def audit(self) -> AuditReport:
+        if self.intent in {"qq", "ecdf", "residual"}:
+            from .statistical_audit import audit_statistical_chart
+
+            return audit_statistical_chart(self)
         return audit_chart(self)
 
     def to_altair(self) -> Any:
