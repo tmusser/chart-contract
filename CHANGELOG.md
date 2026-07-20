@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- A package-build CI job that builds both distributions, checks metadata, installs the wheel in isolation, and smoke-tests the installed CLI and JSON report shape.
+- CI coverage across the complete supported Python 3.10-3.13 range.
+
+### Changed
+
+- Hardened CI with read-only permissions, disabled checkout credentials, pip caching, concurrency cancellation, job timeouts, dependency checks, and source compilation.
+- Preserved the chart-specific verdict and statistical-diagnostic trap checks across every supported Python version.
+- Made pytest fail closed on unknown configuration, undeclared markers, and unexpected `xfail` passes.
+
 ## [0.2.0] - 2026-07-12
 
 ### Added
