@@ -42,3 +42,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-q --strict-config --strict-markers"
+xfail_strict = true
