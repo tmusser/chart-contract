@@ -4,6 +4,10 @@
 
 ### Added
 
+- First-class `Chart.set_membership()` support for audited two-set membership and Venn-style relationship charts.
+- Row-level set evidence checks for required columns, binary membership, unique members, and reconciled A-only/overlap/B-only/neither counts.
+- Schematic layouts for partial overlap, disjoint, subset, and equal-set relationships, with authoritative region labels preserved in Vega-Lite metadata.
+- A runnable `examples/set_membership.py` artifact and dedicated set-membership contract guidance.
 - A package-build CI job that builds both distributions, checks metadata, installs the wheel in isolation, and smoke-tests the installed CLI and JSON report shape.
 - CI coverage across the complete supported Python 3.10-3.13 range.
 

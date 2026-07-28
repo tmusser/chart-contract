@@ -37,6 +37,11 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 | `data.residual.variation` | Residual chart and first-party residual spec audits | `WARN` when residuals have no variation; otherwise `PASS`. | Detects suspiciously constant residual exports. | Verify the prediction and residual calculation pipeline. |
 | `claim.residual.pattern_support` | Residual chart and first-party residual spec audits | `WARN` when absolute fitted/residual correlation is at least 0.5 or ordered-thirds mean shift is at least 1 residual standard deviation; otherwise `PASS`. | Checks whether “no pattern,” “random,” or similar absence claims conflict with monotonic or curved structure. | Describe the observed structure and narrow the diagnostic claim. |
 | `visual.residual.zero_reference` | Residual chart and first-party residual spec audits | `PASS` when a zero rule is guaranteed or present; `FAIL` when a first-party residual spec omits it. | Confirms residual sign and centering remain interpretable. | Use the first-party renderer or add a rule layer with `y.datum = 0`. |
+| `data.set_membership.columns` | Set membership chart audits | `PASS` when the member and two set columns are declared and present; `FAIL` otherwise. | Verifies the universe identifier and both set-membership fields exist. | Declare or add the missing member, set A, or set B column. |
+| `data.set_membership.member_unique` | Set membership chart audits | `PASS` when member identifiers are non-null and unique; `FAIL` for nulls or duplicates. | Prevents duplicate rows from silently inflating set-region counts. | Deduplicate to one row per universe member and fill missing identifiers. |
+| `data.set_membership.binary` | Set membership chart audits | `PASS` for non-null booleans or integer `0`/`1`; `FAIL` otherwise. | Requires explicit, deterministic membership evidence. | Convert both set columns to boolean or `0`/`1`. |
+| `data.set_membership.region_counts` | Set membership chart audits | `PASS` when A-only, overlap, B-only, and neither counts reconcile to the universe. | Records the mutually exclusive region counts supporting the chart. | Repair membership evidence before rendering. |
+| `visual.set_membership.area_semantics` | First-party set membership chart audits | `PASS` when the renderer declares schematic geometry and authoritative labels. | Prevents circle area from masquerading as a quantitative encoding. | Use the first-party renderer or explicitly label schematic geometry and region counts. |
 | `readability.rank.category_count` | Rank chart audits | `PASS` when categories are at or below the limit; `WARN` when there are too many. | Checks whether a rank chart stays readable. | Reduce categories or aggregate the long tail. |
 | `readability.color.category_count` | Chart audits with grouped color encodings | `PASS` when group count is at or below the limit; `WARN` when there are too many. | Checks whether color encoding remains readable. | Reduce groups or facet the comparison. |
 | `claim.causal_support` | Chart audits and spec audits | `PASS` when the claim is non-causal or justified; `WARN` when causal language lacks caveat/evidence. | Checks whether the claim overreaches causally. | Add a caveat or causal evidence metadata when justified. |
@@ -58,9 +63,10 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 
 ## Known limits
 
-- Audits cannot prove causality, normality, randomness, or model adequacy.
+- Audits cannot prove causality, normality, randomness, model adequacy, or semantic completeness of a set definition.
 - Deterministic thresholds identify obvious structure; they do not exhaust every possible diagnostic pattern.
 - Audits cannot replace domain review.
 - Audits depend on metadata quality.
 - First-party statistical spec semantics require `usermeta.chart_contract_intent`.
+- Set membership spec audits do not reconstruct row-level evidence from arbitrary Vega-Lite layers; use `Chart.set_membership().audit()` before rendering.
 - Layered spec audits inspect the first supported analytical layer for generic rules; statistical intent rules inspect the relevant point, line, and rule layers explicitly.

@@ -30,6 +30,11 @@ class Chart:
     caveat: str | None = None
     filters: Mapping[str, Any] | str | None = None
     metadata: Mapping[str, Any] | None = None
+    member: str | None = None
+    set_a: str | None = None
+    set_b: str | None = None
+    set_a_label: str | None = None
+    set_b_label: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -314,7 +319,46 @@ class Chart:
             metadata=metadata,
         )
 
+    @classmethod
+    def set_membership(
+        cls,
+        *,
+        data: pd.DataFrame,
+        member: str,
+        set_a: str,
+        set_b: str,
+        claim: str,
+        set_a_label: str | None = None,
+        set_b_label: str | None = None,
+        source: str | None = None,
+        title: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        """Build an audited two-set membership chart from row-level evidence."""
+
+        return cls(
+            intent="set_membership",
+            data=data,
+            member=member,
+            set_a=set_a,
+            set_b=set_b,
+            set_a_label=set_a_label,
+            set_b_label=set_b_label,
+            claim=claim,
+            source=source,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
     def audit(self) -> AuditReport:
+        if self.intent == "set_membership":
+            from .set_membership_audit import audit_set_membership_chart
+
+            return audit_set_membership_chart(self)
         if self.intent in {"qq", "ecdf", "residual"}:
             from .statistical_audit import audit_statistical_chart
 

@@ -192,6 +192,7 @@ Supported Python API front-door intents:
 - `Chart.qq()`
 - `Chart.ecdf()`
 - `Chart.residual()`
+- `Chart.set_membership()`
 - experimental `audit_spec()`
 
 ## Scope and Non-Goals
@@ -257,21 +258,36 @@ Good diagnostic claims:
 
 ### Try the diagnostic traps
 
-The runnable fixtures in [examples/traps/README.md](examples/traps/README.md) make the diagnostic boundaries concrete:
+The runnable fixtures in [examples/traps/README.md](examples/traps/README.md) make the diagnostic boundaries concrete.
 
-- [Severe QQ tail departure](examples/traps/qq_heavy_tails.vl.json) → `REVIEW` because the normality claim overstates the evidence.
-- [QQ plot without a reference line](examples/traps/qq_missing_reference_line.vl.json) → `BLOCK` because the visual contract is incomplete.
-- [Residuals with an obvious fitted-value pattern](examples/traps/residual_obvious_pattern.vl.json) → `REVIEW` because “no pattern” contradicts the data.
-- [Four-point residual diagnostic](examples/traps/diagnostic_tiny_sample.vl.json) → `BLOCK` because the sample cannot support interpretation.
+## Set Membership Charts
 
-Each fixture includes a Vega-Lite spec, CSV data, and separate claim text so the verdict can be reproduced directly through the CLI.
+Use `Chart.set_membership()` when the claim is about exactly two sets: overlap, exclusion, subset relationships, or coverage of a declared universe.
 
-## Companion Artifact
+The input is one row per member plus two explicit boolean or `0`/`1` membership columns. The audit blocks missing columns, non-binary membership, null identifiers, and duplicated members before region counts are rendered.
 
-This repo was built using `ai-engineering-skills` and is intended as the analytical-integrity proof artifact companion to `context-to-action-skills`.
+```python
+frame = pd.DataFrame(
+    {
+        "customer_id": ["c1", "c2", "c3", "c4"],
+        "email": [1, 1, 0, 0],
+        "paid_search": [0, 1, 1, 0],
+    }
+)
 
-See the [agent workflow case study](docs/AGENT_WORKFLOW_CASE_STUDY.md) and [build manifest](artifacts/BUILD_MANIFEST.md) for the proof trail.
+chart = Chart.set_membership(
+    data=frame,
+    member="customer_id",
+    set_a="email",
+    set_b="paid_search",
+    set_a_label="Email",
+    set_b_label="Paid search",
+    claim="Email and paid search overlap for one of four customers.",
+    source="warehouse.channel_reach",
+    title="Customer reach overlap by channel",
+)
+```
 
-## Part of the Suite
+The renderer supports partial overlap, disjoint, subset, and equal-set relationships. Circle geometry is schematic; labeled A-only, overlap, B-only, and neither counts are authoritative and are preserved in `usermeta`.
 
-See the [suite map](docs/SUITE_MAP.md) for how `chart-contract`, `ai-engineering-skills`, and `context-to-action-skills` fit together as one story.
+Run `python examples/set_membership.py` to write `examples/output/set_membership_chart.vl.json`. See [the set membership contract](docs/SET_MEMBERSHIP.md) for the evidence shape, audit rules, and intentional two-set boundary.

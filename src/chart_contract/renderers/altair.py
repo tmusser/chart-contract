@@ -8,6 +8,7 @@ import altair as alt
 import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series
+from ..set_membership import membership_summary, venn_layout_records
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
     ECDF_VALUE_FIELD,
@@ -30,10 +31,22 @@ def render_chart(chart: Any) -> alt.Chart:
         subtitle.append(f"Filters: {chart.filters}")
 
     usermeta = dict(chart.metadata or {})
-    if chart.intent in {"qq", "ecdf", "residual"}:
+    if chart.intent in {"qq", "ecdf", "residual", "set_membership"}:
         usermeta.setdefault("chart_contract_intent", chart.intent)
     if chart.intent == "qq":
         usermeta.setdefault("qq_reference_distribution", chart.distribution)
+    if chart.intent == "set_membership":
+        summary = membership_summary(chart.data, set_a=chart.set_a, set_b=chart.set_b)
+        usermeta["chart_contract_intent"] = chart.intent
+        usermeta["set_membership"] = {
+            "member": chart.member,
+            "set_a": chart.set_a,
+            "set_b": chart.set_b,
+            "set_a_label": chart.set_a_label or chart.set_a,
+            "set_b_label": chart.set_b_label or chart.set_b,
+            "area_semantics": "schematic; labeled region counts are authoritative",
+            "region_counts": summary.to_dict(),
+        }
     for key, value in {
         "source": chart.source,
         "unit": chart.unit,
@@ -70,6 +83,8 @@ def render_chart(chart: Any) -> alt.Chart:
         rendered = _render_ecdf(chart)
     elif chart.intent == "residual":
         rendered = _render_residual(chart, records)
+    elif chart.intent == "set_membership":
+        rendered = _render_set_membership(chart)
     else:
         raise ValueError(f"Unsupported chart intent: {chart.intent}")
 
@@ -321,6 +336,47 @@ def _render_residual(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         .encode(y=alt.Y(datum=0, type="quantitative"))
     )
     return points + zero
+
+
+def _render_set_membership(chart: Any) -> alt.Chart:
+    if not chart.set_a or not chart.set_b:
+        raise ValueError("Set membership charts require set_a and set_b fields.")
+    summary = membership_summary(chart.data, set_a=chart.set_a, set_b=chart.set_b)
+    set_a_label = chart.set_a_label or chart.set_a.replace("_", " ").title()
+    set_b_label = chart.set_b_label or chart.set_b.replace("_", " ").title()
+    circle_records, region_records, note_records = venn_layout_records(
+        summary,
+        set_a_label=set_a_label,
+        set_b_label=set_b_label,
+    )
+    x_encoding = alt.X("x:Q", scale=alt.Scale(domain=[0, 100]), axis=None)
+    y_encoding = alt.Y("y:Q", scale=alt.Scale(domain=[0, 100]), axis=None)
+
+    circles = (
+        alt.Chart(alt.InlineData(values=circle_records))
+        .mark_circle(opacity=0.28, strokeWidth=2)
+        .encode(
+            x=x_encoding,
+            y=y_encoding,
+            size=alt.Size("size:Q", scale=None, legend=None),
+            color=alt.Color("set_label:N", legend=None),
+            tooltip=[
+                alt.Tooltip("set_label:N", title="Set"),
+                alt.Tooltip("members:Q", title="Members"),
+            ],
+        )
+    )
+    regions = (
+        alt.Chart(alt.InlineData(values=region_records))
+        .mark_text(fontSize=14, fontWeight="bold")
+        .encode(x=x_encoding, y=y_encoding, text=alt.Text("label:N"))
+    )
+    notes = (
+        alt.Chart(alt.InlineData(values=note_records))
+        .mark_text(fontSize=12)
+        .encode(x=x_encoding, y=y_encoding, text=alt.Text("label:N"))
+    )
+    return circles + regions + notes
 
 
 def _metric_title(field_name: str | None, unit: str | None) -> str:

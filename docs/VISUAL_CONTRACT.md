@@ -5,14 +5,14 @@
 A chart should declare:
 
 - claim
-- metric
-- grain
-- dimensions
+- metric or membership evidence
+- grain or universe member
+- dimensions or set columns
 - source
-- units
+- units when quantitative
 - filters
 - time window if temporal
-- caveats if causal, incomplete, or observational
+- caveats if causal, incomplete, observational, or visually schematic
 - visual intent
 - chart type
 
@@ -43,6 +43,29 @@ Why this is strong:
 - The caveat prevents overclaiming causality.
 - The visual intent and chart type match a ranked comparison.
 
+### Good Set Membership Contract
+
+```yaml
+claim: Email and paid search overlap for two of six customers.
+member: customer_id
+sets: [email, paid_search]
+universe: one row per customer
+source: synthetic.channel_reach
+filters: none
+caveats:
+  - Schematic geometry; labeled region counts are authoritative.
+visual_intent: set_membership
+chart_type: venn_style
+```
+
+Why this is strong:
+
+- The universe member is explicit and unique.
+- The two membership columns preserve row-level evidence.
+- The claim can be checked against A-only, overlap, B-only, and neither counts.
+- The caveat prevents readers from treating circle area as quantitative.
+- The intent is limited to two sets rather than pretending many-set circles stay readable.
+
 ### Weak Contract
 
 ```yaml
@@ -67,11 +90,18 @@ Why this is weak:
 - The chart type may not match the task.
 - There is no caveat despite a performance claim.
 
-## v0.1 Intent Mapping
+## Intent Mapping
 
 - `trend` -> line chart
 - `rank` -> sorted bar chart
 - `compare` -> bar chart, optionally grouped
+- `histogram` -> binned bar chart
+- `boxplot` -> boxplot
+- `violin` -> density area
+- `qq` -> quantile points plus fitted reference line
+- `ecdf` -> step line
+- `residual` -> points plus zero reference line
+- `set_membership` -> labeled, schematic two-set Venn-style view
 
 ## Audit Categories
 
