@@ -258,7 +258,14 @@ Good diagnostic claims:
 
 ### Try the diagnostic traps
 
-The runnable fixtures in [examples/traps/README.md](examples/traps/README.md) make the diagnostic boundaries concrete.
+The runnable fixtures in [examples/traps/README.md](examples/traps/README.md) make the diagnostic boundaries concrete:
+
+- [Severe QQ tail departure](examples/traps/qq_heavy_tails.vl.json) → `REVIEW` because the normality claim overstates the evidence.
+- [QQ plot without a reference line](examples/traps/qq_missing_reference_line.vl.json) → `BLOCK` because the visual contract is incomplete.
+- [Residuals with an obvious fitted-value pattern](examples/traps/residual_obvious_pattern.vl.json) → `REVIEW` because “no pattern” contradicts the data.
+- [Four-point residual diagnostic](examples/traps/diagnostic_tiny_sample.vl.json) → `BLOCK` because the sample cannot support interpretation.
+
+Each fixture includes a Vega-Lite spec, CSV data, and separate claim text so the verdict can be reproduced directly through the CLI.
 
 ## Set Membership Charts
 
@@ -290,4 +297,14 @@ chart = Chart.set_membership(
 
 The renderer supports partial overlap, disjoint, subset, and equal-set relationships. Circle geometry is schematic; labeled A-only, overlap, B-only, and neither counts are authoritative and are preserved in `usermeta`.
 
-Run `python examples/set_membership.py` to write `examples/output/set_membership_chart.vl.json`. See [the set membership contract](docs/SET_MEMBERSHIP.md) for the evidence shape, audit rules, and intentional two-set boundary.
+Run `python examples/set_membership.py` to write [the generated Vega-Lite proof artifact](examples/output/set_membership_chart.vl.json). See [the set membership contract](docs/SET_MEMBERSHIP.md) for the evidence shape, audit rules, and intentional two-set boundary.
+
+## Companion Artifact
+
+This repo was built using `ai-engineering-skills` and is intended as the analytical-integrity proof artifact companion to `context-to-action-skills`.
+
+See the [agent workflow case study](docs/AGENT_WORKFLOW_CASE_STUDY.md) and [build manifest](artifacts/BUILD_MANIFEST.md) for the proof trail.
+
+## Part of the Suite
+
+See the [suite map](docs/SUITE_MAP.md) for how `chart-contract`, `ai-engineering-skills`, and `context-to-action-skills` fit together as one story.

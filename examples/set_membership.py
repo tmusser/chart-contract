@@ -41,7 +41,7 @@ def main() -> None:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output_path = OUTPUT_DIR / "set_membership_chart.vl.json"
-    output_path.write_text(json.dumps(chart.to_vega_lite(), indent=2), encoding="utf-8")
+    output_path.write_text(json.dumps(chart.to_vega_lite(), indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {output_path}")
 
 

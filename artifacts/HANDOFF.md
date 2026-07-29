@@ -1,39 +1,43 @@
 # HANDOFF
 
-RESUME PACKET
+## Resume Packet
 
-- Goal: harden QQ and residual diagnostics with claim-support traps, reference-line contracts, and agent-facing claim guidance.
-- Workflow State: runtime rules, first-party spec semantics, four trap triplets, tests, docs, and CI are published in draft PR #5; the full permanent GitHub Actions suite passed.
-- Branch: `agent/diagnostic-claim-traps`
-- Pull request: #5 (`feat: harden diagnostic claim audits`)
-- Next task: review the deterministic thresholds and trap verdicts, then squash-merge if the boundaries are acceptable.
-- Verification: full pytest, all legacy CLI smoke checks, and all four diagnostic trap checks passed in GitHub Actions run #155.
-- Read first: `src/chart_contract/statistical_audit.py`, `src/chart_contract/audit.py`, `src/chart_contract/renderers/altair.py`, `tests/test_statistical_intents.py`, `docs/DIAGNOSTIC_CLAIMS.md`, `artifacts/VERIFY.md`
+- Goal: restore README content displaced by the set-membership insertion and align current-state docs and proof artifacts with `main`.
+- Workflow state: `Chart.set_membership()` is on `main`, its full CI matrix passed, and this cleanup branch contains documentation and generated-artifact follow-through only.
+- Branch: `agent/restore-docs-and-proof-artifacts`
+- Base: `main` at `b5ae6c6edf852e1d510951b69193a63c3cf845c0`
+- Next task: review the cleanup diff, confirm CI, and merge if the restored navigation and current-state wording are accurate.
+- Read first: `README.md`, `ROADMAP.md`, `artifacts/SPEC.md`, `examples/output/set_membership_chart.vl.json`, and `CHANGELOG.md`.
 
 ## Current Repo State
 
-- First-party QQ specs declare `chart_contract_intent=qq` and `qq_reference_distribution=normal`; residual and ECDF specs preserve their statistical intent without changing metadata for older chart types.
-- QQ audits require a fitted normal reference line and warn when outer-tail departure reaches 0.8 sample standard deviations.
-- Residual audits warn when absolute fitted/residual correlation reaches 0.5 or ordered-thirds mean shift reaches one residual standard deviation.
-- Nonnumeric fitted values fail deterministically without entering the pattern calculation.
-- `audit_spec()` applies these semantics only when first-party statistical intent metadata is declared.
-- Trap fixtures distinguish complete-but-overstated diagnostics (`REVIEW`) from structurally invalid or undersampled diagnostics (`BLOCK`).
+- v0.2.0 provides the CLI gate, distribution intents, and statistical diagnostic intents.
+- Unreleased `main` adds audited two-set membership charts with explicit row-level evidence and schematic geometry.
+- CI covers Python 3.10-3.13 and separately builds, inspects, installs, and smoke-tests the wheel.
+- The set-membership example now has a checked-in Vega-Lite proof artifact matching the documented output path.
+- Diagnostic trap links, the companion-artifact explanation, and the suite map are restored in the README.
+- The roadmap and spec now distinguish released v0.2.0 behavior from the unreleased set-membership slice.
 
 ## Important Decisions
 
-- Treat reference lines as visual evidence contracts, not optional decoration.
-- Keep obvious-pattern detection deterministic and explainable rather than adding opaque tests or smoothing.
-- Use `REVIEW` for claims contradicted by visible tail/pattern evidence; reserve `BLOCK` for missing reference layers, invalid fields, or fewer than five complete observations.
-- Preserve the existing `usermeta` contract for trend, rank, compare, histogram, boxplot, and violin charts.
-- Keep normality and model-adequacy language explicitly non-certifying.
+- Restore displaced README material rather than choosing between feature documentation and suite context.
+- Keep this PR free of runtime changes; the set-membership implementation already passed CI on `main`.
+- Treat labeled region counts as evidence and circle area as schematic.
+- Describe the package as an auditable harness, not a statistical certifier or general visualization library.
+- Keep more-than-two-set membership as a separate future matrix or UpSet-style intent.
+
+## Verification
+
+- Parse the generated set-membership Vega-Lite artifact as JSON.
+- Check Markdown structure, internal links, trailing whitespace, and final newlines.
+- Rely on GitHub Actions for the full supported Python matrix and isolated wheel checks.
 
 ## Remaining Risks
 
-- The thresholds catch obvious tail, monotonic, and broad curved structure; they do not exhaust every residual failure mode such as heteroskedasticity or autocorrelation.
-- QQ tail checks use a fitted normal location-scale line and are intentionally not a formal normality test.
-- First-party spec semantics depend on `usermeta.chart_contract_intent`; arbitrary external specs remain under the generic audit contract.
-- The branch history is noisy from connector-assisted publication, so squash merge is recommended.
+- The generated artifact is review evidence, not a browser screenshot; visual appearance still depends on Vega-Lite rendering.
+- `audit_spec()` cannot reconstruct row-level membership evidence from arbitrary external layered specs.
+- The package remains versioned at 0.2.0 while set membership is recorded under Unreleased; the next release number is intentionally undecided.
 
 ## Next Recommended Task
 
-Review draft PR #5 with special attention to the 0.8-SD QQ threshold, the residual correlation/thirds thresholds, and the REVIEW-versus-BLOCK trap split.
+Choose the release version for the set-membership slice after this cleanup merges, then prepare release notes without adding another visual intent at the same time.
