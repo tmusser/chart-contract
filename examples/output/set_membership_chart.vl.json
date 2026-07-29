@@ -1,0 +1,233 @@
+{
+  "config": {
+    "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+    }
+  },
+  "layer": [
+    {
+      "data": {
+        "name": "data-27e62c88eefd2bdc46b3b0e02501f245"
+      },
+      "mark": {
+        "type": "circle",
+        "opacity": 0.28,
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "color": {
+          "field": "set_label",
+          "legend": null,
+          "type": "nominal"
+        },
+        "size": {
+          "field": "size",
+          "legend": null,
+          "scale": null,
+          "type": "quantitative"
+        },
+        "tooltip": [
+          {
+            "field": "set_label",
+            "title": "Set",
+            "type": "nominal"
+          },
+          {
+            "field": "members",
+            "title": "Members",
+            "type": "quantitative"
+          }
+        ],
+        "x": {
+          "axis": null,
+          "field": "x",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ]
+          },
+          "type": "quantitative"
+        },
+        "y": {
+          "axis": null,
+          "field": "y",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ]
+          },
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "data": {
+        "name": "data-25e01b218de9aed12207c69e28666478"
+      },
+      "mark": {
+        "type": "text",
+        "fontSize": 14,
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "text": {
+          "field": "label",
+          "type": "nominal"
+        },
+        "x": {
+          "axis": null,
+          "field": "x",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ]
+          },
+          "type": "quantitative"
+        },
+        "y": {
+          "axis": null,
+          "field": "y",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ]
+          },
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "data": {
+        "name": "data-074295fb7753d5a8cc7f1a2d6112d1f8"
+      },
+      "mark": {
+        "type": "text",
+        "fontSize": 12
+      },
+      "encoding": {
+        "text": {
+          "field": "label",
+          "type": "nominal"
+        },
+        "x": {
+          "axis": null,
+          "field": "x",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ]
+          },
+          "type": "quantitative"
+        },
+        "y": {
+          "axis": null,
+          "field": "y",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ]
+          },
+          "type": "quantitative"
+        }
+      }
+    }
+  ],
+  "height": 360,
+  "title": {
+    "text": "Customer reach overlap by channel",
+    "subtitle": [
+      "Source: synthetic.channel_reach",
+      "Caveat: Schematic geometry; labeled region counts are authoritative."
+    ]
+  },
+  "usermeta": {
+    "chart_contract_intent": "set_membership",
+    "set_membership": {
+      "member": "customer_id",
+      "set_a": "email",
+      "set_b": "paid_search",
+      "set_a_label": "Email",
+      "set_b_label": "Paid search",
+      "area_semantics": "schematic; labeled region counts are authoritative",
+      "region_counts": {
+        "a_only": 2,
+        "overlap": 2,
+        "b_only": 2,
+        "neither": 2,
+        "a_total": 4,
+        "b_total": 4,
+        "total": 8
+      }
+    },
+    "source": "synthetic.channel_reach",
+    "caveat": "Schematic geometry; labeled region counts are authoritative."
+  },
+  "width": 640,
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "datasets": {
+    "data-27e62c88eefd2bdc46b3b0e02501f245": [
+      {
+        "set_key": "a",
+        "set_label": "Email",
+        "x": 40,
+        "y": 52,
+        "size": 56000,
+        "members": 4
+      },
+      {
+        "set_key": "b",
+        "set_label": "Paid search",
+        "x": 60,
+        "y": 52,
+        "size": 56000,
+        "members": 4
+      }
+    ],
+    "data-25e01b218de9aed12207c69e28666478": [
+      {
+        "x": 26,
+        "y": 52,
+        "label": "Email only: 2"
+      },
+      {
+        "x": 50,
+        "y": 52,
+        "label": "Both: 2"
+      },
+      {
+        "x": 74,
+        "y": 52,
+        "label": "Paid search only: 2"
+      }
+    ],
+    "data-074295fb7753d5a8cc7f1a2d6112d1f8": [
+      {
+        "x": 28,
+        "y": 84,
+        "label": "Email"
+      },
+      {
+        "x": 72,
+        "y": 84,
+        "label": "Paid search"
+      },
+      {
+        "x": 50,
+        "y": 10,
+        "label": "Neither: 2 | Universe: 8"
+      },
+      {
+        "x": 50,
+        "y": 95,
+        "label": "Schematic geometry; labeled region counts are authoritative."
+      }
+    ]
+  }
+}
