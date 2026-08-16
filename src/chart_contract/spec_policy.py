@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping, Sequence
+from numbers import Real
 from typing import Any
 
 import pandas as pd
@@ -27,8 +28,10 @@ def audit_spec(
 
 
 def _audit_visual_default_consent(report: AuditReport, spec: Mapping[str, Any]) -> None:
-    scale_override = any(_view_has_quantitative_scale_override(view) for view in _iter_views(spec))
-    normalization = any(_view_uses_normalization(view) for view in _iter_views(spec))
+    views = list(_iter_views(spec))
+    scale_override = any(_view_has_quantitative_scale_override(view) for view in views)
+    normalization = any(_view_uses_normalization(view) for view in views)
+    truncated_bar_domain = any(_view_has_bar_domain_excluding_zero(view) for view in views)
 
     if scale_override:
         if _user_requested(spec, SCALE_REQUEST_FLAG):
@@ -80,6 +83,15 @@ def _audit_visual_default_consent(report: AuditReport, spec: Mapping[str, Any]) 
             "No native Vega-Lite normalization was detected.",
         )
 
+    if truncated_bar_domain:
+        report.add(
+            "scale.bar.explicit_domain_zero",
+            FAIL,
+            "Bar chart uses an explicit quantitative domain that excludes zero.",
+            suggestion="Include zero in the quantitative bar domain or remove the explicit domain override.",
+            field="encoding.*.scale",
+        )
+
 
 def _user_requested(spec: Mapping[str, Any], flag: str) -> bool:
     usermeta = spec.get("usermeta")
@@ -121,6 +133,39 @@ def _view_has_quantitative_scale_override(view: Mapping[str, Any]) -> bool:
     return False
 
 
+def _view_has_bar_domain_excluding_zero(view: Mapping[str, Any]) -> bool:
+    if _mark_type(view) != "bar":
+        return False
+
+    encoding = view.get("encoding")
+    if not isinstance(encoding, Mapping):
+        return False
+
+    for channel in ("x", "y"):
+        definition = encoding.get(channel)
+        if not isinstance(definition, Mapping) or not _is_quantitative(definition):
+            continue
+        scale = definition.get("scale")
+        if not isinstance(scale, Mapping) or scale.get("zero") is False:
+            continue
+
+        domain = scale.get("domain")
+        if isinstance(domain, list) and domain and all(_is_real_number(value) for value in domain):
+            numeric_domain = [float(value) for value in domain]
+            if not (min(numeric_domain) <= 0 <= max(numeric_domain)):
+                return True
+
+        domain_min = scale.get("domainMin")
+        if _is_real_number(domain_min) and float(domain_min) > 0:
+            return True
+
+        domain_max = scale.get("domainMax")
+        if _is_real_number(domain_max) and float(domain_max) < 0:
+            return True
+
+    return False
+
+
 def _view_uses_normalization(view: Mapping[str, Any]) -> bool:
     encoding = view.get("encoding")
     if isinstance(encoding, Mapping):
@@ -138,5 +183,18 @@ def _view_uses_normalization(view: Mapping[str, Any]) -> bool:
     return False
 
 
+def _mark_type(view: Mapping[str, Any]) -> str:
+    mark = view.get("mark")
+    if isinstance(mark, str):
+        return mark
+    if isinstance(mark, Mapping):
+        return str(mark.get("type", ""))
+    return ""
+
+
 def _is_quantitative(definition: Mapping[str, Any]) -> bool:
     return definition.get("type") in {"quantitative", "Q"}
+
+
+def _is_real_number(value: Any) -> bool:
+    return isinstance(value, Real) and not isinstance(value, bool)
