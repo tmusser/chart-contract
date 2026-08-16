@@ -160,3 +160,31 @@ def test_truncated_bar_still_fails_even_when_user_requested() -> None:
     assert report.verdict == "BLOCK"
     assert severities["scale.override.authorization"] == "PASS"
     assert severities["scale.bar.nonzero_baseline"] == "FAIL"
+
+
+def test_explicit_bar_domain_excluding_zero_still_fails_when_user_requested() -> None:
+    spec = {
+        "mark": "bar",
+        "title": "Revenue by segment",
+        "encoding": {
+            "x": {"field": "segment", "type": "nominal"},
+            "y": {
+                "field": "revenue",
+                "type": "quantitative",
+                "scale": {"domain": [100, 110]},
+            },
+        },
+        "usermeta": {
+            "source": "synthetic.revenue",
+            "unit": "dollars",
+            "user_requested_scale_override": True,
+        },
+    }
+    data = pd.DataFrame({"segment": ["A", "B"], "revenue": [100, 105]})
+
+    report = audit_spec(spec=spec, data=data, claim="Segment B has higher revenue than segment A.")
+
+    severities = _severities(report)
+    assert report.verdict == "BLOCK"
+    assert severities["scale.override.authorization"] == "PASS"
+    assert severities["scale.bar.explicit_domain_zero"] == "FAIL"
