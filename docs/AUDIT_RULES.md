@@ -51,6 +51,8 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 | `visual.intent.match` | Chart audits | `PASS` for supported intents; `FAIL` for unsupported direct intent values. | Prevents audit success for a chart that the renderer cannot render. | Use one of the supported `Chart` constructors. |
 | `visual.integrity.decoration` | Chart audits and spec audits | `PASS` when no decorative/chartjunk-like terms are detected; `WARN` when visual metadata contains them in chart or non-arc spec audits; `FAIL` for arc specs. | Checks visual configuration without treating data values, dataset hashes, or provenance text as decoration. | Remove decorative visual fields and prefer plain analytical encodings. |
 | `scale.bar.nonzero_baseline` | Spec audits for bar marks | `PASS` when a bar chart keeps a zero baseline; `FAIL` when it disables zero on a quantitative axis. | Checks for misleading bar length comparisons. | Set `scale.zero = true` on quantitative bar axes. |
+| `scale.override.authorization` | Spec audits | `PASS` when no explicit quantitative x/y scale override is detected or the override is declared user-requested; `FAIL` when an override appears without that declaration. | Detects `scale.zero=false`, explicit `domain`, `domainMin`, `domainMax`, and `domainRaw` settings that change the viewer's quantitative frame of reference. | Remove the override, or set `usermeta.user_requested_scale_override=true` only when the user explicitly asked for the changed scale. |
+| `scale.normalization.authorization` | Spec audits | `PASS` when no native Vega-Lite normalization is detected or normalization is declared user-requested; `FAIL` when normalization appears without that declaration. | Detects encoding `stack="normalize"` and stack transforms with `offset="normalize"`. | Remove normalization, or set `usermeta.user_requested_normalization=true` only when the user explicitly asked for normalized values. |
 | `visual.arc.category_count` | Spec audits for arc marks | `PASS` when an arc chart stays at or below the category limit; `FAIL` when it exceeds the limit. | Checks whether a pie/arc chart uses too many categories, including shorthand encodings. | Switch to a sorted bar chart. |
 
 ## How to add a new rule
@@ -63,10 +65,11 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 
 ## Known limits
 
-- Audits cannot prove causality, normality, randomness, model adequacy, or semantic completeness of a set definition.
+- Audits cannot prove causality, normality, randomness, model adequacy, semantic completeness of a set definition, or whether a user-request declaration is truthful.
 - Deterministic thresholds identify obvious structure; they do not exhaust every possible diagnostic pattern.
 - Audits cannot replace domain review.
 - Audits depend on metadata quality.
 - First-party statistical spec semantics require `usermeta.chart_contract_intent`.
+- Scale/normalization authorization checks cover native Vega-Lite scale and stack controls; they cannot reconstruct semantic normalization hidden in arbitrary calculations or data that was normalized before the spec was produced.
 - Set membership spec audits do not reconstruct row-level evidence from arbitrary Vega-Lite layers; use `Chart.set_membership().audit()` before rendering.
 - Layered spec audits inspect the first supported analytical layer for generic rules; statistical intent rules inspect the relevant point, line, and rule layers explicitly.
