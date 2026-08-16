@@ -2,42 +2,46 @@
 
 ## Resume Packet
 
-- Goal: restore README content displaced by the set-membership insertion and align current-state docs and proof artifacts with `main`.
-- Workflow state: `Chart.set_membership()` is on `main`, its full CI matrix passed, and this cleanup branch contains documentation and generated-artifact follow-through only.
-- Branch: `agent/restore-docs-and-proof-artifacts`
-- Base: `main` at `b5ae6c6edf852e1d510951b69193a63c3cf845c0`
-- Next task: review the cleanup diff, confirm CI, and merge if the restored navigation and current-state wording are accurate.
-- Read first: `README.md`, `ROADMAP.md`, `artifacts/SPEC.md`, `examples/output/set_membership_chart.vl.json`, and `CHANGELOG.md`.
+- Goal: prevent AI-generated chart specs from silently changing quantitative scale or normalization defaults without an explicit user request.
+- Workflow state: draft PR #8 is open; implementation, focused tests, agent guidance, SPEC updates, and visual-default documentation are committed. CI run #179 is queued.
+- Branch: `agent/require-scale-normalization-opt-in`
+- Base: `main` at `1be9e17bd7dd9e5d7174b8a9232e58191fab8bf1`.
+- Next task: inspect CI #179. If it fails, fix only the scale/normalization policy slice; if it passes, perform one final PR diff review before deciding whether to mark ready.
+- Read first: `src/chart_contract/spec_policy.py`, `tests/test_spec_policy.py`, `tests/test_cli_visual_defaults.py`, `docs/VISUAL_DEFAULTS.md`, and `docs/AUDIT_RULES.md`.
 
 ## Current Repo State
 
-- v0.2.0 provides the CLI gate, distribution intents, and statistical diagnostic intents.
-- Unreleased `main` adds audited two-set membership charts with explicit row-level evidence and schematic geometry.
-- CI covers Python 3.10-3.13 and separately builds, inspects, installs, and smoke-tests the wheel.
-- The set-membership example now has a checked-in Vega-Lite proof artifact matching the documented output path.
-- Diagnostic trap links, the companion-artifact explanation, and the suite map are restored in the README.
-- The roadmap and spec now distinguish released v0.2.0 behavior from the unreleased set-membership slice.
+- Existing spec audits already block `scale.zero=false` on quantitative bar axes through `scale.bar.nonzero_baseline`.
+- This branch wraps the existing `audit_spec()` rather than rewriting the mature audit implementation.
+- Public Python audits and the CLI both route through the new wrapper.
+- `scale.override.authorization` blocks explicit quantitative x/y scale changes unless `usermeta.user_requested_scale_override=true` is declared.
+- `scale.normalization.authorization` blocks native Vega-Lite stack normalization unless `usermeta.user_requested_normalization=true` is declared.
+- `scale.bar.explicit_domain_zero` additionally blocks numeric bar domains that explicitly exclude zero even if a scale override was user-requested.
+- Untouched scale defaults require no authorization metadata.
 
 ## Important Decisions
 
-- Restore displaced README material rather than choosing between feature documentation and suite context.
-- Keep this PR free of runtime changes; the set-membership implementation already passed CI on `main`.
-- Treat labeled region counts as evidence and circle area as schematic.
-- Describe the package as an auditable harness, not a statistical certifier or general visualization library.
-- Keep more-than-two-set membership as a separate future matrix or UpSet-style intent.
+- User-request metadata is a declaration boundary, not proof that the user actually requested the transformation.
+- Agents must not add authorization metadata merely to obtain a passing audit.
+- Requested zoom/cropping on line or point charts may pass the new policy because positional comparison can legitimately use a requested local domain.
+- Truncated quantitative bars remain blocked because bar length depends on the baseline.
+- Native `stack="normalize"` and stack transforms with `offset="normalize"` are covered; arbitrary pre-normalized data and semantic normalization hidden in custom calculations remain outside deterministic audit scope.
+- No new renderer, chart intent, runtime dependency, or automatic chart correction was added.
 
 ## Verification
 
-- Parse the generated set-membership Vega-Lite artifact as JSON.
-- Check Markdown structure, internal links, trailing whitespace, and final newlines.
-- Rely on GitHub Actions for the full supported Python matrix and isolated wheel checks.
+- Focused coverage: `tests/test_spec_policy.py`.
+- CLI routing coverage: `tests/test_cli_visual_defaults.py`.
+- Local execution was unavailable because the execution container could not resolve GitHub, so no local pytest result should be claimed.
+- GitHub Actions CI run #179 is the executable validation gate for the current head.
 
 ## Remaining Risks
 
-- The generated artifact is review evidence, not a browser screenshot; visual appearance still depends on Vega-Lite rendering.
-- `audit_spec()` cannot reconstruct row-level membership evidence from arbitrary external layered specs.
-- The package remains versioned at 0.2.0 while set membership is recorded under Unreleased; the next release number is intentionally undecided.
+- The audit trusts the truthfulness of `usermeta.user_requested_*` declarations.
+- Dynamic `domainRaw` expressions are treated as scale overrides for authorization but are not fully analyzed for whether zero is present on bar axes.
+- Arbitrary calculate/window/preprocessing steps can normalize values before the spec reaches the audit and are not reconstructable from generic Vega-Lite semantics.
+- The new policy adds two PASS findings to ordinary public/CLI spec audits, so tests that assert exact finding counts may need adjustment if any exist outside the focused suite.
 
 ## Next Recommended Task
 
-Choose the release version for the set-membership slice after this cleanup merges, then prepare release notes without adding another visual intent at the same time.
+Wait for CI #179, then inspect any failures for exact-count/report-shape assumptions before changing policy semantics. If CI is green, review the diff for scope creep and mark PR #8 ready only if the metadata boundary and bar exception still read cleanly.
