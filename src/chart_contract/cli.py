@@ -11,7 +11,8 @@ from typing import Any
 
 import pandas as pd
 
-from .audit import BLOCK, READY, REVIEW, AuditReport, audit_spec
+from .audit import BLOCK, READY, REVIEW, AuditReport
+from .spec_policy import audit_spec
 
 SUPPORTED_REPORT_FORMATS = ("text", "json", "markdown")
 SUPPORTED_VERDICTS = (READY, REVIEW, BLOCK)
