@@ -54,8 +54,14 @@ occurred, and an agent must not add them merely to make an audit pass.
 
 ## Bar-chart exception
 
-The existing `scale.bar.nonzero_baseline` rule still blocks a quantitative bar axis with
-`scale.zero = false`, even if `user_requested_scale_override` is true.
+A quantitative bar baseline must still include zero even when
+`user_requested_scale_override` is true.
+
+Two rules enforce that boundary:
+
+- `scale.bar.nonzero_baseline` blocks an explicit `scale.zero = false`;
+- `scale.bar.explicit_domain_zero` blocks a numeric `domain`, `domainMin`, or `domainMax`
+  that explicitly excludes zero.
 
 That asymmetry is intentional. A zoomed line or point chart can be a legitimate requested
 view because position, not bar length, carries the comparison. Truncated bars change the
@@ -67,10 +73,14 @@ The policy deterministically detects native Vega-Lite scale-domain overrides and
 stack normalization in the supported spec shapes, including nested layers and concatenated
 views.
 
-It does not infer semantic normalization hidden inside arbitrary `calculate`, aggregate,
-window, or preprocessed data transformations. If values were normalized before reaching the
-spec, the audit cannot reconstruct the user's original units from the rendered specification
-alone.
+The explicit bar-domain rule covers numeric domains and obvious numeric `domainMin` /
+`domainMax` exclusions. It does not attempt to prove the zero behavior of every dynamic
+`domainRaw` expression.
+
+The policy also does not infer semantic normalization hidden inside arbitrary `calculate`,
+aggregate, window, or preprocessed data transformations. If values were normalized before
+reaching the spec, the audit cannot reconstruct the user's original units from the rendered
+specification alone.
 
 The safest agent behavior is therefore simple: preserve the user's original scale and units by
 default, and record a transformation request only when the user actually made one.
