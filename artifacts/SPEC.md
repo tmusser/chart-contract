@@ -20,6 +20,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - two-set membership intent: `Chart.set_membership()`
 - `chart.audit()` for first-party chart contracts
 - experimental `audit_spec()` for supported Vega-Lite evidence shapes
+- external-spec policy checks that block undeclared quantitative scale overrides and native normalization
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -33,6 +34,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Set membership requires one row per unique universe member and exactly two explicit boolean or integer `0`/`1` membership columns.
 - Venn-style circle geometry is schematic; labeled region counts are authoritative.
 - Arbitrary external Vega-Lite specs are audited only where the required evidence can be reconstructed deterministically.
+- Quantitative scale overrides and native Vega-Lite normalization in external specs require explicit user-request declarations; the declarations are metadata boundaries, not proof that the user actually made the request.
+- A nonzero quantitative bar baseline remains a visual-integrity failure even when a user-request declaration is present.
+- The scale/normalization policy does not infer semantic normalization hidden in arbitrary transforms or data that was preprocessed before reaching the audited spec.
 
 ## Non-Goals
 
@@ -43,11 +47,15 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - external data fetching, LLM calls, telemetry, or theme systems
 - three-or-more-set Venn diagrams or area-proportional Venn fitting
 - unverifiable claims of statistical, accessibility, or design certification
+- reconstructing missing user intent from generated chart metadata
 
 ## Acceptance Criteria
 
 - Public API supports every intent listed in Current Scope.
 - Audit findings cover contract completeness, usable data, visual form, claim support, provenance, and explainable visual-integrity checks.
+- External Vega-Lite specs with explicit quantitative domain overrides or `scale.zero=false` block unless `usermeta.user_requested_scale_override=true` is declared, except truncated bars, which remain blocked.
+- External Vega-Lite specs using native stack normalization block unless `usermeta.user_requested_normalization=true` is declared.
+- Untouched quantitative scale defaults do not require authorization metadata.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - Examples run on synthetic data and write inspectable Vega-Lite JSON into `examples/output/`.
@@ -78,6 +86,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 Run `python examples/bad_to_good_chart.py` to compare a risky chart that still renders with a corrected contract-driven chart and inspect the emitted audit evidence.
 
 For set membership, run `python examples/set_membership.py` and verify that A-only, overlap, B-only, neither, and universe counts reconcile in the generated spec metadata.
+
+For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify that silent line-scale cropping and native normalization block while explicitly declared user-requested transformations pass their policy checks.
 
 ## Open Questions
 
