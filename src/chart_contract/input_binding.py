@@ -88,6 +88,23 @@ class BoundAuditReport(AuditReport):
         )
         return candidate == self.input_binding
 
+    def matches_spec(
+        self,
+        *,
+        spec: Mapping[str, Any],
+        data: pd.DataFrame | Sequence[Mapping[str, Any]] | None,
+        claim: str | None,
+    ) -> bool:
+        return self.matches_inputs(subject=spec, subject_kind="spec", data=data, claim=claim)
+
+    def matches_chart(self, chart: Any) -> bool:
+        return self.matches_inputs(
+            subject=chart,
+            subject_kind="chart_contract",
+            data=chart.data,
+            claim=chart.claim,
+        )
+
 
 def bind_spec_report(
     report: AuditReport,
@@ -111,7 +128,7 @@ def bind_chart_report(report: AuditReport, chart: Any) -> BoundAuditReport:
     return BoundAuditReport(
         findings=list(report.findings),
         input_binding=build_input_binding(
-            subject=_chart_contract_payload(chart),
+            subject=chart,
             subject_kind="chart_contract",
             data=chart.data,
             claim=chart.claim,
@@ -128,7 +145,8 @@ def build_input_binding(
     tool_version: str | None = None,
 ) -> InputBinding:
     resolved_version = tool_version or _package_version()
-    subject_sha256 = _sha256_json(subject)
+    normalized_subject = _subject_payload(subject, subject_kind)
+    subject_sha256 = _sha256_json(normalized_subject)
     data_sha256 = _hash_data(data)
     claim_sha256 = _sha256_json(claim)
     bundle_payload = {
@@ -155,6 +173,12 @@ def _package_version() -> str:
         return package_version("chart-contract")
     except PackageNotFoundError:
         return PACKAGE_VERSION_FALLBACK
+
+
+def _subject_payload(subject: Any, subject_kind: str) -> Any:
+    if subject_kind == "chart_contract" and is_dataclass(subject):
+        return _chart_contract_payload(subject)
+    return subject
 
 
 def _chart_contract_payload(chart: Any) -> dict[str, Any]:
