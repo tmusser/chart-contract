@@ -40,7 +40,7 @@ def test_spec_report_is_bound_to_exact_inputs() -> None:
     assert len(payload["input_binding"]["data_sha256"]) == 64
     assert len(payload["input_binding"]["claim_sha256"]) == 64
     assert len(payload["input_binding"]["bundle_sha256"]) == 64
-    assert report.matches_inputs(subject=spec, subject_kind="spec", data=data, claim=claim)
+    assert report.matches_spec(spec=spec, data=data, claim=claim)
 
 
 def test_equivalent_spec_key_order_has_same_fingerprint() -> None:
@@ -66,7 +66,7 @@ def test_mutating_spec_invalidates_existing_report() -> None:
     changed = copy.deepcopy(spec)
     changed["title"] = "A different chart title"
 
-    assert not report.matches_inputs(subject=changed, subject_kind="spec", data=data, claim=claim)
+    assert not report.matches_spec(spec=changed, data=data, claim=claim)
 
 
 def test_mutating_data_invalidates_existing_report() -> None:
@@ -77,7 +77,7 @@ def test_mutating_data_invalidates_existing_report() -> None:
     changed = data.copy()
     changed.loc[1, "conversion"] = 0.99
 
-    assert not report.matches_inputs(subject=spec, subject_kind="spec", data=changed, claim=claim)
+    assert not report.matches_spec(spec=spec, data=changed, claim=claim)
 
 
 def test_mutating_claim_invalidates_existing_report() -> None:
@@ -85,12 +85,7 @@ def test_mutating_claim_invalidates_existing_report() -> None:
     data = _data()
     report = audit_spec(spec=spec, data=data, claim="Conversion increased.")
 
-    assert not report.matches_inputs(
-        subject=spec,
-        subject_kind="spec",
-        data=data,
-        claim="Conversion decreased.",
-    )
+    assert not report.matches_spec(spec=spec, data=data, claim="Conversion decreased.")
 
 
 def test_chart_audit_is_bound_to_chart_contract_data_and_claim() -> None:
@@ -110,6 +105,24 @@ def test_chart_audit_is_bound_to_chart_contract_data_and_claim() -> None:
     assert report.input_binding is not None
     assert report.input_binding.subject_kind == "chart_contract"
     assert report.to_dict()["schema_version"] == "0.3"
+    assert report.matches_chart(chart)
+
+
+def test_mutating_first_party_chart_invalidates_existing_report() -> None:
+    chart = Chart.trend(
+        data=_data(),
+        x="week",
+        y="conversion",
+        claim="Conversion increased from W1 to W2.",
+        source="synthetic.conversion",
+        unit="rate",
+        title="Conversion trend",
+    )
+    report = chart.audit()
+
+    chart.title = "Changed after audit"
+
+    assert not report.matches_chart(chart)
 
 
 def test_binding_has_no_wall_clock_field() -> None:
