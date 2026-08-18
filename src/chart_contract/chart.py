@@ -358,12 +358,17 @@ class Chart:
         if self.intent == "set_membership":
             from .set_membership_audit import audit_set_membership_chart
 
-            return audit_set_membership_chart(self)
-        if self.intent in {"qq", "ecdf", "residual"}:
+            report = audit_set_membership_chart(self)
+        elif self.intent in {"qq", "ecdf", "residual"}:
             from .statistical_audit import audit_statistical_chart
 
-            return audit_statistical_chart(self)
-        return audit_chart(self)
+            report = audit_statistical_chart(self)
+        else:
+            report = audit_chart(self)
+
+        from .input_binding import bind_chart_report
+
+        return bind_chart_report(report, self)
 
     def to_altair(self) -> Any:
         from .renderers.altair import render_chart

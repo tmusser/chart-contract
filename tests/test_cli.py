@@ -73,8 +73,10 @@ def test_json_output_is_valid(capsys: pytest.CaptureFixture[str]) -> None:
 
     assert exit_code == 0
     assert stderr == ""
-    assert payload["schema_version"] == "0.2"
+    assert payload["schema_version"] == "0.3"
     assert payload["verdict"] == "READY"
+    assert payload["input_binding"]["subject_kind"] == "spec"
+    assert len(payload["input_binding"]["bundle_sha256"]) == 64
     assert isinstance(payload["findings"], list)
     assert "contract.claim.present" in {finding["rule_id"] for finding in payload["findings"]}
 
@@ -108,10 +110,12 @@ def test_out_and_markdown_write_files(tmp_path: Path, capsys: pytest.CaptureFixt
     assert exit_code == 0
     assert stderr == ""
     assert stdout.startswith("Verdict: READY | Summary:")
-    assert payload["schema_version"] == "0.2"
+    assert payload["schema_version"] == "0.3"
     assert payload["verdict"] == "READY"
+    assert payload["input_binding"]["tool_version"]
     assert markdown.startswith("# Audit Report")
     assert "Verdict: `READY`" in markdown
+    assert "## Input Binding" in markdown
 
 
 def test_block_exits_nonzero(capsys: pytest.CaptureFixture[str]) -> None:
