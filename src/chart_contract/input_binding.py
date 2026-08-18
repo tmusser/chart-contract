@@ -44,13 +44,13 @@ class BoundAuditReport(AuditReport):
     input_binding: InputBinding | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        payload = super().to_dict()
+        payload = AuditReport.to_dict(self)
         payload["schema_version"] = BOUND_REPORT_SCHEMA_VERSION
         payload["input_binding"] = self.input_binding.to_dict() if self.input_binding else None
         return payload
 
     def to_markdown(self) -> str:
-        base = super().to_markdown()
+        base = AuditReport.to_markdown(self)
         if self.input_binding is None:
             return base
         binding = self.input_binding
