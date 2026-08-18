@@ -180,8 +180,17 @@ jobs:
           assert version_output == f"chart-contract {installed_version}"
 
           payload = json.loads(Path("report.json").read_text(encoding="utf-8"))
-          assert payload["schema_version"] == "0.2"
+          assert payload["schema_version"] == "0.3"
           assert payload["verdict"] == "REVIEW"
           assert isinstance(payload["findings"], list)
           assert payload["findings"]
+
+          binding = payload["input_binding"]
+          assert binding["algorithm"] == "sha256"
+          assert binding["subject_kind"] == "spec"
+          assert binding["tool_version"] == installed_version
+          assert len(binding["subject_sha256"]) == 64
+          assert len(binding["data_sha256"]) == 64
+          assert len(binding["claim_sha256"]) == 64
+          assert len(binding["bundle_sha256"]) == 64
           PY
