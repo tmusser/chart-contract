@@ -4,6 +4,9 @@
 
 ### Added
 
+- Deterministic SHA-256 input bindings for public spec audits and first-party chart audit reports, covering the audited subject, explicit data, claim, and installed package version.
+- Bound report schema `0.3` with component hashes, a bundle hash, and `matches_spec(...)` / `matches_chart(...)` verification helpers.
+- Audit provenance documentation describing content identity, reproducibility, and the boundary between matching inputs and analytical validity.
 - Deterministic spec-audit policy that blocks undeclared quantitative scale overrides and native Vega-Lite normalization.
 - Explicit `usermeta.user_requested_scale_override` and `usermeta.user_requested_normalization` declarations for genuinely user-requested visual transformations.
 - Dedicated visual-default policy tests and documentation, including the rule that truncated quantitative bars remain blocked even with a user-request declaration.
@@ -17,6 +20,7 @@
 
 ### Changed
 
+- Public `audit_spec()` and `Chart.audit()` results are now content-bound so a report can be checked against the inputs being shared instead of surviving silent post-audit mutations.
 - Public `audit_spec()` and the CLI audit gate now apply the visual-default consent policy after the existing deterministic spec audit.
 - Hardened CI with read-only permissions, disabled checkout credentials, pip caching, concurrency cancellation, job timeouts, dependency checks, and source compilation.
 - Preserved the chart-specific verdict and statistical-diagnostic trap checks across every supported Python version.
