@@ -20,6 +20,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - two-set membership intent: `Chart.set_membership()`
 - `chart.audit()` for first-party chart contracts
 - experimental `audit_spec()` for supported Vega-Lite evidence shapes
+- deterministic input bindings that tie public audit reports to the exact audited subject, data, claim, and package version
 - external-spec policy checks that block undeclared quantitative scale overrides and native normalization
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
@@ -37,6 +38,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Quantitative scale overrides and native Vega-Lite normalization in external specs require explicit user-request declarations; the declarations are metadata boundaries, not proof that the user actually made the request.
 - A nonzero quantitative bar baseline remains a visual-integrity failure even when a user-request declaration is present.
 - The scale/normalization policy does not infer semantic normalization hidden in arbitrary transforms or data that was preprocessed before reaching the audited spec.
+- Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
 
 ## Non-Goals
 
@@ -48,11 +50,15 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - three-or-more-set Venn diagrams or area-proportional Venn fitting
 - unverifiable claims of statistical, accessibility, or design certification
 - reconstructing missing user intent from generated chart metadata
+- cryptographic signing, timestamp authority, or remote attestation of audit reports
 
 ## Acceptance Criteria
 
 - Public API supports every intent listed in Current Scope.
 - Audit findings cover contract completeness, usable data, visual form, claim support, provenance, and explainable visual-integrity checks.
+- Public `audit_spec()` and first-party `Chart.audit()` reports include deterministic SHA-256 input bindings and serialize as bound report schema `0.3`.
+- Changing the audited subject, explicit data, or claim invalidates the prior report binding.
+- Equivalent JSON mapping key order does not change a spec fingerprint.
 - External Vega-Lite specs with explicit quantitative domain overrides or `scale.zero=false` block unless `usermeta.user_requested_scale_override=true` is declared, except truncated bars, which remain blocked.
 - External Vega-Lite specs using native stack normalization block unless `usermeta.user_requested_normalization=true` is declared.
 - Untouched quantitative scale defaults do not require authorization metadata.
@@ -88,6 +94,8 @@ Run `python examples/bad_to_good_chart.py` to compare a risky chart that still r
 For set membership, run `python examples/set_membership.py` and verify that A-only, overlap, B-only, neither, and universe counts reconcile in the generated spec metadata.
 
 For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify that silent line-scale cropping and native normalization block while explicitly declared user-requested transformations pass their policy checks.
+
+For audit provenance, run `python -m pytest tests/test_input_binding.py` and verify that unchanged inputs reproduce their binding while spec, data, and claim mutations invalidate it.
 
 ## Open Questions
 
