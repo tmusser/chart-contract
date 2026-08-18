@@ -9,6 +9,7 @@ from typing import Any
 import pandas as pd
 
 from .audit import FAIL, PASS, AuditReport, audit_spec as _base_audit_spec
+from .input_binding import BoundAuditReport, bind_spec_report
 
 SCALE_OVERRIDE_KEYS = {"domain", "domainMin", "domainMax", "domainRaw"}
 SCALE_REQUEST_FLAG = "user_requested_scale_override"
@@ -19,12 +20,12 @@ def audit_spec(
     spec: Mapping[str, Any],
     data: pd.DataFrame | Sequence[Mapping[str, Any]] | None = None,
     claim: str | None = None,
-) -> AuditReport:
-    """Audit a spec, including explicit-consent checks for visual transformations."""
+) -> BoundAuditReport:
+    """Audit a spec and bind the verdict to the exact audited inputs."""
 
     report = _base_audit_spec(spec=spec, data=data, claim=claim)
     _audit_visual_default_consent(report, spec)
-    return report
+    return bind_spec_report(report, spec=spec, data=data, claim=claim)
 
 
 def _audit_visual_default_consent(report: AuditReport, spec: Mapping[str, Any]) -> None:
