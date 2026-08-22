@@ -4,6 +4,8 @@
 
 ### Added
 
+- CLI verification for saved bound JSON audit reports via `chart-contract verify report`, with component-level spec, data, and claim drift output.
+- Serialized binding self-checks that reject malformed hashes and bundle hashes inconsistent with their recorded components before live-input comparison.
 - Deterministic SHA-256 input bindings for public spec audits and first-party chart audit reports, covering the audited subject, explicit data, claim, and installed package version.
 - Bound report schema `0.3` with component hashes, a bundle hash, and `matches_spec(...)` / `matches_chart(...)` verification helpers.
 - Audit provenance documentation describing content identity, reproducibility, and the boundary between matching inputs and analytical validity.
