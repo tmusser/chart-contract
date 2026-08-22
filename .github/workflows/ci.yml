@@ -163,10 +163,15 @@ jobs:
           .venv-smoke/bin/python -m pip install dist/*.whl
           .venv-smoke/bin/python -m pip check
           .venv-smoke/bin/chart-contract --version > version.txt
+          claim="$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
           .venv-smoke/bin/chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
             --data examples/traps/causal_claim_missing_caveat.csv \
-            --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)" \
+            --claim "$claim" \
             --format json > report.json
+          .venv-smoke/bin/chart-contract verify report report.json \
+            --spec examples/traps/causal_claim_missing_caveat.vl.json \
+            --data examples/traps/causal_claim_missing_caveat.csv \
+            --claim "$claim" > binding-check.txt
 
       - name: Verify installed CLI and report shape
         run: |
@@ -193,4 +198,10 @@ jobs:
           assert len(binding["data_sha256"]) == 64
           assert len(binding["claim_sha256"]) == 64
           assert len(binding["bundle_sha256"]) == 64
+
+          binding_output = Path("binding-check.txt").read_text(encoding="utf-8")
+          assert "Binding: MATCH" in binding_output
+          assert "Subject: MATCH" in binding_output
+          assert "Data: MATCH" in binding_output
+          assert "Claim: MATCH" in binding_output
           PY
