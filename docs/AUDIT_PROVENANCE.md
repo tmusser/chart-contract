@@ -48,7 +48,7 @@ When a spec uses only inline data and no explicit `data=` argument is supplied, 
 
 ## Verification
 
-Python callers can verify a durable report against the inputs they are about to share:
+Python callers can verify an in-memory report against the inputs they are about to share:
 
 ```python
 report = audit_spec(spec=spec, data=df, claim=claim)
@@ -64,6 +64,49 @@ assert report.matches_chart(chart)
 
 Any change to the audited subject, explicit data, or claim invalidates the match.
 
+### Verify a saved JSON report
+
+A report written by the CLI can be checked later without reconstructing the original Python object:
+
+```bash
+chart-contract audit spec chart.vl.json \
+  --data chart.csv \
+  --claim "Observed conversion increased." \
+  --format json \
+  --out audit.json
+
+chart-contract verify report audit.json \
+  --spec chart.vl.json \
+  --data chart.csv \
+  --claim "Observed conversion increased."
+```
+
+Representative success output:
+
+```text
+Binding: MATCH
+Subject: MATCH
+Data: MATCH
+Claim: MATCH
+Bound tool version: 0.2.0
+```
+
+The verifier returns:
+
+- `0` when the saved binding matches the current spec, data, and claim exactly;
+- `1` when at least one bound component has drifted;
+- `2` for malformed, unbound, unsupported, or unreadable verification inputs.
+
+Component-level output makes drift inspectable. A spec-only mutation reports `Subject: MISMATCH` while unchanged data and claim remain `MATCH`.
+
+The verifier recomputes fingerprints using the tool version recorded in the saved binding. This preserves the identity of the historical audit instead of requiring the currently installed package version to equal the version that produced the report.
+
+Before comparing live inputs, the CLI also checks that the serialized bundle hash is consistent with the component hashes recorded inside the report. This catches accidental or casual edits to one binding field.
+
+The CLI verification surface currently supports saved **spec-audit** JSON reports. First-party `Chart.audit()` bindings remain verifiable through `matches_chart(...)` in Python because reconstructing an arbitrary chart contract from a generic serialized CLI input would create a second contract format.
+
 ## Boundary
 
 A fingerprint proves content identity, not analytical truth. A matching `READY` report means the current inputs are the same inputs that produced that mechanical verdict. It does not upgrade `READY` into scientific validation or human approval.
+
+The hashes are also not signatures. Someone who can rewrite the report can deliberately recompute a new internally consistent binding. Saved-report verification is a drift and consistency check, not an authenticity, authorship, or tamper-proofing mechanism.
