@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, fields, is_dataclass
 from datetime import date, datetime, time, timedelta
@@ -19,6 +20,7 @@ from .audit import AuditReport
 BOUND_REPORT_SCHEMA_VERSION = "0.3"
 PACKAGE_VERSION_FALLBACK = "0.2.0"
 HASH_ALGORITHM = "sha256"
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,6 +37,36 @@ class InputBinding:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True, slots=True)
+class InputBindingVerification:
+    """Component-level comparison between a durable binding and current inputs."""
+
+    binding: InputBinding
+    candidate: InputBinding
+
+    @property
+    def subject_matches(self) -> bool:
+        return self.binding.subject_sha256 == self.candidate.subject_sha256
+
+    @property
+    def data_matches(self) -> bool:
+        return self.binding.data_sha256 == self.candidate.data_sha256
+
+    @property
+    def claim_matches(self) -> bool:
+        return self.binding.claim_sha256 == self.candidate.claim_sha256
+
+    @property
+    def matches(self) -> bool:
+        return (
+            self.binding.subject_kind == self.candidate.subject_kind
+            and self.subject_matches
+            and self.data_matches
+            and self.claim_matches
+            and self.binding.bundle_sha256 == self.candidate.bundle_sha256
+        )
 
 
 @dataclass(slots=True)
@@ -79,14 +111,13 @@ class BoundAuditReport(AuditReport):
     ) -> bool:
         if self.input_binding is None:
             return False
-        candidate = build_input_binding(
+        return verify_input_binding(
+            self.input_binding,
             subject=subject,
             subject_kind=subject_kind,
             data=data,
             claim=claim,
-            tool_version=self.input_binding.tool_version,
-        )
-        return candidate == self.input_binding
+        ).matches
 
     def matches_spec(
         self,
@@ -104,6 +135,77 @@ class BoundAuditReport(AuditReport):
             data=chart.data,
             claim=chart.claim,
         )
+
+
+def input_binding_from_dict(payload: Mapping[str, Any]) -> InputBinding:
+    """Parse and self-check a serialized input binding."""
+
+    required = {
+        "algorithm",
+        "subject_kind",
+        "subject_sha256",
+        "data_sha256",
+        "claim_sha256",
+        "tool_version",
+        "bundle_sha256",
+    }
+    missing = sorted(required - set(payload))
+    if missing:
+        raise ValueError(f"Input binding is missing required field(s): {', '.join(missing)}")
+
+    algorithm = payload["algorithm"]
+    subject_kind = payload["subject_kind"]
+    subject_sha256 = payload["subject_sha256"]
+    data_sha256 = payload["data_sha256"]
+    claim_sha256 = payload["claim_sha256"]
+    tool_version = payload["tool_version"]
+    bundle_sha256 = payload["bundle_sha256"]
+
+    if algorithm != HASH_ALGORITHM:
+        raise ValueError(f"Unsupported input-binding algorithm: {algorithm!r}")
+    if not isinstance(subject_kind, str) or not subject_kind:
+        raise ValueError("Input binding subject_kind must be a non-empty string.")
+    _require_sha256("subject_sha256", subject_sha256)
+    if data_sha256 is not None:
+        _require_sha256("data_sha256", data_sha256)
+    _require_sha256("claim_sha256", claim_sha256)
+    if not isinstance(tool_version, str) or not tool_version:
+        raise ValueError("Input binding tool_version must be a non-empty string.")
+    _require_sha256("bundle_sha256", bundle_sha256)
+
+    binding = InputBinding(
+        algorithm=algorithm,
+        subject_kind=subject_kind,
+        subject_sha256=subject_sha256,
+        data_sha256=data_sha256,
+        claim_sha256=claim_sha256,
+        tool_version=tool_version,
+        bundle_sha256=bundle_sha256,
+    )
+    expected_bundle = _bundle_sha256(binding)
+    if expected_bundle != binding.bundle_sha256:
+        raise ValueError("Input binding bundle_sha256 does not match its recorded components.")
+    return binding
+
+
+def verify_input_binding(
+    binding: InputBinding,
+    *,
+    subject: Any,
+    subject_kind: str,
+    data: pd.DataFrame | Sequence[Mapping[str, Any]] | None,
+    claim: str | None,
+) -> InputBindingVerification:
+    """Recompute current input fingerprints using the binding's recorded tool version."""
+
+    candidate = build_input_binding(
+        subject=subject,
+        subject_kind=subject_kind,
+        data=data,
+        claim=claim,
+        tool_version=binding.tool_version,
+    )
+    return InputBindingVerification(binding=binding, candidate=candidate)
 
 
 def bind_spec_report(
@@ -166,6 +268,24 @@ def build_input_binding(
         tool_version=resolved_version,
         bundle_sha256=_sha256_json(bundle_payload),
     )
+
+
+def _bundle_sha256(binding: InputBinding) -> str:
+    return _sha256_json(
+        {
+            "algorithm": binding.algorithm,
+            "subject_kind": binding.subject_kind,
+            "subject_sha256": binding.subject_sha256,
+            "data_sha256": binding.data_sha256,
+            "claim_sha256": binding.claim_sha256,
+            "tool_version": binding.tool_version,
+        }
+    )
+
+
+def _require_sha256(field_name: str, value: Any) -> None:
+    if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
+        raise ValueError(f"Input binding {field_name} must be a lowercase SHA-256 hex digest.")
 
 
 def _package_version() -> str:
