@@ -12,6 +12,11 @@ from typing import Any
 import pandas as pd
 
 from .audit import BLOCK, READY, REVIEW, AuditReport
+from .input_binding import (
+    BOUND_REPORT_SCHEMA_VERSION,
+    input_binding_from_dict,
+    verify_input_binding,
+)
 from .spec_policy import audit_spec
 
 SUPPORTED_REPORT_FORMATS = ("text", "json", "markdown")
@@ -31,20 +36,29 @@ def _package_version() -> str:
         return PACKAGE_VERSION_FALLBACK
 
 
-def _load_json_spec(path: Path) -> dict[str, Any]:
-    if path.suffix.lower() != ".json":
-        raise CLIError(f"Spec file must be JSON (.json): {path}")
-
+def _load_json_object(path: Path, *, kind: str) -> dict[str, Any]:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
-        raise CLIError(f"Spec file not found: {path}") from exc
+        raise CLIError(f"{kind} file not found: {path}") from exc
     except json.JSONDecodeError as exc:
-        raise CLIError(f"Spec file is not valid JSON: {path}: {exc.msg}") from exc
+        raise CLIError(f"{kind} file is not valid JSON: {path}: {exc.msg}") from exc
 
     if not isinstance(raw, Mapping):
-        raise CLIError(f"Spec file must contain a JSON object: {path}")
+        raise CLIError(f"{kind} file must contain a JSON object: {path}")
     return dict(raw)
+
+
+def _load_json_spec(path: Path) -> dict[str, Any]:
+    if path.suffix.lower() != ".json":
+        raise CLIError(f"Spec file must be JSON (.json): {path}")
+    return _load_json_object(path, kind="Spec")
+
+
+def _load_json_report(path: Path) -> dict[str, Any]:
+    if path.suffix.lower() != ".json":
+        raise CLIError(f"Report file must be JSON (.json): {path}")
+    return _load_json_object(path, kind="Report")
 
 
 def _load_json_data(path: Path) -> pd.DataFrame:
@@ -156,6 +170,47 @@ def _run_audit_spec(args: argparse.Namespace) -> int:
     return 1 if _should_fail(report.verdict, args.fail_on, args.warnings_as_errors) else 0
 
 
+def _run_verify_report(args: argparse.Namespace) -> int:
+    payload = _load_json_report(Path(args.report_path))
+    if payload.get("schema_version") != BOUND_REPORT_SCHEMA_VERSION:
+        raise CLIError(
+            "Report must use bound report schema "
+            f"{BOUND_REPORT_SCHEMA_VERSION}; got {payload.get('schema_version')!r}."
+        )
+
+    serialized_binding = payload.get("input_binding")
+    if not isinstance(serialized_binding, Mapping):
+        raise CLIError("Report does not contain a serialized input_binding object.")
+    try:
+        binding = input_binding_from_dict(serialized_binding)
+    except ValueError as exc:
+        raise CLIError(f"Invalid report input binding: {exc}") from exc
+
+    if binding.subject_kind != "spec":
+        raise CLIError(
+            "CLI report verification currently supports saved spec-audit reports only; "
+            f"report subject_kind is {binding.subject_kind!r}."
+        )
+
+    spec = _load_json_spec(Path(args.spec_path))
+    data = _load_data(args.data_path)
+    verification = verify_input_binding(
+        binding,
+        subject=spec,
+        subject_kind="spec",
+        data=data,
+        claim=args.claim,
+    )
+
+    status = "MATCH" if verification.matches else "MISMATCH"
+    print(f"Binding: {status}")
+    print(f"Subject: {'MATCH' if verification.subject_matches else 'MISMATCH'}")
+    print(f"Data: {'MATCH' if verification.data_matches else 'MISMATCH'}")
+    print(f"Claim: {'MATCH' if verification.claim_matches else 'MISMATCH'}")
+    print(f"Bound tool version: {binding.tool_version}")
+    return 0 if verification.matches else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="chart-contract", description="Audit Vega-Lite specs from disk.")
     parser.add_argument(
@@ -193,6 +248,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fail when the report verdict reaches this threshold.",
     )
     spec_parser.set_defaults(func=_run_audit_spec)
+
+    verify_parser = subparsers.add_parser("verify", help="Verify durable audit artifacts against current inputs.")
+    verify_subparsers = verify_parser.add_subparsers(dest="verify_command", required=True)
+    report_parser = verify_subparsers.add_parser(
+        "report",
+        help="Verify a saved JSON audit report against the spec, data, and claim being shared.",
+    )
+    report_parser.add_argument("report_path", help="Path to a bound JSON audit report.")
+    report_parser.add_argument("--spec", dest="spec_path", required=True, help="Current Vega-Lite spec file.")
+    report_parser.add_argument("--data", dest="data_path", help="Optional current CSV or JSON data file.")
+    report_parser.add_argument("--claim", help="Current exact claim text.")
+    report_parser.set_defaults(func=_run_verify_report)
 
     return parser
 
