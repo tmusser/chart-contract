@@ -18,12 +18,16 @@ The current unreleased line adds and hardens:
 - row-level universe, binary-membership, unique-member, and reconciled-region checks
 - schematic partial-overlap, disjoint, subset, and equal-set layouts with authoritative labels
 - deterministic content bindings for audit reports plus CLI re-verification of saved spec-audit reports against current spec/data/claim inputs
+- machine-readable `audit-v0.2` profile inspection with stable rule metadata and explicit analytical boundaries
+- deterministic `audit-profile-semantics-v1` identities that exclude package-version-only drift
+- mechanical saved-profile diffs covering rule additions/removals, field changes, order drift, and tool-metadata drift without an automatic compatibility judgment
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
 ## Next
 
-- decide the release version and release notes for the set-membership and audit-provenance slices
+- decide the release version and release notes for the set-membership, audit-provenance, and profile-inspection slices
+- consider binding a future audit-report schema revision to exact audit-profile identity after the profile contract sees real use; do not retroactively change `0.3` report semantics
 - keep generated example artifacts deterministic and reviewable
 - extend CLI/spec auditing only where evidence can be reconstructed without pretending arbitrary visuals are semantically complete
 - add new intents only when their data, claim, and visual contracts can be tested explicitly
@@ -40,5 +44,6 @@ The current unreleased line adds and hardens:
 - no automatic chart correction
 - no dashboard or chart-generator product surface
 - no formal statistical certification
+- no automatic compatibility or scientific-quality classification from audit-profile drift
 - no area-proportional Venn fitting in the two-set intent
 - no broad plotting-library coverage without an auditable contract
