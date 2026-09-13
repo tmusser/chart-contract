@@ -2,7 +2,7 @@
 
 ## Objective
 
-Build `chart-contract`, a lightweight Python harness for claim-first analytical charts that makes the claim, evidence shape, visual intent, provenance, and known limitations inspectable before a chart is shared.
+Build `chart-contract`, a lightweight Python harness for claim-first analytical charts that makes the claim, evidence shape, visual intent, provenance, audit-policy identity, and known limitations inspectable before a chart is shared.
 
 The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/`FAIL` findings summarized as `READY`, `REVIEW`, or `BLOCK`.
 
@@ -21,6 +21,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - `chart.audit()` for first-party chart contracts
 - experimental `audit_spec()` for supported Vega-Lite evidence shapes
 - deterministic input bindings that tie public audit reports to the exact audited subject, data, claim, and package version
+- machine-readable `audit-v0.2` profile metadata for the documented audit ruleset
+- deterministic `audit-profile-semantics-v1` identity that separates semantic audit-policy drift from package/tool metadata drift
+- `chart-contract profile show` and `chart-contract profile diff` for read-only ruleset inspection and mechanical drift
 - external-spec policy checks that block undeclared quantitative scale overrides and native normalization
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
@@ -39,6 +42,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - A nonzero quantitative bar baseline remains a visual-integrity failure even when a user-request declaration is present.
 - The scale/normalization policy does not infer semantic normalization hidden in arbitrary transforms or data that was preprocessed before reaching the audited spec.
 - Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
+- Audit-profile digests identify declared ruleset semantics; they do not authenticate execution, prove the implementation correct, or establish that any chart is safe or scientifically sound.
+- Profile diffs are mechanical only and do not classify changes as compatible, breaking, improved, or scientifically preferable.
 
 ## Non-Goals
 
@@ -51,6 +56,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - unverifiable claims of statistical, accessibility, or design certification
 - reconstructing missing user intent from generated chart metadata
 - cryptographic signing, timestamp authority, or remote attestation of audit reports
+- retroactively attaching audit-profile identity to existing bound report schema `0.3`
+- automatic audit-profile compatibility classification
 
 ## Acceptance Criteria
 
@@ -59,6 +66,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Public `audit_spec()` and first-party `Chart.audit()` reports include deterministic SHA-256 input bindings and serialize as bound report schema `0.3`.
 - Changing the audited subject, explicit data, or claim invalidates the prior report binding.
 - Equivalent JSON mapping key order does not change a spec fingerprint.
+- `chart-contract profile show audit-v0.2 --json` emits a bounded manifest covering the same stable rule IDs as `docs/AUDIT_RULES.md`.
+- Package-version-only changes do not change `audit-profile-semantics-v1` identity; changes to rule semantics do.
+- `chart-contract profile diff` reports profile/rule/order/tool drift without making a compatibility judgment.
 - External Vega-Lite specs with explicit quantitative domain overrides or `scale.zero=false` block unless `usermeta.user_requested_scale_override=true` is declared, except truncated bars, which remain blocked.
 - External Vega-Lite specs using native stack normalization block unless `usermeta.user_requested_normalization=true` is declared.
 - Untouched quantitative scale defaults do not require authorization metadata.
@@ -84,6 +94,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - `python examples/distribution_charts.py`
 - `python examples/statistical_diagnostics.py`
 - `python examples/set_membership.py`
+- `chart-contract profile show audit-v0.2 --json`
 - `chart-contract --version`
 - `git diff --check`
 
@@ -97,8 +108,11 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py` and verify that unchanged inputs reproduce their binding while spec, data, and claim mutations invalidate it.
 
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 43-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+
 ## Open Questions
 
 - What release version should carry the set-membership intent?
 - Should a future many-set intent use an UpSet-style matrix rather than circles?
 - Which additional external-spec shapes can be audited without inventing missing semantic evidence?
+- After the profile contract sees real use, should a new report schema bind saved audits to exact audit-profile identity?
