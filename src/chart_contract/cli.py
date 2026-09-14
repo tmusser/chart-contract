@@ -17,6 +17,8 @@ from .input_binding import (
     input_binding_from_dict,
     verify_input_binding,
 )
+from .profile_diff import ProfileDiff, build_profile_diff
+from .profiles import DEFAULT_PROFILE, ProfileManifest, get_profile_manifest, load_profile_manifest
 from .spec_policy import audit_spec
 
 SUPPORTED_REPORT_FORMATS = ("text", "json", "markdown")
@@ -145,8 +147,6 @@ def _write_report(path: Path, content: str) -> None:
 def _should_fail(report_verdict: str, fail_on: str, warnings_as_errors: bool) -> bool:
     threshold = fail_on
     if warnings_as_errors and VERDICT_RANK[threshold] > VERDICT_RANK[REVIEW]:
-        # Keep the CLI aligned with AuditReport.verdict names until exit-code policy
-        # needs a deeper mapping layer.
         threshold = REVIEW
     return VERDICT_RANK[report_verdict] >= VERDICT_RANK[threshold]
 
@@ -157,8 +157,6 @@ def _run_audit_spec(args: argparse.Namespace) -> int:
     report = audit_spec(spec=spec, data=data, claim=args.claim)
     selected_output = _render_report(report, args.format)
     if args.out_path:
-        # When the full report is written to disk, keep stdout to a one-line status
-        # summary so CI and agents still get a quick verdict without parsing files.
         _write_report(Path(args.out_path), selected_output)
         print(_summary_line(report))
     else:
@@ -211,6 +209,105 @@ def _run_verify_report(args: argparse.Namespace) -> int:
     return 0 if verification.matches else 1
 
 
+def _format_profile_text(manifest: ProfileManifest) -> str:
+    lines = [
+        f"Profile: {manifest.name}",
+        f"Rules: {len(manifest.rules)}",
+        "Scientific validation: false",
+        "Automatic adjudication: false",
+        "",
+    ]
+    for rule in manifest.rules:
+        lines.extend(
+            [
+                f"{rule.rule_id} [{'/'.join(rule.severities)}]",
+                f"  Applies to: {', '.join(rule.applies_to)}",
+                f"  Trigger: {rule.trigger}",
+                f"  Boundary: {rule.known_boundary}",
+                "",
+            ]
+        )
+    return "\n".join(lines).rstrip()
+
+
+def _run_profile_show(args: argparse.Namespace) -> int:
+    try:
+        manifest = get_profile_manifest(args.profile)
+    except ValueError as exc:
+        raise CLIError(str(exc)) from exc
+    if args.format == "json":
+        print(json.dumps(manifest.to_dict(), indent=2, sort_keys=True))
+    else:
+        print(_format_profile_text(manifest))
+    return 0
+
+
+def _format_profile_diff_text(diff: ProfileDiff) -> str:
+    lines = [
+        f"Profile: {diff.before_profile} -> {diff.after_profile}",
+        f"Semantic profile changed: {'true' if diff.semantic_changed else 'false'}",
+        f"Tool metadata changed: {'true' if diff.tool_metadata_changed else 'false'}",
+        "Compatibility judgment: none",
+        "Profile manifest SHA-256:",
+        f"  - {diff.before_binding['profile_manifest_sha256']}",
+        f"  + {diff.after_binding['profile_manifest_sha256']}",
+        "",
+    ]
+    if diff.profile_changes:
+        lines.append("Profile fields:")
+        for change in diff.profile_changes:
+            lines.append(f"  {change.field}")
+            lines.append(f"    - {json.dumps(change.before, sort_keys=True)}")
+            lines.append(f"    + {json.dumps(change.after, sort_keys=True)}")
+    else:
+        lines.append("Profile fields: none")
+
+    if diff.rules_added:
+        lines.append("Rules added:")
+        for rule in diff.rules_added:
+            lines.append(f"  {rule['id']}")
+    else:
+        lines.append("Rules added: none")
+
+    if diff.rules_removed:
+        lines.append("Rules removed:")
+        for rule in diff.rules_removed:
+            lines.append(f"  {rule['id']}")
+    else:
+        lines.append("Rules removed: none")
+
+    if diff.rules_changed:
+        lines.append("Rules changed:")
+        for rule in diff.rules_changed:
+            lines.append(f"  {rule.rule_id}")
+            for change in rule.changes:
+                lines.append(f"    {change.field}")
+                lines.append(f"      - {json.dumps(change.before, sort_keys=True)}")
+                lines.append(f"      + {json.dumps(change.after, sort_keys=True)}")
+    else:
+        lines.append("Rules changed: none")
+
+    lines.append(f"Rule order changed: {'true' if diff.rule_order_changed else 'false'}")
+    if diff.rule_order_changed:
+        lines.append(f"  - {', '.join(diff.before_rule_order)}")
+        lines.append(f"  + {', '.join(diff.after_rule_order)}")
+    return "\n".join(lines)
+
+
+def _run_profile_diff(args: argparse.Namespace) -> int:
+    try:
+        before = load_profile_manifest(args.before)
+        after = load_profile_manifest(args.after)
+        diff = build_profile_diff(before, after)
+    except (FileNotFoundError, ValueError, TypeError) as exc:
+        raise CLIError(str(exc)) from exc
+    if args.format == "json":
+        print(json.dumps(diff.to_dict(), indent=2, sort_keys=True))
+    else:
+        print(_format_profile_diff_text(diff))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="chart-contract", description="Audit Vega-Lite specs from disk.")
     parser.add_argument(
@@ -260,6 +357,33 @@ def build_parser() -> argparse.ArgumentParser:
     report_parser.add_argument("--data", dest="data_path", help="Optional current CSV or JSON data file.")
     report_parser.add_argument("--claim", help="Current exact claim text.")
     report_parser.set_defaults(func=_run_verify_report)
+
+    profile_parser = subparsers.add_parser(
+        "profile",
+        help="Inspect and compare machine-readable audit profile metadata.",
+    )
+    profile_subparsers = profile_parser.add_subparsers(dest="profile_command", required=True)
+
+    profile_show = profile_subparsers.add_parser(
+        "show",
+        help="Show the machine-readable rule manifest for an audit profile.",
+    )
+    profile_show.add_argument("profile", nargs="?", default=DEFAULT_PROFILE)
+    profile_show_output = profile_show.add_mutually_exclusive_group()
+    profile_show_output.add_argument("--format", choices=("text", "json"), dest="format")
+    profile_show_output.add_argument("--json", action="store_const", const="json", dest="format")
+    profile_show.set_defaults(format="text", func=_run_profile_show)
+
+    profile_diff = profile_subparsers.add_parser(
+        "diff",
+        help="Compare two saved machine-readable audit profile manifests.",
+    )
+    profile_diff.add_argument("before", help="Earlier profile-manifest JSON path.")
+    profile_diff.add_argument("after", help="Later profile-manifest JSON path.")
+    profile_diff_output = profile_diff.add_mutually_exclusive_group()
+    profile_diff_output.add_argument("--format", choices=("text", "json"), dest="format")
+    profile_diff_output.add_argument("--json", action="store_const", const="json", dest="format")
+    profile_diff.set_defaults(format="text", func=_run_profile_diff)
 
     return parser
 

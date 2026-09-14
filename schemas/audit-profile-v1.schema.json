@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tmusser/chart-contract/blob/main/schemas/audit-profile-v1.schema.json",
+  "title": "chart-contract audit profile manifest v1",
+  "description": "Machine-readable metadata for an implemented chart-contract audit ruleset. Conformance is not scientific validation and does not execute an audit.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "type",
+    "tool",
+    "profile",
+    "scientific_validation",
+    "automatic_adjudication",
+    "scope_notice",
+    "not_evaluated",
+    "rule_count",
+    "rules"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "type": {"const": "chart_contract.audit_profile_manifest"},
+    "tool": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "chart-contract"},
+        "version": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "object",
+      "required": ["name", "description"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "scientific_validation": {"const": false},
+    "automatic_adjudication": {"const": false},
+    "scope_notice": {"type": "string", "minLength": 1},
+    "not_evaluated": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "rule_count": {"type": "integer", "minimum": 1},
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/rule"}
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "required": ["id", "applies_to", "severities", "trigger", "known_boundary"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "applies_to": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["chart", "spec"]}
+        },
+        "severities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["PASS", "WARN", "FAIL"]}
+        },
+        "trigger": {"type": "string", "minLength": 1},
+        "known_boundary": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
