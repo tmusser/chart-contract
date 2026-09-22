@@ -72,6 +72,16 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+First-party `Chart` renderers also preserve the exact analytical claim in
+`spec.usermeta.claim`. For those self-contained specs, `--claim` may be omitted and the
+embedded claim becomes the audited/bound claim. If both an embedded claim and `--claim` are
+present, they must match exactly; a mismatch is `BLOCK` via
+`contract.claim.consistency`. External specs without `usermeta.claim` keep the existing
+explicit-`--claim` workflow.
+
+Claim identity is provenance, not proof: matching text does not establish that the claim is
+true or supported.
+
 Representative output:
 
 ```text
