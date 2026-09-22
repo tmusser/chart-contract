@@ -1,5 +1,43 @@
 # VERIFY
 
+2026-09-22 - Preserve exact claim identity in rendered specs
+
+Environment:
+- Branch: `agent/embed-audited-claim`
+- Base: `main` at `e279b87dad8a0a8cb6b62ba2a8085648798134f7`
+- Verification authority: GitHub Actions full matrix and isolated wheel smoke after PR creation
+
+Implemented behavior:
+- first-party Vega-Lite specs preserve the exact chart claim as `usermeta.claim`, independently of display title
+- spec audits use the embedded claim when no explicit claim is supplied
+- `contract.claim.consistency` FAILs when an explicit audit claim conflicts with an embedded claim
+- legacy specs without `usermeta.claim` keep the existing explicit-claim audit behavior with no new consistency finding
+- bound spec reports fingerprint the resolved claim actually audited
+- saved-report verification resolves the embedded claim when no explicit claim is supplied
+- claim metadata is excluded from decorative-term scanning so analytical prose cannot create chart-decoration warnings
+
+Deterministic boundary:
+- claim consistency is exact text identity after trimming outer whitespace; no semantic/NLP equivalence is attempted
+- matching claim identity does not establish that the claim is true or supported
+- no chart intent, renderer family, statistical threshold, scale policy, or READY / REVIEW / BLOCK mapping changes
+
+Focused regression coverage:
+- rendered claim survives a custom title
+- embedded-only spec audits can reach READY
+- conflicting embedded/explicit claims BLOCK
+- saved embedded-claim reports verify without separately re-supplying the claim
+- legacy explicit-only specs do not gain a consistency finding
+- claim prose is not scanned as chart decoration
+- machine-readable audit profile parity includes the new rule
+
+Remaining risks:
+- arbitrary external Vega-Lite specs are not required to embed a claim; explicit `--claim` remains supported
+- exact string identity intentionally does not judge paraphrase equivalence
+- generated historical proof specs are not bulk-regenerated in this slice to avoid unrelated Altair-version formatting churn
+
+Next safest task:
+- Open the PR, run the full Python 3.10-3.13 matrix plus isolated wheel smoke, and record any failures before merge.
+
 2026-07-12 - Harden diagnostic claim audits
 
 Environment:
