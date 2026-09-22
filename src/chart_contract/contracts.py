@@ -111,6 +111,7 @@ def find_decorative_terms(payload: Any) -> list[str]:
     ignored_value_keys = {
         "causal_evidence",
         "caveat",
+        "claim",
         "data",
         "datasets",
         "filters",
@@ -141,6 +142,20 @@ def find_decorative_terms(payload: Any) -> list[str]:
 
     visit(payload)
     return sorted(found)
+
+
+def declared_claim_from_spec(spec: Mapping[str, Any]) -> str | None:
+    usermeta = spec.get("usermeta", {})
+    if isinstance(usermeta, Mapping):
+        claim = usermeta.get("claim")
+        if isinstance(claim, str) and claim.strip():
+            return claim.strip()
+    return None
+
+
+def resolve_spec_claim(spec: Mapping[str, Any], claim: str | None) -> str:
+    explicit = (claim or "").strip()
+    return explicit or declared_claim_from_spec(spec) or ""
 
 
 def declared_unit_from_spec(spec: Mapping[str, Any]) -> str | None:
