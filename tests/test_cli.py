@@ -81,6 +81,72 @@ def test_json_output_is_valid(capsys: pytest.CaptureFixture[str]) -> None:
     assert "contract.claim.present" in {finding["rule_id"] for finding in payload["findings"]}
 
 
+def test_cli_uses_embedded_claim_when_flag_is_omitted(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    spec = json.loads((FIXTURES / "ready_chart.vl.json").read_text(encoding="utf-8"))
+    claim = "Enterprise and SMB segments differ in conversion rate."
+    spec.setdefault("usermeta", {})["claim"] = claim
+    spec_path = tmp_path / "embedded-claim.vl.json"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    exit_code, stdout, stderr = invoke(
+        [
+            "audit",
+            "spec",
+            str(spec_path),
+            "--data",
+            str(FIXTURES / "segments.csv"),
+            "--format",
+            "json",
+        ],
+        capsys,
+    )
+
+    payload = json.loads(stdout)
+    severities = {
+        finding["rule_id"]: finding["severity"]
+        for finding in payload["findings"]
+    }
+
+    assert exit_code == 0
+    assert stderr == ""
+    assert payload["verdict"] == "READY"
+    assert severities["contract.claim.present"] == "PASS"
+    assert severities["contract.claim.consistency"] == "PASS"
+
+
+def test_cli_blocks_when_flag_conflicts_with_embedded_claim(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    spec = json.loads((FIXTURES / "ready_chart.vl.json").read_text(encoding="utf-8"))
+    spec.setdefault("usermeta", {})["claim"] = (
+        "Enterprise and SMB segments differ in conversion rate."
+    )
+    spec_path = tmp_path / "conflicting-claim.vl.json"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    exit_code, stdout, stderr = invoke(
+        [
+            "audit",
+            "spec",
+            str(spec_path),
+            "--data",
+            str(FIXTURES / "segments.csv"),
+            "--claim",
+            "Enterprise and SMB segments have identical conversion rate.",
+        ],
+        capsys,
+    )
+
+    assert exit_code == 1
+    assert stderr == ""
+    assert "Verdict: BLOCK" in stdout
+    assert "FAIL contract.claim.consistency" in stdout
+
+
 def test_out_and_markdown_write_files(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     out_path = tmp_path / "report.json"
     markdown_path = tmp_path / "report.md"
