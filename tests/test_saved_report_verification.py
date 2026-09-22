@@ -73,6 +73,38 @@ def test_cli_verifies_saved_report_against_exact_inputs(tmp_path: Path, capsys) 
     assert "Claim: MATCH" in output
 
 
+def test_cli_verifies_embedded_claim_report_without_claim_flag(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    spec_path, data_path, claim = _write_inputs(tmp_path)
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec.setdefault("usermeta", {})["claim"] = claim
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    data = pd.read_csv(data_path)
+    report = audit_spec(spec=spec, data=data)
+    report_path = tmp_path / "embedded-claim-audit.json"
+    report_path.write_text(json.dumps(report.to_dict(), indent=2), encoding="utf-8")
+
+    code = main(
+        [
+            "verify",
+            "report",
+            str(report_path),
+            "--spec",
+            str(spec_path),
+            "--data",
+            str(data_path),
+        ]
+    )
+
+    assert code == 0
+    output = capsys.readouterr().out
+    assert "Binding: MATCH" in output
+    assert "Claim: MATCH" in output
+
+
 def test_cli_reports_spec_drift_without_blurring_other_components(
     tmp_path: Path, capsys
 ) -> None:
