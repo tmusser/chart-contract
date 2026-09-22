@@ -8,6 +8,59 @@ from chart_contract import Chart, audit_spec
 TRAPS = Path(__file__).resolve().parent.parent / "examples" / "traps"
 
 
+def test_embedded_claim_can_drive_spec_audit() -> None:
+    df = pd.DataFrame({"week": ["W1", "W2"], "conversion": [0.41, 0.43]})
+    spec = {
+        "mark": "line",
+        "title": "Conversion trend",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "conversion", "type": "quantitative"},
+        },
+        "usermeta": {
+            "claim": "Conversion increased from W1 to W2.",
+            "source": "synthetic.conversion",
+            "unit": "rate",
+        },
+    }
+
+    report = audit_spec(spec=spec, data=df)
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert report.verdict == "READY"
+    assert severities["contract.claim.present"] == "PASS"
+    assert severities["contract.claim.consistency"] == "PASS"
+    assert report.matches_spec(spec=spec, data=df, claim=None)
+
+
+def test_conflicting_embedded_and_explicit_claim_blocks() -> None:
+    df = pd.DataFrame({"week": ["W1", "W2"], "conversion": [0.41, 0.43]})
+    spec = {
+        "mark": "line",
+        "title": "Conversion trend",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "conversion", "type": "quantitative"},
+        },
+        "usermeta": {
+            "claim": "Conversion increased from W1 to W2.",
+            "source": "synthetic.conversion",
+            "unit": "rate",
+        },
+    }
+
+    report = audit_spec(
+        spec=spec,
+        data=df,
+        claim="Conversion decreased from W1 to W2.",
+    )
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert report.verdict == "BLOCK"
+    assert severities["contract.claim.present"] == "PASS"
+    assert severities["contract.claim.consistency"] == "FAIL"
+
+
 def test_bar_chart_nonzero_baseline_fails() -> None:
     spec = {
         "mark": "bar",
