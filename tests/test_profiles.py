@@ -35,7 +35,7 @@ def test_profile_manifest_covers_documented_rule_reference_in_order() -> None:
     manifest_ids = [rule.rule_id for rule in manifest.rules]
     documented_ids = _documented_rule_ids()
 
-    assert len(manifest_ids) == 43
+    assert len(manifest_ids) == 44
     assert len(manifest_ids) == len(set(manifest_ids))
     assert manifest_ids == documented_ids
 
