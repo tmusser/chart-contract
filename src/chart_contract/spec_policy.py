@@ -9,6 +9,7 @@ from typing import Any
 import pandas as pd
 
 from .audit import FAIL, PASS, AuditReport, audit_spec as _base_audit_spec
+from .contracts import resolve_spec_claim
 from .input_binding import BoundAuditReport, bind_spec_report
 
 SCALE_OVERRIDE_KEYS = {"domain", "domainMin", "domainMax", "domainRaw"}
@@ -23,9 +24,10 @@ def audit_spec(
 ) -> BoundAuditReport:
     """Audit a spec and bind the verdict to the exact audited inputs."""
 
+    resolved_claim = resolve_spec_claim(spec, claim)
     report = _base_audit_spec(spec=spec, data=data, claim=claim)
     _audit_visual_default_consent(report, spec)
-    return bind_spec_report(report, spec=spec, data=data, claim=claim)
+    return bind_spec_report(report, spec=spec, data=data, claim=resolved_claim)
 
 
 def _audit_visual_default_consent(report: AuditReport, spec: Mapping[str, Any]) -> None:
