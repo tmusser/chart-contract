@@ -5,7 +5,12 @@
 Environment:
 - Branch: `agent/embed-audited-claim`
 - Base: `main` at `e279b87dad8a0a8cb6b62ba2a8085648798134f7`
-- Verification authority: GitHub Actions full matrix and isolated wheel smoke after PR creation
+- Pull request: #12 (`feat: preserve exact claim identity in rendered specs`)
+- GitHub Actions CI run #196 (`35791682346`) -> PASSED
+- Python 3.10, 3.11, 3.12, 3.13 test lanes -> PASSED
+- legacy CLI version/verdict smoke paths -> PASSED on every Python lane
+- statistical diagnostic trap checks -> PASSED on every Python lane
+- isolated wheel build/install and installed CLI/report-shape smoke -> PASSED
 
 Implemented behavior:
 - first-party Vega-Lite specs preserve the exact chart claim as `usermeta.claim`, independently of display title
@@ -35,8 +40,13 @@ Remaining risks:
 - exact string identity intentionally does not judge paraphrase equivalence
 - generated historical proof specs are not bulk-regenerated in this slice to avoid unrelated Altair-version formatting churn
 
+CI note:
+- The first PR run exposed only three stale test expectations: two hard-coded 43-rule profile counts and one pre-claim `usermeta` equality assertion.
+- Those expectations were updated to the intentional 44-rule/profile metadata contract; no production logic changed in response.
+- The corrected run then passed in full.
+
 Next safest task:
-- Open the PR, run the full Python 3.10-3.13 matrix plus isolated wheel smoke, and record any failures before merge.
+- Review PR #12 for the exact-identity boundary and merge if acceptable; keep percent-unit versus decimal-scale policy as a separate follow-up.
 
 2026-07-12 - Harden diagnostic claim audits
 
