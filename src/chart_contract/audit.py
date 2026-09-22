@@ -10,6 +10,7 @@ import pandas as pd
 
 from .contracts import (
     declared_caveat_from_spec,
+    declared_claim_from_spec,
     declared_evidence_from_spec,
     declared_source_from_spec,
     declared_unit_from_spec,
@@ -389,7 +390,9 @@ def audit_spec(
     unit = declared_unit_from_spec(spec)
     caveat = declared_caveat_from_spec(spec)
     evidence_flag = declared_evidence_from_spec(spec)
-    resolved_claim = (claim or "").strip()
+    explicit_claim = (claim or "").strip()
+    embedded_claim = declared_claim_from_spec(spec)
+    resolved_claim = explicit_claim or embedded_claim or ""
     resolved_data = _coerce_records(spec, data)
     resolved_frame = pd.DataFrame(resolved_data) if resolved_data is not None else None
 
@@ -400,9 +403,28 @@ def audit_spec(
             "contract.claim.present",
             FAIL,
             "Spec audit needs a claim to evaluate support and caveats.",
-            suggestion="Pass claim=... when calling audit_spec().",
+            suggestion="Pass claim=... or embed spec['usermeta']['claim'].",
             field="claim",
         )
+
+    if embedded_claim:
+        if explicit_claim and explicit_claim != embedded_claim:
+            report.add(
+                "contract.claim.consistency",
+                FAIL,
+                "Explicit audit claim conflicts with spec usermeta.claim.",
+                suggestion=(
+                    "Audit the exact claim embedded in the chart artifact, or update the "
+                    "artifact so both claim sources are identical."
+                ),
+                field="usermeta.claim",
+            )
+        else:
+            report.add(
+                "contract.claim.consistency",
+                PASS,
+                "Embedded claim matches the audited claim source.",
+            )
 
     if source:
         report.add("contract.source.present", PASS, "Source is declared in spec user metadata.")
