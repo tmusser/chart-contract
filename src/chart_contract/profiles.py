@@ -114,6 +114,7 @@ AUDIT_V0_2 = ProfileManifest(
     ),
     rules=(
         _r("contract.claim.present", ("chart", "spec"), ("PASS", "FAIL"), "A chart/spec must declare an analytical claim.", "Claim presence does not establish that the claim is supported or true."),
+        _r("contract.claim.consistency", ("spec",), ("PASS", "FAIL"), "When a spec embeds usermeta.claim, any separately supplied audit claim must match it exactly.", "Exact claim identity prevents claim swapping but does not establish that the claim is supported or true."),
         _r("contract.source.present", ("chart", "spec"), ("PASS", "WARN"), "Source/provenance metadata should be declared.", "A declared source is not independently verified."),
         _r("data.y.column", ("chart",), ("FAIL",), "The declared y field is missing from chart data.", "Column presence does not establish measurement validity."),
         _r("data.y.numeric", ("chart",), ("PASS", "FAIL"), "The declared y field must be numeric for quantitative chart intents.", "Numeric type does not establish that the metric is meaningful or correctly computed."),
