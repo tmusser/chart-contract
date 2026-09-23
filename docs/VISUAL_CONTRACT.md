@@ -71,6 +71,29 @@ Why this is strong:
 - The caveat prevents readers from treating circle area as quantitative.
 - The intent is limited to two sets rather than pretending many-set circles stay readable.
 
+### Good Process Tree Contract
+
+```yaml
+claim: Requests move from intake through review to revision or approval.
+node: step_id
+parent: parent_id
+label: step
+branch: branch
+source: workflow.request_approval
+caveats:
+  - Schematic layout; spacing and box area are not quantitative.
+visual_intent: process_tree
+chart_type: rooted_flowchart
+```
+
+Why this is strong:
+
+- Node identity and parent relationships are explicit.
+- Exactly one root defines the entry point.
+- Branch labels preserve decision semantics without inferring them from geometry.
+- The schematic caveat prevents spacing or box size from being read quantitatively.
+- The intent stays within a rooted tree rather than pretending to support arbitrary process graphs.
+
 ### Weak Contract
 
 ```yaml
@@ -107,6 +130,7 @@ Why this is weak:
 - `ecdf` -> step line
 - `residual` -> points plus zero reference line
 - `set_membership` -> labeled, schematic two-set Venn-style view
+- `process_tree` -> top-down rooted process/decision tree with directed connectors
 
 ## Audit Categories
 
