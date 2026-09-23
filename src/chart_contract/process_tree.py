@@ -46,8 +46,10 @@ def process_tree_summary(
         raise ValueError("Process tree requires at least one node.")
 
     node_values = data[node].tolist()
-    if data[node].isna().any():
-        raise ValueError("Process-tree node identifiers must be non-null.")
+    if data[node].isna().any() or any(
+        isinstance(value, str) and not value.strip() for value in node_values
+    ):
+        raise ValueError("Process-tree node identifiers must be non-null and non-empty.")
     if data[node].duplicated().any():
         raise ValueError("Process-tree node identifiers must be unique.")
 
