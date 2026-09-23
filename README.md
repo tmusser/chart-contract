@@ -203,6 +203,7 @@ Supported Python API front-door intents:
 - `Chart.ecdf()`
 - `Chart.residual()`
 - `Chart.set_membership()`
+- `Chart.process_tree()`
 - experimental `audit_spec()`
 
 ## Scope and Non-Goals
@@ -308,6 +309,44 @@ chart = Chart.set_membership(
 The renderer supports partial overlap, disjoint, subset, and equal-set relationships. Circle geometry is schematic; labeled A-only, overlap, B-only, and neither counts are authoritative and are preserved in `usermeta`.
 
 Run `python examples/set_membership.py` to write [the generated Vega-Lite proof artifact](examples/output/set_membership_chart.vl.json). See [the set membership contract](docs/SET_MEMBERSHIP.md) for the evidence shape, audit rules, and intentional two-set boundary.
+
+## Process Tree / Flowchart
+
+Use `Chart.process_tree()` for a rooted decision tree or process map: one entry node,
+directed parent-child steps, and optional branch labels such as `Yes` / `No`.
+
+```python
+frame = pd.DataFrame(
+    {
+        "step_id": ["start", "review", "approve", "revise"],
+        "parent_id": [None, "start", "review", "review"],
+        "step": ["Request received", "Review request", "Approve", "Revise"],
+        "branch": [None, None, "Yes", "No"],
+    }
+)
+
+chart = Chart.process_tree(
+    data=frame,
+    node="step_id",
+    parent="parent_id",
+    label="step",
+    branch="branch",
+    claim="Requests move from intake through review to revision or approval.",
+    source="workflow.request_approval",
+    title="Request approval flow",
+)
+```
+
+The renderer uses a deterministic top-down layout with boxed nodes, elbow connectors,
+directional arrowheads, and optional branch labels. Sibling order follows input row order.
+
+The audit blocks duplicate/null node IDs, blank labels, multiple roots, dangling parent
+references, and cycles before rendering. Geometry is schematic: box size and spacing do not
+encode duration, probability, importance, or volume.
+
+Run `python examples/process_tree.py` to write `examples/output/process_tree.vl.json`.
+See [the process-tree contract](docs/PROCESS_TREE.md) for the evidence shape and intentional
+rooted-tree boundary.
 
 ## Companion Artifact
 
