@@ -35,7 +35,7 @@ def main() -> None:
         parent="parent_id",
         label="step",
         branch="branch",
-        claim="Requests move from intake through review to revision or approval.",
+        claim="Requests follow intake, review, and then revision or approval.",
         source="synthetic.request_approval",
         title="Request approval flow",
     )
