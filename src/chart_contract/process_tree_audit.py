@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import pandas as pd
+
 from .audit import FAIL, PASS, WARN, AuditReport
 from .contracts import (
     find_decorative_terms,
@@ -283,6 +285,6 @@ def _is_root_parent(value: Any) -> bool:
     if isinstance(value, str):
         return not value.strip()
     try:
-        return bool(__import__("pandas").isna(value))
+        return bool(pd.isna(value))
     except (TypeError, ValueError):
         return False
