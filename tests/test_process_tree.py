@@ -123,6 +123,24 @@ def test_process_tree_blocks_duplicate_nodes() -> None:
     assert _severities(report)["data.process_tree.node_unique"] == "FAIL"
 
 
+def test_process_tree_blocks_blank_node_id() -> None:
+    frame = _frame()
+    frame.loc[4, "step_id"] = " "
+
+    report = Chart.process_tree(
+        data=frame,
+        node="step_id",
+        parent="parent_id",
+        label="step",
+        claim="Documented approval flow.",
+        source="synthetic.approval_process",
+        title="Request approval flow",
+    ).audit()
+
+    assert report.verdict == "BLOCK"
+    assert _severities(report)["data.process_tree.node_unique"] == "FAIL"
+
+
 def test_process_tree_blocks_unknown_parent() -> None:
     frame = _frame()
     frame.loc[4, "parent_id"] = "missing"
