@@ -6,7 +6,12 @@ Environment:
 - Branch: `agent/add-process-tree`
 - Base: `main` at `6e179e2eaa70256c41e05580669964353543afc0`
 - Local GitHub checkout attempt -> BLOCKED by environment DNS; no local/browser rendering claim is made
-- Authoritative verification gate: GitHub Actions full Python matrix plus isolated wheel smoke after PR creation
+- Pull request: #13 (`feat: add audited process-tree flowcharts`)
+- GitHub Actions CI run #199 (`35879021178`) -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- legacy CLI version/verdict smoke paths -> PASSED on every Python lane
+- statistical diagnostic trap checks -> PASSED on every Python lane
+- isolated wheel build/install and installed CLI/report-shape smoke -> PASSED
 
 Implemented behavior:
 - `Chart.process_tree()` accepts one row per node with declared node, parent, label, and optional branch columns
@@ -33,8 +38,14 @@ Remaining risks:
 - long labels and very wide trees can still pressure a fixed-size static chart; this slice does not add automatic text wrapping or a general layout engine
 - rooted trees intentionally reject loops, multi-parent nodes, cross-links, and swimlanes
 
+CI note:
+- The first PR run passed without production or test fixes.
+- Altair/Vega-Lite spec generation for the layered process-tree renderer passed the full repository suite.
+- Browser-level pixel inspection remains unverified in this environment.
+
 Next safest task:
-- Open the PR, run the full CI matrix, inspect any Altair schema failures, and keep general graph support out of this slice.
+- Review PR #13 and merge if the rooted-tree boundary and visual contract are acceptable.
+- Keep loops, DAGs, swimlanes, and general graph layout as separate future work rather than broadening this intent.
 
 2026-09-22 - Preserve exact claim identity in rendered specs
 
