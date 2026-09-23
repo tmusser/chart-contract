@@ -421,7 +421,7 @@ def _render_process_tree(chart: Any) -> alt.Chart:
 
     connectors = (
         alt.Chart(alt.InlineData(values=connector_records))
-        .mark_line(strokeWidth=1.5)
+        .mark_line(strokeWidth=1.5, color="#6b7280")
         .encode(
             x=alt.X("x:Q", scale=x_scale, axis=None),
             y=alt.Y("y:Q", scale=y_scale, axis=None),
@@ -431,16 +431,15 @@ def _render_process_tree(chart: Any) -> alt.Chart:
     )
     arrows = (
         alt.Chart(alt.InlineData(values=arrow_records))
-        .mark_point(shape="triangle-down", filled=True, size=85)
+        .mark_point(shape="triangle-down", filled=True, size=85, color="#6b7280")
         .encode(
             x=alt.X("x:Q", scale=x_scale, axis=None),
             y=alt.Y("y:Q", scale=y_scale, axis=None),
-            tooltip=alt.value(None),
         )
     )
     boxes = (
         alt.Chart(alt.InlineData(values=node_records))
-        .mark_rect(cornerRadius=8, strokeWidth=1.5)
+        .mark_rect(cornerRadius=8, strokeWidth=1.5, fill="#f8fafc", stroke="#475569")
         .encode(
             x=alt.X("x1:Q", scale=x_scale, axis=None),
             x2=alt.X2("x2:Q"),
@@ -454,7 +453,7 @@ def _render_process_tree(chart: Any) -> alt.Chart:
     )
     labels = (
         alt.Chart(alt.InlineData(values=node_records))
-        .mark_text(fontSize=13, fontWeight="bold", limit=170)
+        .mark_text(fontSize=13, fontWeight="bold", limit=170, color="#0f172a")
         .encode(
             x=alt.X("x:Q", scale=x_scale, axis=None),
             y=alt.Y("y:Q", scale=y_scale, axis=None),
@@ -466,7 +465,7 @@ def _render_process_tree(chart: Any) -> alt.Chart:
     if branch_records:
         branches = (
             alt.Chart(alt.InlineData(values=branch_records))
-            .mark_text(fontSize=11, dy=-7)
+            .mark_text(fontSize=11, dy=-7, color="#475569")
             .encode(
                 x=alt.X("x:Q", scale=x_scale, axis=None),
                 y=alt.Y("y:Q", scale=y_scale, axis=None),
