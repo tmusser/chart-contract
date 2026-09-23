@@ -331,7 +331,7 @@ chart = Chart.process_tree(
     parent="parent_id",
     label="step",
     branch="branch",
-    claim="Requests move from intake through review to revision or approval.",
+    claim="Requests follow intake, review, and then revision or approval.",
     source="workflow.request_approval",
     title="Request approval flow",
 )
