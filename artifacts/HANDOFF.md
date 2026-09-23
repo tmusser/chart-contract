@@ -50,6 +50,6 @@ A local clone/render attempt could not run because this environment cannot resol
 
 ## Next Recommended Task
 
-- Open the PR and let CI validate Altair/Vega-Lite schema compatibility across Python 3.10-3.13.
-- If green, inspect the final diff for accidental broadening into general graph semantics.
+- Review PR #13; CI is green across Python 3.10-3.13 and the isolated wheel smoke.
+- Inspect the final diff for accidental broadening into general graph semantics before merge.
 - Keep any future DAG/loop/swimlane work as a separate intent or separate tool rather than weakening the rooted-tree contract.
