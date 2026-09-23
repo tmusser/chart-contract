@@ -74,7 +74,7 @@ Why this is strong:
 ### Good Process Tree Contract
 
 ```yaml
-claim: Requests move from intake through review to revision or approval.
+claim: Requests follow intake, review, and then revision or approval.
 node: step_id
 parent: parent_id
 label: step
