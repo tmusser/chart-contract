@@ -16,7 +16,7 @@ def test_cli_profile_show_json(capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["type"] == "chart_contract.audit_profile_manifest"
     assert payload["profile"]["name"] == "audit-v0.2"
-    assert payload["rule_count"] == 44
+    assert payload["rule_count"] == 51
     assert payload["scientific_validation"] is False
     assert payload["automatic_adjudication"] is False
 
@@ -27,7 +27,7 @@ def test_cli_profile_show_text_preserves_boundary(capsys) -> None:
     assert code == 0
     output = capsys.readouterr().out
     assert "Profile: audit-v0.2" in output
-    assert "Rules: 44" in output
+    assert "Rules: 51" in output
     assert "Scientific validation: false" in output
     assert "Automatic adjudication: false" in output
     assert "claim.causal_support" in output

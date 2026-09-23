@@ -8,6 +8,7 @@ import altair as alt
 import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series
+from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..set_membership import membership_summary, venn_layout_records
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
@@ -31,7 +32,7 @@ def render_chart(chart: Any) -> alt.Chart:
         subtitle.append(f"Filters: {chart.filters}")
 
     usermeta = dict(chart.metadata or {})
-    if chart.intent in {"qq", "ecdf", "residual", "set_membership"}:
+    if chart.intent in {"qq", "ecdf", "residual", "set_membership", "process_tree"}:
         usermeta.setdefault("chart_contract_intent", chart.intent)
     if chart.intent == "qq":
         usermeta.setdefault("qq_reference_distribution", chart.distribution)
@@ -47,6 +48,24 @@ def render_chart(chart: Any) -> alt.Chart:
             "area_semantics": "schematic; labeled region counts are authoritative",
             "region_counts": summary.to_dict(),
         }
+    process_summary = None
+    if chart.intent == "process_tree":
+        process_summary = process_tree_summary(
+            chart.data,
+            node=chart.node,
+            parent=chart.parent,
+            label=chart.label,
+            branch=chart.branch,
+        )
+        usermeta["chart_contract_intent"] = chart.intent
+        usermeta["process_tree"] = {
+            "node": chart.node,
+            "parent": chart.parent,
+            "label": chart.label,
+            "branch": chart.branch,
+            "layout": "deterministic top-down rooted tree; sibling order follows input row order",
+            **process_summary.to_dict(),
+        }
     for key, value in {
         "claim": chart.claim,
         "source": chart.source,
@@ -57,8 +76,12 @@ def render_chart(chart: Any) -> alt.Chart:
         if value not in (None, ""):
             usermeta[key] = value
     properties: dict[str, Any] = {
-        "width": 640,
-        "height": 360,
+        "width": 760 if chart.intent == "process_tree" else 640,
+        "height": (
+            max(360, 120 * (process_summary.max_depth + 1))
+            if process_summary is not None
+            else 360
+        ),
         "title": {
             "text": chart.title or chart.claim or "Chart",
             "subtitle": subtitle,
@@ -86,6 +109,8 @@ def render_chart(chart: Any) -> alt.Chart:
         rendered = _render_residual(chart, records)
     elif chart.intent == "set_membership":
         rendered = _render_set_membership(chart)
+    elif chart.intent == "process_tree":
+        rendered = _render_process_tree(chart)
     else:
         raise ValueError(f"Unsupported chart intent: {chart.intent}")
 
@@ -378,6 +403,77 @@ def _render_set_membership(chart: Any) -> alt.Chart:
         .encode(x=x_encoding, y=y_encoding, text=alt.Text("label:N"))
     )
     return circles + regions + notes
+
+
+def _render_process_tree(chart: Any) -> alt.Chart:
+    if not chart.node or not chart.parent or not chart.label:
+        raise ValueError("Process-tree charts require node, parent, and label fields.")
+
+    node_records, connector_records, arrow_records, branch_records = process_tree_layout_records(
+        chart.data,
+        node=chart.node,
+        parent=chart.parent,
+        label=chart.label,
+        branch=chart.branch,
+    )
+    x_scale = alt.Scale(domain=[0, 100])
+    y_scale = alt.Scale(domain=[0, 100], reverse=True)
+
+    connectors = (
+        alt.Chart(alt.InlineData(values=connector_records))
+        .mark_line(strokeWidth=1.5, color="#6b7280")
+        .encode(
+            x=alt.X("x:Q", scale=x_scale, axis=None),
+            y=alt.Y("y:Q", scale=y_scale, axis=None),
+            detail=alt.Detail("edge_id:N"),
+            order=alt.Order("order:Q"),
+        )
+    )
+    arrows = (
+        alt.Chart(alt.InlineData(values=arrow_records))
+        .mark_point(shape="triangle-down", filled=True, size=85, color="#6b7280")
+        .encode(
+            x=alt.X("x:Q", scale=x_scale, axis=None),
+            y=alt.Y("y:Q", scale=y_scale, axis=None),
+        )
+    )
+    boxes = (
+        alt.Chart(alt.InlineData(values=node_records))
+        .mark_rect(cornerRadius=8, strokeWidth=1.5, fill="#f8fafc", stroke="#475569")
+        .encode(
+            x=alt.X("x1:Q", scale=x_scale, axis=None),
+            x2=alt.X2("x2:Q"),
+            y=alt.Y("y1:Q", scale=y_scale, axis=None),
+            y2=alt.Y2("y2:Q"),
+            tooltip=[
+                alt.Tooltip("node_id:N", title="Node"),
+                alt.Tooltip("label:N", title="Step"),
+            ],
+        )
+    )
+    labels = (
+        alt.Chart(alt.InlineData(values=node_records))
+        .mark_text(fontSize=13, fontWeight="bold", limit=170, color="#0f172a")
+        .encode(
+            x=alt.X("x:Q", scale=x_scale, axis=None),
+            y=alt.Y("y:Q", scale=y_scale, axis=None),
+            text=alt.Text("label:N"),
+        )
+    )
+    rendered = connectors + arrows + boxes + labels
+
+    if branch_records:
+        branches = (
+            alt.Chart(alt.InlineData(values=branch_records))
+            .mark_text(fontSize=11, dy=-7, color="#475569")
+            .encode(
+                x=alt.X("x:Q", scale=x_scale, axis=None),
+                y=alt.Y("y:Q", scale=y_scale, axis=None),
+                text=alt.Text("label:N"),
+            )
+        )
+        rendered = rendered + branches
+    return rendered
 
 
 def _metric_title(field_name: str | None, unit: str | None) -> str:

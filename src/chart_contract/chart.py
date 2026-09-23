@@ -35,6 +35,10 @@ class Chart:
     set_b: str | None = None
     set_a_label: str | None = None
     set_b_label: str | None = None
+    node: str | None = None
+    parent: str | None = None
+    label: str | None = None
+    branch: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -354,8 +358,45 @@ class Chart:
             metadata=metadata,
         )
 
+    @classmethod
+    def process_tree(
+        cls,
+        *,
+        data: pd.DataFrame,
+        node: str,
+        parent: str,
+        label: str,
+        claim: str,
+        branch: str | None = None,
+        source: str | None = None,
+        title: str | None = None,
+        caveat: str | None = None,
+        filters: Mapping[str, Any] | str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> "Chart":
+        """Build an audited rooted process/decision tree from one row per node."""
+
+        return cls(
+            intent="process_tree",
+            data=data,
+            node=node,
+            parent=parent,
+            label=label,
+            branch=branch,
+            claim=claim,
+            source=source,
+            title=title,
+            caveat=caveat,
+            filters=filters,
+            metadata=metadata,
+        )
+
     def audit(self) -> AuditReport:
-        if self.intent == "set_membership":
+        if self.intent == "process_tree":
+            from .process_tree_audit import audit_process_tree_chart
+
+            report = audit_process_tree_chart(self)
+        elif self.intent == "set_membership":
             from .set_membership_audit import audit_set_membership_chart
 
             report = audit_set_membership_chart(self)

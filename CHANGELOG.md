@@ -4,12 +4,16 @@
 
 ### Added
 
+- First-class `Chart.process_tree()` support for rooted decision/process trees using one row per node, directed parent references, readable labels, and optional branch labels.
+- Deterministic top-down process-tree rendering with elbow connectors, arrowheads, boxed nodes, and structural metadata for root/node/edge/depth identity.
+- Process-tree audit rules for required columns, unique node IDs, labels, a single root, valid parent references, acyclicity, and first-party structural rendering.
+- A runnable `examples/process_tree.py` artifact and dedicated rooted-tree contract guidance.
 - First-party Vega-Lite output now preserves the exact analytical claim as `usermeta.claim`, independent of display title, so rendered artifacts remain attached to the claim they were created to support.
 - `contract.claim.consistency` blocks spec audits when an explicit audit claim conflicts with an embedded `usermeta.claim`; embedded-only specs can be audited and re-verified without separately re-supplying the claim.
 - Machine-readable `audit-v0.2` profile inspection via `chart-contract profile show`, covering the documented audit rule IDs, applicable audit surfaces, allowed severities, triggers, and known boundaries.
 - Deterministic `audit-profile-semantics-v1` SHA-256 identities that exclude top-level tool/package metadata so version-only changes do not masquerade as audit-policy drift.
 - `chart-contract profile diff <before.json> <after.json>` for mechanical profile/rule/order/tool drift with no automatic compatibility judgment.
-- Published audit-profile and profile-diff schemas plus regression coverage for 44-rule reference parity, semantic binding drift, and CLI inspection.
+- Published audit-profile and profile-diff schemas plus regression coverage for 51-rule reference parity, semantic binding drift, and CLI inspection.
 - CLI verification for saved bound JSON audit reports via `chart-contract verify report`, with component-level spec, data, and claim drift output.
 - Serialized binding self-checks that reject malformed hashes and bundle hashes inconsistent with their recorded components before live-input comparison.
 - Deterministic SHA-256 input bindings for public spec audits and first-party chart audit reports, covering the audited subject, explicit data, claim, and installed package version.

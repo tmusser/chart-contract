@@ -1,5 +1,52 @@
 # VERIFY
 
+2026-09-23 - Add rooted process-tree flowcharts
+
+Environment:
+- Branch: `agent/add-process-tree`
+- Base: `main` at `6e179e2eaa70256c41e05580669964353543afc0`
+- Local GitHub checkout attempt -> BLOCKED by environment DNS; no local/browser rendering claim is made
+- Pull request: #13 (`feat: add audited process-tree flowcharts`)
+- GitHub Actions CI run #199 (`35879021178`) -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- legacy CLI version/verdict smoke paths -> PASSED on every Python lane
+- statistical diagnostic trap checks -> PASSED on every Python lane
+- isolated wheel build/install and installed CLI/report-shape smoke -> PASSED
+
+Implemented behavior:
+- `Chart.process_tree()` accepts one row per node with declared node, parent, label, and optional branch columns
+- deterministic validation requires unique non-null node IDs, non-empty labels, exactly one root, existing parent references, and an acyclic rooted structure
+- deterministic top-down layout preserves sibling input order and renders elbow connectors, arrowheads, boxed nodes, and optional branch labels
+- generated specs preserve `chart_contract_intent=process_tree` plus structural metadata for column roles, root, node count, edge count, maximum depth, and layout convention
+- process-tree audit remains a rooted-tree contract rather than a general graph/flowchart engine
+- machine-readable audit profile/documentation parity expands from 44 to 51 rules
+
+Focused regression coverage:
+- root/node/edge/depth structural summary
+- top-down node depth and sibling order
+- layered renderer mark contract and structural metadata
+- valid tree -> READY
+- duplicate node -> BLOCK
+- unknown parent -> BLOCK
+- multiple roots -> BLOCK
+- cycle -> BLOCK
+- structurally invalid tree refuses to render
+- example execution writes a process-tree Vega-Lite spec
+
+Remaining risks:
+- visual appearance is exercised through Vega-Lite/Altair spec generation but has not been browser-inspected in this environment
+- long labels and very wide trees can still pressure a fixed-size static chart; this slice does not add automatic text wrapping or a general layout engine
+- rooted trees intentionally reject loops, multi-parent nodes, cross-links, and swimlanes
+
+CI note:
+- The first PR run passed without production or test fixes.
+- Altair/Vega-Lite spec generation for the layered process-tree renderer passed the full repository suite.
+- Browser-level pixel inspection remains unverified in this environment.
+
+Next safest task:
+- Review PR #13 and merge if the rooted-tree boundary and visual contract are acceptable.
+- Keep loops, DAGs, swimlanes, and general graph layout as separate future work rather than broadening this intent.
+
 2026-09-22 - Preserve exact claim identity in rendered specs
 
 Environment:
