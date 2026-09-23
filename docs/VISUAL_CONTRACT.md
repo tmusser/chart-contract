@@ -4,6 +4,11 @@
 
 A chart should declare:
 
+For first-party rendered Vega-Lite artifacts, the exact analytical claim is preserved as
+`usermeta.claim` even when the display title differs. This keeps the durable chart artifact
+attached to the claim it was built to support. The metadata records identity only; it does not
+establish that the claim is true.
+
 - claim
 - metric or membership evidence
 - grain or universe member

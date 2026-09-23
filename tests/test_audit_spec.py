@@ -8,6 +8,59 @@ from chart_contract import Chart, audit_spec
 TRAPS = Path(__file__).resolve().parent.parent / "examples" / "traps"
 
 
+def test_embedded_claim_can_drive_spec_audit() -> None:
+    df = pd.DataFrame({"week": ["W1", "W2"], "conversion": [0.41, 0.43]})
+    spec = {
+        "mark": "line",
+        "title": "Conversion trend",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "conversion", "type": "quantitative"},
+        },
+        "usermeta": {
+            "claim": "Conversion increased from W1 to W2.",
+            "source": "synthetic.conversion",
+            "unit": "rate",
+        },
+    }
+
+    report = audit_spec(spec=spec, data=df)
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert report.verdict == "READY"
+    assert severities["contract.claim.present"] == "PASS"
+    assert severities["contract.claim.consistency"] == "PASS"
+    assert report.matches_spec(spec=spec, data=df, claim=None)
+
+
+def test_conflicting_embedded_and_explicit_claim_blocks() -> None:
+    df = pd.DataFrame({"week": ["W1", "W2"], "conversion": [0.41, 0.43]})
+    spec = {
+        "mark": "line",
+        "title": "Conversion trend",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "conversion", "type": "quantitative"},
+        },
+        "usermeta": {
+            "claim": "Conversion increased from W1 to W2.",
+            "source": "synthetic.conversion",
+            "unit": "rate",
+        },
+    }
+
+    report = audit_spec(
+        spec=spec,
+        data=df,
+        claim="Conversion decreased from W1 to W2.",
+    )
+
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+    assert report.verdict == "BLOCK"
+    assert severities["contract.claim.present"] == "PASS"
+    assert severities["contract.claim.consistency"] == "FAIL"
+
+
 def test_bar_chart_nonzero_baseline_fails() -> None:
     spec = {
         "mark": "bar",
@@ -64,6 +117,44 @@ def test_single_point_line_trend_fails() -> None:
     severities = {finding.rule_id: finding.severity for finding in report.findings}
     assert report.verdict == "BLOCK"
     assert severities["data.trend.min_points"] == "FAIL"
+
+
+def test_explicit_only_legacy_spec_has_no_consistency_finding() -> None:
+    spec = json.loads((TRAPS / "causal_claim_missing_caveat.vl.json").read_text(encoding="utf-8"))
+    data = pd.read_csv(TRAPS / "causal_claim_missing_caveat.csv")
+
+    report = audit_spec(
+        spec=spec,
+        data=data,
+        claim=(TRAPS / "causal_claim_missing_caveat.claim.txt").read_text(encoding="utf-8").strip(),
+    )
+
+    assert "contract.claim.consistency" not in {
+        finding.rule_id for finding in report.findings
+    }
+
+
+def test_embedded_claim_text_is_not_scanned_as_chart_decoration() -> None:
+    df = pd.DataFrame({"week": ["W1", "W2"], "value": [1.0, 2.0]})
+    spec = {
+        "mark": "line",
+        "title": "Observed comparison",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "value", "type": "quantitative"},
+        },
+        "usermeta": {
+            "claim": "Observed 3D-product adoption increased from W1 to W2.",
+            "source": "synthetic.adoption",
+            "unit": "count",
+        },
+    }
+
+    report = audit_spec(spec=spec, data=df)
+    severities = {finding.rule_id: finding.severity for finding in report.findings}
+
+    assert severities["contract.claim.consistency"] == "PASS"
+    assert severities["visual.integrity.decoration"] == "PASS"
 
 
 def test_two_point_line_trend_passes_min_points() -> None:

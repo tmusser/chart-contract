@@ -16,6 +16,7 @@ from typing import Any
 import pandas as pd
 
 from .audit import AuditReport
+from .contracts import resolve_spec_claim
 
 BOUND_REPORT_SCHEMA_VERSION = "0.3"
 PACKAGE_VERSION_FALLBACK = "0.2.0"
@@ -126,7 +127,12 @@ class BoundAuditReport(AuditReport):
         data: pd.DataFrame | Sequence[Mapping[str, Any]] | None,
         claim: str | None,
     ) -> bool:
-        return self.matches_inputs(subject=spec, subject_kind="spec", data=data, claim=claim)
+        return self.matches_inputs(
+            subject=spec,
+            subject_kind="spec",
+            data=data,
+            claim=resolve_spec_claim(spec, claim),
+        )
 
     def matches_chart(self, chart: Any) -> bool:
         return self.matches_inputs(

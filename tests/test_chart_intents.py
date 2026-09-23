@@ -32,6 +32,29 @@ def test_trend_chart_creates_audit_report_and_spec() -> None:
     assert spec["title"]["text"] == "Conversion improved after onboarding launch"
 
 
+def test_rendered_spec_preserves_exact_claim_separately_from_title() -> None:
+    df = pd.DataFrame(
+        {
+            "week": ["2026-05-01", "2026-05-08"],
+            "conversion_rate": [0.12, 0.14],
+        }
+    )
+    claim = "Conversion increased between the two observed weeks."
+
+    spec = Chart.trend(
+        data=df,
+        x="week",
+        y="conversion_rate",
+        claim=claim,
+        source="warehouse.funnel_events",
+        unit="conversion rate",
+        title="Weekly activation trend",
+    ).to_vega_lite()
+
+    assert spec["title"]["text"] == "Weekly activation trend"
+    assert spec["usermeta"]["claim"] == claim
+
+
 def test_rank_chart_declares_sort() -> None:
     df = pd.DataFrame(
         {

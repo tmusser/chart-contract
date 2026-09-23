@@ -1,5 +1,53 @@
 # VERIFY
 
+2026-09-22 - Preserve exact claim identity in rendered specs
+
+Environment:
+- Branch: `agent/embed-audited-claim`
+- Base: `main` at `e279b87dad8a0a8cb6b62ba2a8085648798134f7`
+- Pull request: #12 (`feat: preserve exact claim identity in rendered specs`)
+- GitHub Actions CI run #196 (`35791682346`) -> PASSED
+- Python 3.10, 3.11, 3.12, 3.13 test lanes -> PASSED
+- legacy CLI version/verdict smoke paths -> PASSED on every Python lane
+- statistical diagnostic trap checks -> PASSED on every Python lane
+- isolated wheel build/install and installed CLI/report-shape smoke -> PASSED
+
+Implemented behavior:
+- first-party Vega-Lite specs preserve the exact chart claim as `usermeta.claim`, independently of display title
+- spec audits use the embedded claim when no explicit claim is supplied
+- `contract.claim.consistency` FAILs when an explicit audit claim conflicts with an embedded claim
+- legacy specs without `usermeta.claim` keep the existing explicit-claim audit behavior with no new consistency finding
+- bound spec reports fingerprint the resolved claim actually audited
+- saved-report verification resolves the embedded claim when no explicit claim is supplied
+- claim metadata is excluded from decorative-term scanning so analytical prose cannot create chart-decoration warnings
+
+Deterministic boundary:
+- claim consistency is exact text identity after trimming outer whitespace; no semantic/NLP equivalence is attempted
+- matching claim identity does not establish that the claim is true or supported
+- no chart intent, renderer family, statistical threshold, scale policy, or READY / REVIEW / BLOCK mapping changes
+
+Focused regression coverage:
+- rendered claim survives a custom title
+- embedded-only spec audits can reach READY
+- conflicting embedded/explicit claims BLOCK
+- saved embedded-claim reports verify without separately re-supplying the claim
+- legacy explicit-only specs do not gain a consistency finding
+- claim prose is not scanned as chart decoration
+- machine-readable audit profile parity includes the new rule
+
+Remaining risks:
+- arbitrary external Vega-Lite specs are not required to embed a claim; explicit `--claim` remains supported
+- exact string identity intentionally does not judge paraphrase equivalence
+- generated historical proof specs are not bulk-regenerated in this slice to avoid unrelated Altair-version formatting churn
+
+CI note:
+- The first PR run exposed only three stale test expectations: two hard-coded 43-rule profile counts and one pre-claim `usermeta` equality assertion.
+- Those expectations were updated to the intentional 44-rule/profile metadata contract; no production logic changed in response.
+- The corrected run then passed in full.
+
+Next safest task:
+- Review PR #12 for the exact-identity boundary and merge if acceptable; keep percent-unit versus decimal-scale policy as a separate follow-up.
+
 2026-07-12 - Harden diagnostic claim audits
 
 Environment:

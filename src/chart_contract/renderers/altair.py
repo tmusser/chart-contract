@@ -48,6 +48,7 @@ def render_chart(chart: Any) -> alt.Chart:
             "region_counts": summary.to_dict(),
         }
     for key, value in {
+        "claim": chart.claim,
         "source": chart.source,
         "unit": chart.unit,
         "caveat": chart.caveat,

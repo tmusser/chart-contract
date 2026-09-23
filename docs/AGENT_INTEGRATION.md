@@ -16,7 +16,7 @@ Supported inputs:
 
 - `--data path/to/data.csv` for CSV input.
 - `--data path/to/data.json` for JSON input.
-- `--claim "..."` for the chart claim being audited.
+- `--claim "..."` for the chart claim being audited when the spec does not already carry `usermeta.claim`; when both are present they must match exactly.
 - `--format text|json|markdown` for the desired report shape.
 - `--out path/to/report.txt` to write the selected output to disk.
 - `--markdown path/to/report.md` to write Markdown output alongside the selected format.
@@ -32,6 +32,8 @@ Gate behavior:
 Policy:
 
 - The agent must stop on `BLOCK`.
+- Do not swap the claim attached to a chart artifact. If `usermeta.claim` exists, audit that claim or supply the exact same text; `contract.claim.consistency` blocks conflicting claim sources.
+- First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.
 - `--fail-on` is available when you want an explicit threshold, but `BLOCK` is usually the practical gate.
@@ -56,8 +58,8 @@ The working pattern is:
 Python callers can perform the final identity check directly:
 
 ```python
-report = audit_spec(spec=spec, data=df, claim=claim)
-if not report.matches_spec(spec=spec, data=df, claim=claim):
+report = audit_spec(spec=spec, data=df)  # uses usermeta.claim when present
+if not report.matches_spec(spec=spec, data=df, claim=None):
     raise RuntimeError("audit report is stale; rerun chart-contract")
 ```
 
@@ -65,7 +67,7 @@ For first-party charts, use `report.matches_chart(chart)`.
 
 Copy/paste instruction for agents:
 
-> Generate a chart only if chart-contract audit passes. If there are WARN findings, summarize them and ask whether to proceed. If there are FAIL findings, do not render for sharing; fix the spec or explain why it failed. Do not reuse an audit report after changing the spec, data, or claim; rerun the audit and verify the input binding immediately before sharing.
+> Generate a chart only if chart-contract audit passes. Preserve the exact claim carried by the chart artifact; never audit it under a different claim. If there are WARN findings, summarize them and ask whether to proceed. If there are FAIL findings, do not render for sharing; fix the spec or explain why it failed. Do not reuse an audit report after changing the spec, data, or claim; rerun the audit and verify the input binding immediately before sharing.
 
 Allowed:
 

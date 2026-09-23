@@ -12,6 +12,7 @@ from typing import Any
 import pandas as pd
 
 from .audit import BLOCK, READY, REVIEW, AuditReport
+from .contracts import resolve_spec_claim
 from .input_binding import (
     BOUND_REPORT_SCHEMA_VERSION,
     input_binding_from_dict,
@@ -192,12 +193,13 @@ def _run_verify_report(args: argparse.Namespace) -> int:
 
     spec = _load_json_spec(Path(args.spec_path))
     data = _load_data(args.data_path)
+    resolved_claim = resolve_spec_claim(spec, args.claim)
     verification = verify_input_binding(
         binding,
         subject=spec,
         subject_kind="spec",
         data=data,
-        claim=args.claim,
+        claim=resolved_claim,
     )
 
     status = "MATCH" if verification.matches else "MISMATCH"

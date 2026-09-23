@@ -13,6 +13,7 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 | Rule ID | Applies to | Severity behavior | What it checks | Suggested fix |
 | --- | --- | --- | --- | --- |
 | `contract.claim.present` | Chart audits and spec audits | `PASS` when a claim is declared; `FAIL` when it is missing. | Confirms the chart or spec has an explicit analytical claim. | Add a claim that states what the viewer should believe. |
+| `contract.claim.consistency` | Spec audits with `usermeta.claim` | `PASS` when the embedded claim is the only claim source or exactly matches a separately supplied claim; `FAIL` when they differ. | Prevents a durable chart artifact from being audited under a different claim than the one it carries. | Use the embedded claim, or update the artifact and rerun the audit so both claim sources are identical. |
 | `contract.source.present` | Chart audits and spec audits | `PASS` when source is declared; `WARN` when it is missing. | Confirms provenance metadata is visible. | Add a source such as a table, model, query, or dataset identifier. |
 | `data.y.column` | Chart audits | `FAIL` when the y field is absent. | Verifies the dependent metric column exists. | Add or rename the y column in the data. |
 | `data.y.numeric` | Chart audits | `PASS` when y is numeric; `FAIL` when y exists but is not numeric. | Verifies the metric is quantitative. | Convert the field to numeric or choose a numeric metric. |

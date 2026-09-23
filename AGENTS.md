@@ -5,6 +5,9 @@
 - Prefer deterministic audit rules over vague judgment.
 - Keep warnings explainable.
 - Do not claim causality unless evidence supports it.
+- Preserve the exact analytical claim in first-party rendered specs as `usermeta.claim`, independent of display title.
+- If an audited spec carries `usermeta.claim`, do not silently substitute a different out-of-band claim; an exact mismatch must remain a deterministic failure.
+- Treat a matching embedded claim as identity/provenance only, not evidence that the claim is true or supported.
 - Do not mutate or fetch external data.
 - Do not silently truncate quantitative scales or normalize values. For external Vega-Lite specs, require explicit `usermeta.user_requested_scale_override=true` or `usermeta.user_requested_normalization=true` before those transformations can pass the policy audit.
 - Treat user-request metadata as a declaration, not proof that the user actually requested the transformation.

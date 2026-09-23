@@ -21,6 +21,7 @@ The current unreleased line adds and hardens:
 - machine-readable `audit-v0.2` profile inspection with stable rule metadata and explicit analytical boundaries
 - deterministic `audit-profile-semantics-v1` identities that exclude package-version-only drift
 - mechanical saved-profile diffs covering rule additions/removals, field changes, order drift, and tool-metadata drift without an automatic compatibility judgment
+- self-contained first-party Vega-Lite claim identity via `usermeta.claim`, with deterministic conflict blocking when an external audit claim disagrees
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
