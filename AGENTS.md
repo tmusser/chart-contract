@@ -2,6 +2,8 @@
 
 - Preserve the v0.1 scope in `artifacts/SPEC.md`.
 - Do not add UI, dashboards, or extra chart types without updating `artifacts/SPEC.md`.
+- Keep `process_tree` a rooted, acyclic structural intent; do not silently broaden it into a general graph, DAG, swimlane, or cyclic flowchart engine.
+- Treat process-tree geometry as schematic: only parent-child topology, direction, labels, and optional branch text are authoritative.
 - Prefer deterministic audit rules over vague judgment.
 - Keep warnings explainable.
 - Do not claim causality unless evidence supports it.
