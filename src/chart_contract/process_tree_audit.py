@@ -95,12 +95,14 @@ def audit_process_tree_chart(chart: Any) -> AuditReport:
     label = chart.label
 
     identifiers = chart.data[node]
-    if identifiers.isna().any():
+    if identifiers.isna().any() or any(
+        isinstance(value, str) and not value.strip() for value in identifiers.tolist()
+    ):
         report.add(
             "data.process_tree.node_unique",
             FAIL,
-            "Process-tree node identifiers contain null values.",
-            suggestion="Provide one non-null identifier per node.",
+            "Process-tree node identifiers must be non-null and non-empty.",
+            suggestion="Provide one non-null, non-empty identifier per node.",
             field=node,
         )
     elif identifiers.duplicated().any():
