@@ -18,6 +18,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - distribution intents: `Chart.histogram()`, `Chart.boxplot()`, and `Chart.violin()`
 - statistical diagnostic intents: `Chart.qq()`, `Chart.ecdf()`, and `Chart.residual()`
 - two-set membership intent: `Chart.set_membership()`
+- rooted process-tree intent: `Chart.process_tree()`
 - `chart.audit()` for first-party chart contracts
 - experimental `audit_spec()` for supported Vega-Lite evidence shapes
 - deterministic input bindings that tie public audit reports to the exact audited subject, data, claim, and package version
@@ -37,6 +38,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - QQ and residual charts provide visual diagnostic guardrails, not formal normality or model-adequacy certification.
 - Set membership requires one row per unique universe member and exactly two explicit boolean or integer `0`/`1` membership columns.
 - Venn-style circle geometry is schematic; labeled region counts are authoritative.
+- Process trees require one row per unique node, exactly one root, valid parent references, non-empty labels, and no cycles; optional branch text labels incoming edges.
+- Process-tree geometry is schematic: parent-child topology, direction, labels, and branch text are authoritative; box size and spacing are not quantitative.
 - Arbitrary external Vega-Lite specs are audited only where the required evidence can be reconstructed deterministically.
 - Quantitative scale overrides and native Vega-Lite normalization in external specs require explicit user-request declarations; the declarations are metadata boundaries, not proof that the user actually made the request.
 - A nonzero quantitative bar baseline remains a visual-integrity failure even when a user-request declaration is present.
@@ -53,6 +56,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - broad plotting-library coverage beyond explicitly supported intents
 - external data fetching, LLM calls, telemetry, or theme systems
 - three-or-more-set Venn diagrams or area-proportional Venn fitting
+- cyclic flowcharts, multi-parent DAGs, cross-links, swimlanes, or arbitrary graph layout in the `process_tree` intent
 - unverifiable claims of statistical, accessibility, or design certification
 - reconstructing missing user intent from generated chart metadata
 - cryptographic signing, timestamp authority, or remote attestation of audit reports
@@ -74,6 +78,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Untouched quantitative scale defaults do not require authorization metadata.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
+- `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
 - Examples run on synthetic data and write inspectable Vega-Lite JSON into `examples/output/`.
 - CI tests the supported Python range and validates an isolated built wheel.
 - README, roadmap, changelog, and workflow artifacts describe current behavior without overstating guarantees.
@@ -94,6 +99,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - `python examples/distribution_charts.py`
 - `python examples/statistical_diagnostics.py`
 - `python examples/set_membership.py`
+- `python examples/process_tree.py`
 - `chart-contract profile show audit-v0.2 --json`
 - `chart-contract --version`
 - `git diff --check`
@@ -104,15 +110,17 @@ Run `python examples/bad_to_good_chart.py` to compare a risky chart that still r
 
 For set membership, run `python examples/set_membership.py` and verify that A-only, overlap, B-only, neither, and universe counts reconcile in the generated spec metadata.
 
+For process trees, run `python examples/process_tree.py` and verify that the generated spec records one root, four directed edges, deterministic top-down layout metadata, and labeled Yes/No branches.
+
 For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify that silent line-scale cropping and native normalization block while explicitly declared user-requested transformations pass their policy checks.
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py` and verify that unchanged inputs reproduce their binding while spec, data, and claim mutations invalidate it.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 43-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 51-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 ## Open Questions
 
-- What release version should carry the set-membership intent?
+- What release version should carry the set-membership and process-tree intents?
 - Should a future many-set intent use an UpSet-style matrix rather than circles?
 - Which additional external-spec shapes can be audited without inventing missing semantic evidence?
 - After the profile contract sees real use, should a new report schema bind saved audits to exact audit-profile identity?
