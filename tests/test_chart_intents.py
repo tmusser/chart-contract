@@ -105,6 +105,7 @@ def test_examples_execute_and_write_specs() -> None:
         "trend_claim.py",
         "rank_claim.py",
         "compare_claim.py",
+        "process_tree.py",
     ]
 
     for script in scripts:
@@ -118,3 +119,4 @@ def test_examples_execute_and_write_specs() -> None:
     assert (output_dir / "trend_claim.vl.json").exists()
     assert (output_dir / "rank_claim.vl.json").exists()
     assert (output_dir / "compare_claim.vl.json").exists()
+    assert (output_dir / "process_tree.vl.json").exists()
