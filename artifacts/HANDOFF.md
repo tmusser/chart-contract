@@ -2,53 +2,54 @@
 
 ## Resume Packet
 
-- Goal: keep rendered chart artifacts attached to the exact analytical claim they were created to support.
-- Branch: `agent/embed-audited-claim`.
-- Base: `main` at `e279b87dad8a0a8cb6b62ba2a8085648798134f7`.
-- Current slice: embedded claim metadata, deterministic claim-conflict auditing, resolved-claim input binding, saved-report verification, profile parity, tests, and agent documentation.
-- Read first: `src/chart_contract/contracts.py`, `src/chart_contract/audit.py`, `src/chart_contract/spec_policy.py`, `src/chart_contract/renderers/altair.py`, `src/chart_contract/input_binding.py`, `tests/test_audit_spec.py`, and `docs/AGENT_INTEGRATION.md`.
+- Goal: add a first-class rooted decision/process-tree diagram without broadening chart-contract into a general graph library.
+- Branch: `agent/add-process-tree`.
+- Base: `main` at `6e179e2eaa70256c41e05580669964353543afc0`.
+- Current slice: `Chart.process_tree()`, structural validation, deterministic top-down flowchart layout, audit-profile rules, example, tests, and docs.
+- Read first: `src/chart_contract/process_tree.py`, `src/chart_contract/process_tree_audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/renderers/altair.py`, `tests/test_process_tree.py`, and `docs/PROCESS_TREE.md`.
 
 ## Current Repo State
 
-- First-party `Chart.to_vega_lite()` output preserves the exact analytical claim as `usermeta.claim` even when the display title differs.
-- `audit_spec()` accepts the existing explicit claim input and can now recover the claim from `usermeta.claim` when the explicit input is omitted.
-- If both claim sources exist and differ after trimming outer whitespace, `contract.claim.consistency` emits `FAIL`, producing `BLOCK`.
-- External/legacy specs without `usermeta.claim` preserve their existing findings and explicit-claim workflow; no consistency finding is emitted for absence alone.
-- Bound spec reports hash the resolved claim actually audited. `matches_spec(..., claim=None)` and CLI saved-report verification use the embedded claim when present.
-- The machine-readable `audit-v0.2` profile now contains 44 documented rules including `contract.claim.consistency`.
+- `Chart.process_tree()` takes one row per node and column names for `node`, `parent`, `label`, and optional `branch`.
+- Exactly one row must have an empty parent. Every other parent must resolve to an existing node.
+- Node IDs must be non-null and unique; labels must be non-empty; parent relationships must be acyclic.
+- The layout is deterministic and top-down. Sibling order follows input row order.
+- The renderer uses elbow connectors, directional arrowheads, boxed nodes, node labels, and optional branch text.
+- The generated Vega-Lite artifact records `usermeta.chart_contract_intent=process_tree` and a `usermeta.process_tree` structural summary.
+- The machine-readable `audit-v0.2` profile and `docs/AUDIT_RULES.md` now contain 51 rules.
 
 ## Important Decisions
 
-- Claim identity is provenance, not analytical support.
-- The consistency check uses deterministic exact text identity, not semantic similarity or LLM judgment.
-- A custom display title may differ from the analytical claim; title and claim are intentionally separate fields.
-- Embedded claim metadata is authoritative for first-party chart artifacts, but arbitrary external Vega-Lite specs are not required to carry it.
-- Missing embedded metadata does not create a new warning or failure, preserving legacy audit behavior.
-- Claim metadata values are excluded from chart-decoration keyword scanning.
-- No automatic claim rewriting, chart correction, or publication behavior is added.
+- Public API name is `process_tree`, not `decision_tree`, to avoid implying an ML classifier.
+- This is a rooted-tree intent, not arbitrary graph layout.
+- Parent-child topology, direction, node labels, and optional branch text are authoritative.
+- Box size and spacing are schematic and do not encode probability, duration, importance, volume, or causal strength.
+- Branch text belongs to the child row and labels the incoming edge from its parent.
+- Cycles, multi-parent nodes, cross-links, DAGs, and swimlanes are intentionally out of scope.
+- No new runtime dependency or external layout engine is introduced.
 
 ## Verification
 
 Focused tests cover:
-- exact claim retention through first-party rendering;
-- embedded-only audits;
-- explicit/embedded conflict blocking;
-- resolved-claim durable bindings;
-- saved-report verification without a repeated explicit claim;
-- legacy explicit-only behavior;
-- decoration-scanner isolation;
-- machine-readable profile/documentation parity.
+- structural summary and deterministic layout;
+- renderer layers and usermeta;
+- READY valid tree;
+- BLOCK duplicate IDs, unknown parents, multiple roots, and cycles;
+- refusal to render invalid structures;
+- example-script execution;
+- 51-rule profile/documentation parity.
 
-The full GitHub Actions Python 3.10-3.13 matrix and isolated wheel smoke remain the authoritative final gate for this slice.
+A local clone/render attempt could not run because this environment cannot resolve github.com. GitHub Actions is therefore the authoritative executable gate; do not claim browser-level visual inspection.
 
 ## Remaining Risks
 
-- Exact identity cannot determine whether two differently worded claims are substantively equivalent.
-- A matching embedded claim can still be false, unsupported, misleading, or scientifically invalid.
-- Historical checked-in Vega-Lite outputs are not bulk-regenerated in this slice because dependency-version rendering drift would add unrelated proof-artifact churn.
+- Very wide trees or long labels can become crowded in a static Vega-Lite canvas.
+- The renderer does not automatically wrap arbitrary labels.
+- Generic `audit_spec()` does not reconstruct process-tree topology from layered Vega-Lite output; use `Chart.process_tree().audit()` before rendering.
+- A structurally valid tree can still document a process that is incomplete, stale, or operationally wrong.
 
 ## Next Recommended Task
 
-- Open the PR and let the full CI matrix attack the implementation.
-- If green, inspect the final branch diff for accidental audit-semantic changes outside claim identity.
-- Keep the older percent-unit versus decimal-scale question as a separate follow-up rather than combining it into this back-to-basics slice.
+- Open the PR and let CI validate Altair/Vega-Lite schema compatibility across Python 3.10-3.13.
+- If green, inspect the final diff for accidental broadening into general graph semantics.
+- Keep any future DAG/loop/swimlane work as a separate intent or separate tool rather than weakening the rooted-tree contract.
