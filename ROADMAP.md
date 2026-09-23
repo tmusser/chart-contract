@@ -22,6 +22,7 @@ The current unreleased line adds and hardens:
 - deterministic `audit-profile-semantics-v1` identities that exclude package-version-only drift
 - mechanical saved-profile diffs covering rule additions/removals, field changes, order drift, and tool-metadata drift without an automatic compatibility judgment
 - self-contained first-party Vega-Lite claim identity via `usermeta.claim`, with deterministic conflict blocking when an external audit claim disagrees
+- `Chart.process_tree()` for audited rooted decision/process trees with deterministic top-down layout, directed edges, and optional branch labels
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
@@ -47,4 +48,5 @@ The current unreleased line adds and hardens:
 - no formal statistical certification
 - no automatic compatibility or scientific-quality classification from audit-profile drift
 - no area-proportional Venn fitting in the two-set intent
+- no cyclic, multi-parent, swimlane, or arbitrary graph layout in the rooted process-tree intent
 - no broad plotting-library coverage without an auditable contract
