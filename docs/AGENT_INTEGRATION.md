@@ -42,14 +42,14 @@ This command prints the selected format to stdout by default.
 When `--out` is supplied, the selected output is written to disk and stdout becomes a one-line verdict summary.
 When `--markdown` is supplied, Markdown is also written to the requested path.
 
-JSON and Markdown reports include a deterministic input binding over the audited subject, explicit data, claim, and package version. This lets downstream code detect a stale report after post-audit mutation; it does not make the verdict scientifically valid or human-approved.
+JSON and Markdown reports include deterministic input and report bindings over the audited subject, explicit data, claim, package version, saved findings/verdict, and semantic audit-profile identity. This lets downstream code detect post-audit mutation or stale policy semantics; it does not make the verdict scientifically valid or human-approved.
 
 This is a gate, not a publisher. It is meant to keep the agent inside a bounded audit loop before anything is shared.
 
 The working pattern is:
 
 1. The agent proposes a chart.
-2. `chart-contract` audits the spec and data contract and records the input binding.
+2. `chart-contract` audits the spec and data contract and records input, result, and audit-profile bindings.
 3. The agent fixes the chart or stops.
 4. If any audited input changes, the agent reruns the audit rather than reusing the old report.
 5. Immediately before sharing, the agent verifies that the report still corresponds to the current inputs.
@@ -67,13 +67,13 @@ For first-party charts, use `report.matches_chart(chart)`.
 
 Copy/paste instruction for agents:
 
-> Generate a chart only if chart-contract audit passes. Preserve the exact claim carried by the chart artifact; never audit it under a different claim. If there are WARN findings, summarize them and ask whether to proceed. If there are FAIL findings, do not render for sharing; fix the spec or explain why it failed. Do not reuse an audit report after changing the spec, data, or claim; rerun the audit and verify the input binding immediately before sharing.
+> Generate a chart only if chart-contract audit passes. Preserve the exact claim carried by the chart artifact; never audit it under a different claim. If there are WARN findings, summarize them and ask whether to proceed. If there are FAIL findings, do not render for sharing; fix the spec or explain why it failed. Do not reuse an audit report after changing the spec, data, claim, saved findings/verdict, or audit-policy semantics; rerun the audit and verify the durable bindings immediately before sharing.
 
 Allowed:
 
 - Generate a draft chart spec.
 - Run audit.
-- Verify the input binding before sharing.
+- Verify report integrity, audit-profile identity, and the input binding before sharing.
 - Explain warnings.
 - Propose fixes.
 
