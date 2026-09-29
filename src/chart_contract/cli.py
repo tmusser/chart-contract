@@ -15,11 +15,17 @@ from .audit import BLOCK, READY, REVIEW, AuditReport
 from .contracts import resolve_spec_claim
 from .input_binding import (
     BOUND_REPORT_SCHEMA_VERSION,
-    input_binding_from_dict,
+    bound_report_from_dict,
     verify_input_binding,
 )
 from .profile_diff import ProfileDiff, build_profile_diff
-from .profiles import DEFAULT_PROFILE, ProfileManifest, get_profile_manifest, load_profile_manifest
+from .profiles import (
+    DEFAULT_PROFILE,
+    ProfileManifest,
+    build_audit_profile_binding,
+    get_profile_manifest,
+    load_profile_manifest,
+)
 from .spec_policy import audit_spec
 
 SUPPORTED_REPORT_FORMATS = ("text", "json", "markdown")
@@ -171,19 +177,28 @@ def _run_audit_spec(args: argparse.Namespace) -> int:
 
 def _run_verify_report(args: argparse.Namespace) -> int:
     payload = _load_json_report(Path(args.report_path))
-    if payload.get("schema_version") != BOUND_REPORT_SCHEMA_VERSION:
+    schema_version = payload.get("schema_version")
+    if schema_version != BOUND_REPORT_SCHEMA_VERSION:
+        if schema_version == "0.3":
+            raise CLIError(
+                "Report schema 0.3 predates report-result and audit-profile binding; "
+                "re-audit the chart to produce schema "
+                f"{BOUND_REPORT_SCHEMA_VERSION} before durable verification."
+            )
         raise CLIError(
             "Report must use bound report schema "
-            f"{BOUND_REPORT_SCHEMA_VERSION}; got {payload.get('schema_version')!r}."
+            f"{BOUND_REPORT_SCHEMA_VERSION}; got {schema_version!r}."
         )
 
-    serialized_binding = payload.get("input_binding")
-    if not isinstance(serialized_binding, Mapping):
-        raise CLIError("Report does not contain a serialized input_binding object.")
     try:
-        binding = input_binding_from_dict(serialized_binding)
+        report = bound_report_from_dict(payload)
     except ValueError as exc:
-        raise CLIError(f"Invalid report input binding: {exc}") from exc
+        raise CLIError(f"Invalid bound report: {exc}") from exc
+
+    binding = report.input_binding
+    report_binding = report.report_binding
+    if binding is None or report_binding is None:
+        raise CLIError("Report is missing required durable bindings.")
 
     if binding.subject_kind != "spec":
         raise CLIError(
@@ -201,14 +216,23 @@ def _run_verify_report(args: argparse.Namespace) -> int:
         data=data,
         claim=resolved_claim,
     )
+    current_profile = build_audit_profile_binding()
+    profile_matches = report_binding.audit_profile == current_profile
 
     status = "MATCH" if verification.matches else "MISMATCH"
+    print("Report integrity: MATCH")
+    print(f"Audit profile: {'MATCH' if profile_matches else 'MISMATCH'}")
     print(f"Binding: {status}")
     print(f"Subject: {'MATCH' if verification.subject_matches else 'MISMATCH'}")
     print(f"Data: {'MATCH' if verification.data_matches else 'MISMATCH'}")
     print(f"Claim: {'MATCH' if verification.claim_matches else 'MISMATCH'}")
+    print(f"Bound profile: {report_binding.audit_profile.profile}")
+    print(
+        "Bound profile SHA-256: "
+        f"{report_binding.audit_profile.profile_manifest_sha256}"
+    )
     print(f"Bound tool version: {binding.tool_version}")
-    return 0 if verification.matches else 1
+    return 0 if verification.matches and profile_matches else 1
 
 
 def _format_profile_text(manifest: ProfileManifest) -> str:
