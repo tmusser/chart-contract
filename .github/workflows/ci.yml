@@ -185,7 +185,7 @@ jobs:
           assert version_output == f"chart-contract {installed_version}"
 
           payload = json.loads(Path("report.json").read_text(encoding="utf-8"))
-          assert payload["schema_version"] == "0.3"
+          assert payload["schema_version"] == "0.4"
           assert payload["verdict"] == "REVIEW"
           assert isinstance(payload["findings"], list)
           assert payload["findings"]
@@ -199,7 +199,17 @@ jobs:
           assert len(binding["claim_sha256"]) == 64
           assert len(binding["bundle_sha256"]) == 64
 
+          report_binding = payload["report_binding"]
+          assert report_binding["algorithm"] == "sha256"
+          assert report_binding["canonicalization"] == "audit-report-semantics-v1"
+          assert report_binding["input_bundle_sha256"] == binding["bundle_sha256"]
+          assert report_binding["audit_profile"]["profile"] == "audit-v0.2"
+          assert len(report_binding["audit_profile"]["profile_manifest_sha256"]) == 64
+          assert len(report_binding["report_sha256"]) == 64
+
           binding_output = Path("binding-check.txt").read_text(encoding="utf-8")
+          assert "Report integrity: MATCH" in binding_output
+          assert "Audit profile: MATCH" in binding_output
           assert "Binding: MATCH" in binding_output
           assert "Subject: MATCH" in binding_output
           assert "Data: MATCH" in binding_output
