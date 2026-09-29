@@ -1,5 +1,38 @@
 # VERIFY
 
+2026-09-29 - Harden durable report integrity and audit-policy identity
+
+Environment:
+- Branch: `agent/harden-report-integrity`
+- Base: `main` at `38ac3b701615e01f345733baa0144d621c3a5325`
+- Pull request: #14 (`feat: bind audit reports to result and policy identity`)
+- GitHub Actions CI run #202 (`36641570160`) -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- legacy CLI version/verdict smoke paths -> PASSED on every Python lane
+- statistical diagnostic trap checks -> PASSED on every Python lane
+- build + distribution inspection -> PASSED
+- isolated wheel install -> PASSED
+- installed CLI schema-0.4 report-shape and durable verification smoke -> PASSED
+
+Verified behavior:
+- bound reports serialize as schema `0.4`;
+- `input_binding` continues to identify exact subject/data/claim/tool-version inputs;
+- new `report_binding` identifies the input bundle, serialized audit result, and exact `audit-v0.2` semantic profile;
+- edited findings or derived verdict metadata are rejected as internally inconsistent;
+- audit-profile semantic drift is reported separately from live input drift and returns exit 1;
+- post-audit in-memory finding mutation invalidates `matches_spec(...)` / `matches_chart(...)`;
+- historical schema `0.3` artifacts require re-audit rather than synthetic backfill.
+
+Remaining risks:
+- SHA-256 bindings are deterministic drift/consistency receipts, not signatures, authorship proof, timestamp authority, or remote attestation.
+- A writer who can deliberately alter the artifact can recompute a new internally consistent binding.
+- Audit-profile identity describes declared policy semantics; it does not prove implementation correctness or scientific validity.
+
+Next safest task:
+- Review and merge PR #14 if the schema migration and explicit legacy-`0.3` boundary are desirable.
+- Keep any future signing/attestation layer separate from the current deterministic content-identity contract.
+
 2026-09-23 - Add rooted process-tree flowcharts
 
 Environment:
