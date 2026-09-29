@@ -15,6 +15,8 @@
 - Treat user-request metadata as a declaration, not proof that the user actually requested the transformation.
 - A truncated quantitative bar baseline remains a visual-integrity failure even when user-request metadata is present.
 - Treat the machine-readable audit profile as descriptive ruleset metadata, not another audit or scientific approval artifact.
+- Do not recompute a report binding to legitimize post-audit edits to findings or verdict fields; rerun the audit and emit a new report.
+- Treat a saved-report audit-profile mismatch as stale policy identity that requires re-audit for current verification, not as proof that either policy is better or scientifically valid.
 - Do not translate a matching audit-profile digest or a profile diff into a claim that a chart is safe, valid, compatible, improved, or scientifically sound.
 - Keep package/tool metadata separate from semantic audit-profile identity so version-only drift does not masquerade as policy drift.
 - Update `artifacts/VERIFY.md` after changes.

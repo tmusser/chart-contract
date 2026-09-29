@@ -15,12 +15,18 @@ from typing import Any
 
 import pandas as pd
 
-from .audit import AuditReport
+from .audit import AuditFinding, AuditReport
 from .contracts import resolve_spec_claim
+from .profiles import (
+    AuditProfileBinding,
+    audit_profile_binding_from_dict,
+    build_audit_profile_binding,
+)
 
-BOUND_REPORT_SCHEMA_VERSION = "0.3"
+BOUND_REPORT_SCHEMA_VERSION = "0.4"
 PACKAGE_VERSION_FALLBACK = "0.2.0"
 HASH_ALGORITHM = "sha256"
+REPORT_BINDING_CANONICALIZATION = "audit-report-semantics-v1"
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -70,16 +76,38 @@ class InputBindingVerification:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class ReportBinding:
+    """Content identity for a saved audit result, its inputs, and audit profile."""
+
+    algorithm: str
+    canonicalization: str
+    input_bundle_sha256: str
+    audit_profile: AuditProfileBinding
+    report_sha256: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "algorithm": self.algorithm,
+            "canonicalization": self.canonicalization,
+            "input_bundle_sha256": self.input_bundle_sha256,
+            "audit_profile": self.audit_profile.to_dict(),
+            "report_sha256": self.report_sha256,
+        }
+
+
 @dataclass(slots=True)
 class BoundAuditReport(AuditReport):
-    """Audit report whose verdict is bound to deterministic input fingerprints."""
+    """Audit report bound to deterministic inputs, result semantics, and policy identity."""
 
     input_binding: InputBinding | None = None
+    report_binding: ReportBinding | None = None
 
     def to_dict(self) -> dict[str, Any]:
         payload = AuditReport.to_dict(self)
         payload["schema_version"] = BOUND_REPORT_SCHEMA_VERSION
         payload["input_binding"] = self.input_binding.to_dict() if self.input_binding else None
+        payload["report_binding"] = self.report_binding.to_dict() if self.report_binding else None
         return payload
 
     def to_markdown(self) -> str:
@@ -100,6 +128,22 @@ class BoundAuditReport(AuditReport):
             f"- Tool version: `{binding.tool_version}`",
             f"- Bundle SHA-256: `{binding.bundle_sha256}`",
         ]
+        if self.report_binding is not None:
+            report_binding = self.report_binding
+            lines.extend(
+                [
+                    "",
+                    "## Report Binding",
+                    "",
+                    f"- Canonicalization: `{report_binding.canonicalization}`",
+                    f"- Audit profile: `{report_binding.audit_profile.profile}`",
+                    (
+                        "- Audit profile SHA-256: "
+                        f"`{report_binding.audit_profile.profile_manifest_sha256}`"
+                    ),
+                    f"- Report SHA-256: `{report_binding.report_sha256}`",
+                ]
+            )
         return "\n".join(lines)
 
     def matches_inputs(
@@ -110,7 +154,11 @@ class BoundAuditReport(AuditReport):
         data: pd.DataFrame | Sequence[Mapping[str, Any]] | None,
         claim: str | None,
     ) -> bool:
-        if self.input_binding is None:
+        if self.input_binding is None or self.report_binding is None:
+            return False
+        if not report_integrity_matches(self):
+            return False
+        if self.report_binding.audit_profile != build_audit_profile_binding():
             return False
         return verify_input_binding(
             self.input_binding,
@@ -141,6 +189,126 @@ class BoundAuditReport(AuditReport):
             data=chart.data,
             claim=chart.claim,
         )
+
+
+def report_binding_from_dict(payload: Mapping[str, Any]) -> ReportBinding:
+    """Parse a serialized report binding without treating it as authentication."""
+
+    required = {
+        "algorithm",
+        "canonicalization",
+        "input_bundle_sha256",
+        "audit_profile",
+        "report_sha256",
+    }
+    missing = sorted(required - set(payload))
+    if missing:
+        raise ValueError(f"Report binding is missing required field(s): {', '.join(missing)}")
+
+    algorithm = payload["algorithm"]
+    canonicalization = payload["canonicalization"]
+    input_bundle_sha256 = payload["input_bundle_sha256"]
+    audit_profile_payload = payload["audit_profile"]
+    report_sha256 = payload["report_sha256"]
+
+    if algorithm != HASH_ALGORITHM:
+        raise ValueError(f"Unsupported report-binding algorithm: {algorithm!r}")
+    if canonicalization != REPORT_BINDING_CANONICALIZATION:
+        raise ValueError(f"Unsupported report-binding canonicalization: {canonicalization!r}")
+    _require_sha256("input_bundle_sha256", input_bundle_sha256, prefix="Report binding")
+    if not isinstance(audit_profile_payload, Mapping):
+        raise ValueError("Report binding audit_profile must be an object.")
+    audit_profile = audit_profile_binding_from_dict(audit_profile_payload)
+    _require_sha256("report_sha256", report_sha256, prefix="Report binding")
+    return ReportBinding(
+        algorithm=algorithm,
+        canonicalization=canonicalization,
+        input_bundle_sha256=input_bundle_sha256,
+        audit_profile=audit_profile,
+        report_sha256=report_sha256,
+    )
+
+
+def bound_report_from_dict(payload: Mapping[str, Any]) -> BoundAuditReport:
+    """Parse and self-check a serialized schema-0.4 bound audit report."""
+
+    schema_version = payload.get("schema_version")
+    if schema_version != BOUND_REPORT_SCHEMA_VERSION:
+        raise ValueError(
+            f"Expected bound report schema {BOUND_REPORT_SCHEMA_VERSION}; got {schema_version!r}."
+        )
+
+    serialized_input = payload.get("input_binding")
+    if not isinstance(serialized_input, Mapping):
+        raise ValueError("Bound report is missing input_binding.")
+    input_binding = input_binding_from_dict(serialized_input)
+
+    serialized_report = payload.get("report_binding")
+    if not isinstance(serialized_report, Mapping):
+        raise ValueError("Bound report is missing report_binding.")
+    report_binding = report_binding_from_dict(serialized_report)
+    if report_binding.input_bundle_sha256 != input_binding.bundle_sha256:
+        raise ValueError("Report binding input_bundle_sha256 does not match input_binding.")
+
+    raw_findings = payload.get("findings")
+    if not isinstance(raw_findings, list):
+        raise ValueError("Bound report findings must be a list.")
+    findings: list[AuditFinding] = []
+    for index, raw_finding in enumerate(raw_findings):
+        if not isinstance(raw_finding, Mapping):
+            raise ValueError(f"Bound report finding {index} must be an object.")
+        required = {"rule_id", "severity", "message"}
+        missing = sorted(required - set(raw_finding))
+        if missing:
+            raise ValueError(
+                f"Bound report finding {index} is missing required field(s): {', '.join(missing)}"
+            )
+        rule_id = raw_finding["rule_id"]
+        severity = raw_finding["severity"]
+        message = raw_finding["message"]
+        suggestion = raw_finding.get("suggestion")
+        field_name = raw_finding.get("field")
+        if not isinstance(rule_id, str) or not rule_id:
+            raise ValueError(f"Bound report finding {index} rule_id must be a non-empty string.")
+        if not isinstance(severity, str):
+            raise ValueError(f"Bound report finding {index} severity must be a string.")
+        if not isinstance(message, str) or not message:
+            raise ValueError(f"Bound report finding {index} message must be a non-empty string.")
+        if suggestion is not None and not isinstance(suggestion, str):
+            raise ValueError(f"Bound report finding {index} suggestion must be a string or null.")
+        if field_name is not None and not isinstance(field_name, str):
+            raise ValueError(f"Bound report finding {index} field must be a string or null.")
+        findings.append(
+            AuditFinding(
+                rule_id=rule_id,
+                severity=severity,
+                message=message,
+                suggestion=suggestion,
+                field=field_name,
+            )
+        )
+
+    report = BoundAuditReport(
+        findings=findings,
+        input_binding=input_binding,
+        report_binding=report_binding,
+    )
+    derived = AuditReport.to_dict(report)
+    for field_name in (
+        "passed",
+        "has_failures",
+        "has_warnings",
+        "verdict",
+        "summary",
+        "verdict_summary",
+    ):
+        if payload.get(field_name) != derived[field_name]:
+            raise ValueError(
+                f"Bound report {field_name} does not match the serialized findings."
+            )
+    if not report_integrity_matches(report):
+        raise ValueError("Bound report report_sha256 does not match its serialized audit result.")
+    return report
 
 
 def input_binding_from_dict(payload: Mapping[str, Any]) -> InputBinding:
@@ -221,27 +389,84 @@ def bind_spec_report(
     data: pd.DataFrame | Sequence[Mapping[str, Any]] | None,
     claim: str | None,
 ) -> BoundAuditReport:
-    return BoundAuditReport(
-        findings=list(report.findings),
-        input_binding=build_input_binding(
-            subject=spec,
-            subject_kind="spec",
-            data=data,
-            claim=claim,
-        ),
+    input_binding = build_input_binding(
+        subject=spec,
+        subject_kind="spec",
+        data=data,
+        claim=claim,
     )
+    return _bind_report(report, input_binding)
 
 
 def bind_chart_report(report: AuditReport, chart: Any) -> BoundAuditReport:
-    return BoundAuditReport(
-        findings=list(report.findings),
-        input_binding=build_input_binding(
-            subject=chart,
-            subject_kind="chart_contract",
-            data=chart.data,
-            claim=chart.claim,
-        ),
+    input_binding = build_input_binding(
+        subject=chart,
+        subject_kind="chart_contract",
+        data=chart.data,
+        claim=chart.claim,
     )
+    return _bind_report(report, input_binding)
+
+
+def _bind_report(report: AuditReport, input_binding: InputBinding) -> BoundAuditReport:
+    bound = BoundAuditReport(findings=list(report.findings), input_binding=input_binding)
+    bound.report_binding = build_report_binding(bound, input_binding)
+    return bound
+
+
+def build_report_binding(
+    report: AuditReport,
+    input_binding: InputBinding,
+    *,
+    audit_profile: AuditProfileBinding | None = None,
+) -> ReportBinding:
+    """Bind a concrete audit result to its input bundle and audit-profile semantics."""
+
+    profile_binding = audit_profile or build_audit_profile_binding()
+    semantic_payload = _report_semantic_payload(report, input_binding, profile_binding)
+    return ReportBinding(
+        algorithm=HASH_ALGORITHM,
+        canonicalization=REPORT_BINDING_CANONICALIZATION,
+        input_bundle_sha256=input_binding.bundle_sha256,
+        audit_profile=profile_binding,
+        report_sha256=_sha256_json(semantic_payload),
+    )
+
+
+def report_integrity_matches(report: BoundAuditReport) -> bool:
+    """Check that a bound report still matches its originally bound result semantics."""
+
+    if report.input_binding is None or report.report_binding is None:
+        return False
+    if report.report_binding.input_bundle_sha256 != report.input_binding.bundle_sha256:
+        return False
+    expected = build_report_binding(
+        report,
+        report.input_binding,
+        audit_profile=report.report_binding.audit_profile,
+    )
+    return expected == report.report_binding
+
+
+def _report_semantic_payload(
+    report: AuditReport,
+    input_binding: InputBinding,
+    audit_profile: AuditProfileBinding,
+) -> dict[str, Any]:
+    serialized = AuditReport.to_dict(report)
+    return {
+        "input_bundle_sha256": input_binding.bundle_sha256,
+        "audit_profile": audit_profile.to_dict(),
+        "result": {
+            "passed": serialized["passed"],
+            "has_failures": serialized["has_failures"],
+            "has_warnings": serialized["has_warnings"],
+            "verdict": serialized["verdict"],
+            "summary": serialized["summary"],
+            "verdict_summary": serialized["verdict_summary"],
+            "findings": serialized["findings"],
+        },
+    }
 
 
 def build_input_binding(
@@ -289,9 +514,9 @@ def _bundle_sha256(binding: InputBinding) -> str:
     )
 
 
-def _require_sha256(field_name: str, value: Any) -> None:
+def _require_sha256(field_name: str, value: Any, *, prefix: str = "Input binding") -> None:
     if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
-        raise ValueError(f"Input binding {field_name} must be a lowercase SHA-256 hex digest.")
+        raise ValueError(f"{prefix} {field_name} must be a lowercase SHA-256 hex digest.")
 
 
 def _package_version() -> str:

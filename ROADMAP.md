@@ -18,6 +18,7 @@ The current unreleased line adds and hardens:
 - row-level universe, binary-membership, unique-member, and reconciled-region checks
 - schematic partial-overlap, disjoint, subset, and equal-set layouts with authoritative labels
 - deterministic content bindings for audit reports plus CLI re-verification of saved spec-audit reports against current spec/data/claim inputs
+- schema `0.4` report integrity bindings over findings/verdict semantics, the input bundle, and exact audit-profile identity
 - machine-readable `audit-v0.2` profile inspection with stable rule metadata and explicit analytical boundaries
 - deterministic `audit-profile-semantics-v1` identities that exclude package-version-only drift
 - mechanical saved-profile diffs covering rule additions/removals, field changes, order drift, and tool-metadata drift without an automatic compatibility judgment
@@ -29,7 +30,7 @@ The current unreleased line adds and hardens:
 ## Next
 
 - decide the release version and release notes for the set-membership, audit-provenance, and profile-inspection slices
-- consider binding a future audit-report schema revision to exact audit-profile identity after the profile contract sees real use; do not retroactively change `0.3` report semantics
+- dogfood schema `0.4` durable verification and keep legacy `0.3` semantics historical rather than synthesizing missing profile/result identity
 - keep generated example artifacts deterministic and reviewable
 - extend CLI/spec auditing only where evidence can be reconstructed without pretending arbitrary visuals are semantically complete
 - add new intents only when their data, claim, and visual contracts can be tested explicitly

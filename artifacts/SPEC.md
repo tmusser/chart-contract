@@ -21,7 +21,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - rooted process-tree intent: `Chart.process_tree()`
 - `chart.audit()` for first-party chart contracts
 - experimental `audit_spec()` for supported Vega-Lite evidence shapes
-- deterministic input bindings that tie public audit reports to the exact audited subject, data, claim, and package version
+- deterministic input bindings that tie public audit reports to the exact audited subject, data, claim, and historical package version
+- schema `0.4` report bindings that tie saved findings/verdict semantics to the input bundle and exact audit-profile semantic identity
 - machine-readable `audit-v0.2` profile metadata for the documented audit ruleset
 - deterministic `audit-profile-semantics-v1` identity that separates semantic audit-policy drift from package/tool metadata drift
 - `chart-contract profile show` and `chart-contract profile diff` for read-only ruleset inspection and mechanical drift
@@ -45,7 +46,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - A nonzero quantitative bar baseline remains a visual-integrity failure even when a user-request declaration is present.
 - The scale/normalization policy does not infer semantic normalization hidden in arbitrary transforms or data that was preprocessed before reaching the audited spec.
 - Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
+- Report-result fingerprints detect saved finding/verdict drift but are not signatures; someone with write access can deliberately recompute them.
 - Audit-profile digests identify declared ruleset semantics; they do not authenticate execution, prove the implementation correct, or establish that any chart is safe or scientifically sound.
+- A profile mismatch means the saved audit policy differs from the installed policy and requires re-audit for a current verification result; it does not itself classify the old or new policy as better.
 - Profile diffs are mechanical only and do not classify changes as compatible, breaking, improved, or scientifically preferable.
 
 ## Non-Goals
@@ -60,15 +63,16 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - unverifiable claims of statistical, accessibility, or design certification
 - reconstructing missing user intent from generated chart metadata
 - cryptographic signing, timestamp authority, or remote attestation of audit reports
-- retroactively attaching audit-profile identity to existing bound report schema `0.3`
+- backfilling audit-profile/result identity into historical report schema `0.3`; durable `0.4` verification requires re-audit
 - automatic audit-profile compatibility classification
 
 ## Acceptance Criteria
 
 - Public API supports every intent listed in Current Scope.
 - Audit findings cover contract completeness, usable data, visual form, claim support, provenance, and explainable visual-integrity checks.
-- Public `audit_spec()` and first-party `Chart.audit()` reports include deterministic SHA-256 input bindings and serialize as bound report schema `0.3`.
-- Changing the audited subject, explicit data, or claim invalidates the prior report binding.
+- Public `audit_spec()` and first-party `Chart.audit()` reports include deterministic SHA-256 input and report bindings and serialize as bound report schema `0.4`.
+- Changing the audited subject, explicit data, claim, saved findings/verdict, or audit-profile semantics invalidates durable verification.
+- Report binding covers the input bundle, every serialized finding, derived verdict/summary fields, and `audit-profile-semantics-v1` identity.
 - Equivalent JSON mapping key order does not change a spec fingerprint.
 - `chart-contract profile show audit-v0.2 --json` emits a bounded manifest covering the same stable rule IDs as `docs/AUDIT_RULES.md`.
 - Package-version-only changes do not change `audit-profile-semantics-v1` identity; changes to rule semantics do.
@@ -114,7 +118,7 @@ For process trees, run `python examples/process_tree.py` and verify that the gen
 
 For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify that silent line-scale cropping and native normalization block while explicitly declared user-requested transformations pass their policy checks.
 
-For audit provenance, run `python -m pytest tests/test_input_binding.py` and verify that unchanged inputs reproduce their binding while spec, data, and claim mutations invalidate it.
+For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
 For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 51-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
@@ -123,4 +127,4 @@ For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests
 - What release version should carry the set-membership and process-tree intents?
 - Should a future many-set intent use an UpSet-style matrix rather than circles?
 - Which additional external-spec shapes can be audited without inventing missing semantic evidence?
-- After the profile contract sees real use, should a new report schema bind saved audits to exact audit-profile identity?
+- Should a future signed-attestation layer live outside chart-contract rather than weakening the current explicit "hashes are not signatures" boundary?
