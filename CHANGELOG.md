@@ -4,6 +4,9 @@
 
 ### Added
 
+- Bound report schema `0.4` with deterministic `audit-report-semantics-v1` result bindings over the input bundle, serialized findings/verdict fields, and exact `audit-v0.2` semantic profile identity.
+- Saved-report verification now rejects edited findings or derived verdict metadata, reports audit-profile drift separately from input drift, and requires re-audit for legacy schema `0.3` artifacts.
+- In-memory `matches_spec(...)` / `matches_chart(...)` checks now fail if a bound report's findings are mutated after audit or its audit-profile identity no longer matches the installed policy.
 - First-class `Chart.process_tree()` support for rooted decision/process trees using one row per node, directed parent references, readable labels, and optional branch labels.
 - Deterministic top-down process-tree rendering with elbow connectors, arrowheads, boxed nodes, and structural metadata for root/node/edge/depth identity.
 - Process-tree audit rules for required columns, unique node IDs, labels, a single root, valid parent references, acyclicity, and first-party structural rendering.
