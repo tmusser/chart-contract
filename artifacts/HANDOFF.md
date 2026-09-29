@@ -2,54 +2,57 @@
 
 ## Resume Packet
 
-- Goal: add a first-class rooted decision/process-tree diagram without broadening chart-contract into a general graph library.
-- Branch: `agent/add-process-tree`.
-- Base: `main` at `6e179e2eaa70256c41e05580669964353543afc0`.
-- Current slice: `Chart.process_tree()`, structural validation, deterministic top-down flowchart layout, audit-profile rules, example, tests, and docs.
-- Read first: `src/chart_contract/process_tree.py`, `src/chart_contract/process_tree_audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/renderers/altair.py`, `tests/test_process_tree.py`, and `docs/PROCESS_TREE.md`.
+- Goal: harden durable audit reports against post-audit result edits and audit-policy drift without turning content hashes into authenticity claims.
+- Branch: `agent/harden-report-integrity`.
+- Base: `main` at `38ac3b701615e01f345733baa0144d621c3a5325`.
+- Pull request: #14 (`feat: bind audit reports to result and policy identity`).
+- Current slice: bound report schema `0.4`, result-integrity binding, audit-profile binding, saved-report verification, in-memory mutation detection, tests, CI smoke, and provenance docs.
+- Read first: `src/chart_contract/input_binding.py`, `src/chart_contract/cli.py`, `tests/test_input_binding.py`, `tests/test_saved_report_verification.py`, and `docs/AUDIT_PROVENANCE.md`.
 
 ## Current Repo State
 
-- `Chart.process_tree()` takes one row per node and column names for `node`, `parent`, `label`, and optional `branch`.
-- Exactly one row must have an empty parent. Every other parent must resolve to an existing node.
-- Node IDs must be non-null and unique; labels must be non-empty; parent relationships must be acyclic.
-- The layout is deterministic and top-down. Sibling order follows input row order.
-- The renderer uses elbow connectors, directional arrowheads, boxed nodes, node labels, and optional branch text.
-- The generated Vega-Lite artifact records `usermeta.chart_contract_intent=process_tree` and a `usermeta.process_tree` structural summary.
-- The machine-readable `audit-v0.2` profile and `docs/AUDIT_RULES.md` now contain 51 rules.
+- Public `audit_spec()` and first-party `Chart.audit()` reports now serialize as bound report schema `0.4`.
+- Existing `input_binding` still fingerprints the exact audited subject, explicit data, claim, and historical tool version.
+- New `report_binding` fingerprints the input bundle plus every serialized finding, derived verdict/summary fields, and the exact `audit-v0.2` semantic profile binding.
+- `chart-contract verify report` reports three layers independently: report integrity, audit-profile identity, and current input identity.
+- A semantically different installed audit profile returns `Audit profile: MISMATCH` and exit 1 even when the saved report and current inputs are otherwise internally consistent.
+- Edited findings or contradictory derived verdict metadata make the saved report malformed and verification exits 2.
+- `matches_spec(...)` and `matches_chart(...)` now reject post-audit result mutation as well as input drift.
+- Historical schema `0.3` reports remain historical and require re-audit for schema-`0.4` durable verification.
 
 ## Important Decisions
 
-- Public API name is `process_tree`, not `decision_tree`, to avoid implying an ML classifier.
-- This is a rooted-tree intent, not arbitrary graph layout.
-- Parent-child topology, direction, node labels, and optional branch text are authoritative.
-- Box size and spacing are schematic and do not encode probability, duration, importance, volume, or causal strength.
-- Branch text belongs to the child row and labels the incoming edge from its parent.
-- Cycles, multi-parent nodes, cross-links, DAGs, and swimlanes are intentionally out of scope.
-- No new runtime dependency or external layout engine is introduced.
+- `audit-report-semantics-v1` is deterministic content identity, not cryptographic authentication.
+- The report binding includes audit-profile semantic identity but deliberately inherits the profile contract's package-version exclusion, so version-only drift is not policy drift.
+- A profile mismatch means the saved ruleset semantics are stale relative to the installed policy; it is not an automatic compatibility, quality, or scientific judgment.
+- Do not recompute a report binding after manually editing findings or verdict fields. Re-run the audit and emit a new report.
+- Do not synthesize missing result/profile identity for schema `0.3`; those facts were not recorded historically.
+- Signing, timestamp authority, remote attestation, and authorship proof remain explicit non-goals.
 
 ## Verification
 
-Focused tests cover:
-- structural summary and deterministic layout;
-- renderer layers and usermeta;
-- READY valid tree;
-- BLOCK duplicate IDs, unknown parents, multiple roots, and cycles;
-- refusal to render invalid structures;
-- example-script execution;
-- 51-rule profile/documentation parity.
+GitHub Actions CI run #202 (`36641570160`) passed on the pre-handoff code head:
 
-A local clone/render attempt could not run because this environment cannot resolve github.com. GitHub Actions is therefore the authoritative executable gate; do not claim browser-level visual inspection.
+- Python 3.10 -> PASSED
+- Python 3.11 -> PASSED
+- Python 3.12 -> PASSED
+- Python 3.13 -> PASSED
+- CLI verdict and statistical trap checks -> PASSED
+- build/distribution inspection -> PASSED
+- isolated wheel installation -> PASSED
+- installed CLI schema-`0.4` report shape and verification smoke -> PASSED
+
+The final handoff/verification documentation commits do not change runtime semantics; the final branch CI should still be treated as the merge gate.
 
 ## Remaining Risks
 
-- Very wide trees or long labels can become crowded in a static Vega-Lite canvas.
-- The renderer does not automatically wrap arbitrary labels.
-- Generic `audit_spec()` does not reconstruct process-tree topology from layered Vega-Lite output; use `Chart.process_tree().audit()` before rendering.
-- A structurally valid tree can still document a process that is incomplete, stale, or operationally wrong.
+- Someone with write access can deliberately recompute hashes after changing an artifact; this feature detects drift, not adversarial forgery.
+- Matching profile identity does not prove the Python implementation faithfully implements every declared profile rule.
+- A fully matching `READY` artifact is still a deterministic mechanical result, not scientific validation or human approval.
+- Consumers that persist schema `0.3` reports must re-audit rather than expecting an in-place upgrade.
 
 ## Next Recommended Task
 
-- Review PR #13; CI is green across Python 3.10-3.13 and the isolated wheel smoke.
-- Inspect the final diff for accidental broadening into general graph semantics before merge.
-- Keep any future DAG/loop/swimlane work as a separate intent or separate tool rather than weakening the rooted-tree contract.
+- Confirm final PR #14 CI remains green after the documentation-only handoff commits.
+- Review the schema-`0.4` migration boundary and merge if the explicit re-audit requirement for legacy `0.3` artifacts is acceptable.
+- Keep any future cryptographic signing/attestation work as a separate layer rather than weakening the present content-identity semantics.
