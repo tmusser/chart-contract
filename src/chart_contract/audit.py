@@ -607,11 +607,24 @@ def _audit_percent_representation(
     report: AuditReport,
     *,
     unit: str | None,
-    representation: str | None,
+    representation: Any,
     percent_presentation: bool,
     surface: str,
 ) -> None:
-    if not percent_presentation and not representation:
+    if not percent_presentation and representation is None:
+        return
+
+    field_name = "value_representation" if surface == "chart" else "usermeta.value_representation"
+    if representation is not None and (
+        not isinstance(representation, str) or not representation.strip()
+    ):
+        report.add(
+            "labels.percent.representation",
+            FAIL,
+            f"Percent value representation must be a non-empty string; got {representation!r}.",
+            suggestion="Use 'fraction' or 'percentage_points'.",
+            field=field_name,
+        )
         return
 
     normalized = representation.strip().lower() if isinstance(representation, str) else None
@@ -621,7 +634,7 @@ def _audit_percent_representation(
             FAIL,
             "Percent value representation is declared without explicit percent presentation semantics.",
             suggestion="Use unit='percent'/'percentage'/'%' or remove value_representation.",
-            field="value_representation" if surface == "chart" else "usermeta.value_representation",
+            field=field_name,
         )
     elif normalized is None:
         report.add(
@@ -632,7 +645,7 @@ def _audit_percent_representation(
                 "Declare value_representation='fraction' for 0.42 meaning 42%, or "
                 "'percentage_points' for 42 meaning 42%."
             ),
-            field="value_representation" if surface == "chart" else "usermeta.value_representation",
+            field=field_name,
         )
     elif is_supported_percent_representation(normalized):
         report.add(
@@ -646,7 +659,7 @@ def _audit_percent_representation(
             FAIL,
             f"Unsupported percent value representation: {representation!r}.",
             suggestion="Use 'fraction' or 'percentage_points'; chart-contract never guesses or rescales silently.",
-            field="value_representation" if surface == "chart" else "usermeta.value_representation",
+            field=field_name,
         )
 
 
