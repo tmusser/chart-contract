@@ -2,57 +2,59 @@
 
 ## Resume Packet
 
-- Goal: harden durable audit reports against post-audit result edits and audit-policy drift without turning content hashes into authenticity claims.
-- Branch: `agent/harden-report-integrity`.
-- Base: `main` at `38ac3b701615e01f345733baa0144d621c3a5325`.
-- Pull request: #14 (`feat: bind audit reports to result and policy identity`).
-- Current slice: bound report schema `0.4`, result-integrity binding, audit-profile binding, saved-report verification, in-memory mutation detection, tests, CI smoke, and provenance docs.
-- Read first: `src/chart_contract/input_binding.py`, `src/chart_contract/cli.py`, `tests/test_input_binding.py`, `tests/test_saved_report_verification.py`, and `docs/AUDIT_PROVENANCE.md`.
+- Goal: make percent-valued chart representation explicit without guessing scale from observed values or silently rescaling data.
+- Branch: `agent/percent-representation-contract`.
+- Base: `main` at `0ef60fb788c5ad4a24878c06905424e65a15be61`.
+- Pull request: #15 (`feat: make percent value representation explicit`).
+- Current slice: public `value_representation` contract, percent rendering semantics, external-spec audits, two new audit-profile rules, tests, and docs.
+- Read first: `src/chart_contract/audit.py`, `src/chart_contract/chart.py`, `src/chart_contract/contracts.py`, `src/chart_contract/renderers/altair.py`, `tests/test_percent_semantics.py`, and `docs/PERCENT_SEMANTICS.md`.
 
 ## Current Repo State
 
-- Public `audit_spec()` and first-party `Chart.audit()` reports now serialize as bound report schema `0.4`.
-- Existing `input_binding` still fingerprints the exact audited subject, explicit data, claim, and historical tool version.
-- New `report_binding` fingerprints the input bundle plus every serialized finding, derived verdict/summary fields, and the exact `audit-v0.2` semantic profile binding.
-- `chart-contract verify report` reports three layers independently: report integrity, audit-profile identity, and current input identity.
-- A semantically different installed audit profile returns `Audit profile: MISMATCH` and exit 1 even when the saved report and current inputs are otherwise internally consistent.
-- Edited findings or contradictory derived verdict metadata make the saved report malformed and verification exits 2.
-- `matches_spec(...)` and `matches_chart(...)` now reject post-audit result mutation as well as input drift.
-- Historical schema `0.3` reports remain historical and require re-audit for schema-`0.4` durable verification.
+- Quantitative first-party chart constructors accept optional `value_representation`.
+- Explicit percent units are `percent`, `percentage`, and `%`.
+- Supported raw representations are `fraction` and `percentage_points`.
+- Missing representation on explicit percent presentation yields `labels.percent.representation: WARN`.
+- Unsupported, malformed, or representation-without-percent declarations yield `FAIL`.
+- First-party fractional percent charts use Vega-Lite percent axis/tooltip formatting; source DataFrames are not rescaled or mutated.
+- Percentage-point charts remain on their raw numeric scale and avoid Vega-Lite's fraction-scaling percent formatter.
+- External spec audits can recover representation from `usermeta.value_representation`.
+- `labels.percent.format` warns when fractional values lack percent formatting and blocks percentage-point values passed through a percent formatter.
+- Generic `rate` units are deliberately not inferred as percentages.
+- The `audit-v0.2` profile now contains 53 rules, so this PR intentionally changes audit-profile semantic identity.
 
 ## Important Decisions
 
-- `audit-report-semantics-v1` is deterministic content identity, not cryptographic authentication.
-- The report binding includes audit-profile semantic identity but deliberately inherits the profile contract's package-version exclusion, so version-only drift is not policy drift.
-- A profile mismatch means the saved ruleset semantics are stale relative to the installed policy; it is not an automatic compatibility, quality, or scientific judgment.
-- Do not recompute a report binding after manually editing findings or verdict fields. Re-run the audit and emit a new report.
-- Do not synthesize missing result/profile identity for schema `0.3`; those facts were not recorded historically.
-- Signing, timestamp authority, remote attestation, and authorship proof remain explicit non-goals.
+- Never infer representation from value ranges. `0.42` and `42` remain author-declared semantics.
+- Never multiply or divide chart data merely to satisfy or render the percent contract.
+- `value_representation` is not a generic scaling API; using it without explicit percent presentation semantics blocks.
+- Percent representation metadata describes presentation scale only. It does not validate metric construction, denominators, statistical meaning, or source truth.
+- A generic rate may represent events/time, events/person, ratios, indices, or other units and remains outside this percent-specific slice.
+- Older schema-0.4 reports correctly become stale-policy artifacts because adding these rules changes `audit-profile-semantics-v1`.
 
 ## Verification
 
-GitHub Actions CI run #202 (`36641570160`) passed on the pre-handoff code head:
+GitHub Actions CI run #205 (`36785086891`) passed on the code-bearing head:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
 - Python 3.12 -> PASSED
 - Python 3.13 -> PASSED
-- CLI verdict and statistical trap checks -> PASSED
+- CLI verdict and statistical diagnostic traps -> PASSED
 - build/distribution inspection -> PASSED
-- isolated wheel installation -> PASSED
-- installed CLI schema-`0.4` report shape and verification smoke -> PASSED
+- isolated wheel install / installed CLI smoke -> PASSED
 
-The final handoff/verification documentation commits do not change runtime semantics; the final branch CI should still be treated as the merge gate.
+The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Actions run as the merge gate.
 
 ## Remaining Risks
 
-- Someone with write access can deliberately recompute hashes after changing an artifact; this feature detects drift, not adversarial forgery.
-- Matching profile identity does not prove the Python implementation faithfully implements every declared profile rule.
-- A fully matching `READY` artifact is still a deterministic mechanical result, not scientific validation or human approval.
-- Consumers that persist schema `0.3` reports must re-audit rather than expecting an in-place upgrade.
+- External Vega-Lite specs using arbitrary expression-based formatting may sit outside the deterministic format check.
+- Percent representation does not prove that upstream values use the declared convention truthfully.
+- The name `percentage_points` is an explicit scale declaration; downstream interpretation of changes still requires domain/statistical judgment.
+- Broader rate denominator semantics remain intentionally unsolved.
 
 ## Next Recommended Task
 
-- Confirm final PR #14 CI remains green after the documentation-only handoff commits.
-- Review the schema-`0.4` migration boundary and merge if the explicit re-audit requirement for legacy `0.3` artifacts is acceptable.
-- Keep any future cryptographic signing/attestation work as a separate layer rather than weakening the present content-identity semantics.
+- Confirm final PR #15 CI remains green after these documentation-only commits.
+- Review the public naming and severity boundaries, then merge if they match the desired contract.
+- Keep broader rate/ratio semantics or transform-lineage work as separate PRs.

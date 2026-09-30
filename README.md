@@ -189,6 +189,32 @@ spec = chart.to_vega_lite()
 altair_chart = chart.to_altair()
 ```
 
+### Percent values: declare the raw scale
+
+If a metric is presented as percent, make the raw representation explicit instead of relying
+on value-range guesses:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="week",
+    y="conversion_rate",
+    claim="Observed conversion increased.",
+    source="warehouse.funnel_events",
+    unit="percent",
+    value_representation="fraction",  # 0.42 means 42%
+)
+```
+
+Use `value_representation="percentage_points"` when raw `42` means 42%. Missing
+representation produces `REVIEW`; unsupported or contradictory percent semantics can
+`BLOCK`. The first-party renderer formats fractional percent values for display but never
+rescales the underlying data.
+
+Generic `rate` units are deliberately **not** assumed to be percentages. See
+[Percent value semantics](docs/PERCENT_SEMANTICS.md) for the deterministic contract and
+external Vega-Lite behavior.
+
 For a minimal pre-share gate, inspect `report.verdict` before you send the chart onward: `READY` means the audit found only `PASS` checks, `REVIEW` means warnings need human judgment, and `BLOCK` means at least one failure should stop sharing until fixed. `report.verdict` is the authoritative gate field; `report.passed` only means there are no `FAIL` findings, so a `REVIEW` report can still have `passed=True`.
 
 Supported Python API front-door intents:

@@ -14,6 +14,9 @@
 - Do not silently truncate quantitative scales or normalize values. For external Vega-Lite specs, require explicit `usermeta.user_requested_scale_override=true` or `usermeta.user_requested_normalization=true` before those transformations can pass the policy audit.
 - Treat user-request metadata as a declaration, not proof that the user actually requested the transformation.
 - A truncated quantitative bar baseline remains a visual-integrity failure even when user-request metadata is present.
+- Never infer percent representation from observed value ranges. When percent presentation is explicit, require `value_representation` to distinguish fractional values from percentage-point values.
+- Do not rescale percent data to obtain a passing audit. Preserve raw values and use display formatting that matches the declared representation.
+- Do not treat a generic `rate` unit as percent; rates may use unrelated denominators or scales.
 - Treat the machine-readable audit profile as descriptive ruleset metadata, not another audit or scientific approval artifact.
 - Do not recompute a report binding to legitimize post-audit edits to findings or verdict fields; rerun the audit and emit a new report.
 - Treat a saved-report audit-profile mismatch as stale policy identity that requires re-audit for current verification, not as proof that either policy is better or scientifically valid.

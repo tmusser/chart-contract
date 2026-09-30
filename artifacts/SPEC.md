@@ -27,6 +27,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - deterministic `audit-profile-semantics-v1` identity that separates semantic audit-policy drift from package/tool metadata drift
 - `chart-contract profile show` and `chart-contract profile diff` for read-only ruleset inspection and mechanical drift
 - external-spec policy checks that block undeclared quantitative scale overrides and native normalization
+- explicit percent value representation via `value_representation="fraction" | "percentage_points"`, preserved in first-party spec metadata
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -45,6 +46,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Quantitative scale overrides and native Vega-Lite normalization in external specs require explicit user-request declarations; the declarations are metadata boundaries, not proof that the user actually made the request.
 - A nonzero quantitative bar baseline remains a visual-integrity failure even when a user-request declaration is present.
 - The scale/normalization policy does not infer semantic normalization hidden in arbitrary transforms or data that was preprocessed before reaching the audited spec.
+- Percent representation is never inferred from observed value ranges; `0.42` versus `42` must be declared when percent presentation is explicit.
+- Generic rate units are not assumed to be percentages, and percent representation checks do not validate upstream numerator/denominator logic.
 - Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
 - Report-result fingerprints detect saved finding/verdict drift but are not signatures; someone with write access can deliberately recompute them.
 - Audit-profile digests identify declared ruleset semantics; they do not authenticate execution, prove the implementation correct, or establish that any chart is safe or scientifically sound.
@@ -80,6 +83,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - External Vega-Lite specs with explicit quantitative domain overrides or `scale.zero=false` block unless `usermeta.user_requested_scale_override=true` is declared, except truncated bars, which remain blocked.
 - External Vega-Lite specs using native stack normalization block unless `usermeta.user_requested_normalization=true` is declared.
 - Untouched quantitative scale defaults do not require authorization metadata.
+- Percent-valued first-party charts warn when representation is missing, block malformed/unsupported declarations, preserve `usermeta.value_representation`, and never mutate the raw data.
+- External percent specs warn when fractional values lack percent formatting and block percentage-point values routed through a fraction-scaling percent formatter.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -120,7 +125,9 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 51-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 53-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+
+For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
 ## Open Questions
 

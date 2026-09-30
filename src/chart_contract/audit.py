@@ -14,6 +14,7 @@ from .contracts import (
     declared_evidence_from_spec,
     declared_source_from_spec,
     declared_unit_from_spec,
+    declared_value_representation_from_spec,
     extract_inline_values,
     find_decorative_terms,
     has_causal_language,
@@ -23,6 +24,8 @@ from .contracts import (
     is_generic_title,
     is_numeric_series,
     is_ordered_series,
+    is_percent_unit,
+    is_supported_percent_representation,
 )
 
 PASS = "PASS"
@@ -161,6 +164,14 @@ def audit_chart(chart: Any) -> AuditReport:
     distribution_intent = chart.intent in DISTRIBUTION_INTENTS
     metric_field = _chart_metric_field(chart)
     category_field = _distribution_category_field(chart)
+
+    _audit_percent_representation(
+        report,
+        unit=getattr(chart, "unit", None),
+        representation=getattr(chart, "value_representation", None),
+        percent_presentation=is_percent_unit(getattr(chart, "unit", None)),
+        surface="chart",
+    )
 
     if claim:
         report.add("contract.claim.present", PASS, "Claim is declared.")
@@ -388,6 +399,7 @@ def audit_spec(
     title = _title_text(spec.get("title"))
     source = declared_source_from_spec(spec)
     unit = declared_unit_from_spec(spec)
+    value_representation = declared_value_representation_from_spec(spec)
     caveat = declared_caveat_from_spec(spec)
     evidence_flag = declared_evidence_from_spec(spec)
     explicit_claim = (claim or "").strip()
@@ -448,6 +460,29 @@ def audit_spec(
                 suggestion="Add spec['usermeta']['unit'] or a clear axis title with units.",
                 field="unit",
             )
+
+        percent_presentation = is_percent_unit(unit) or _encoding_uses_percent_format(encoding)
+        _audit_percent_representation(
+            report,
+            unit=unit,
+            representation=value_representation,
+            percent_presentation=percent_presentation,
+            surface="spec",
+        )
+        _audit_percent_format(
+            report,
+            encoding=encoding,
+            representation=value_representation,
+            percent_presentation=percent_presentation,
+        )
+    elif value_representation:
+        _audit_percent_representation(
+            report,
+            unit=unit,
+            representation=value_representation,
+            percent_presentation=False,
+            surface="spec",
+        )
 
     _audit_spec_encoding_fields(report, encoding, resolved_frame)
 
@@ -566,6 +601,126 @@ def audit_spec(
     audit_statistical_spec(report, spec, resolved_frame, resolved_claim)
 
     return report
+
+
+def _audit_percent_representation(
+    report: AuditReport,
+    *,
+    unit: str | None,
+    representation: Any,
+    percent_presentation: bool,
+    surface: str,
+) -> None:
+    if not percent_presentation and representation is None:
+        return
+
+    field_name = "value_representation" if surface == "chart" else "usermeta.value_representation"
+    if representation is not None and (
+        not isinstance(representation, str) or not representation.strip()
+    ):
+        report.add(
+            "labels.percent.representation",
+            FAIL,
+            f"Percent value representation must be a non-empty string; got {representation!r}.",
+            suggestion="Use 'fraction' or 'percentage_points'.",
+            field=field_name,
+        )
+        return
+
+    normalized = representation.strip().lower() if isinstance(representation, str) else None
+    if not percent_presentation:
+        report.add(
+            "labels.percent.representation",
+            FAIL,
+            "Percent value representation is declared without explicit percent presentation semantics.",
+            suggestion="Use unit='percent'/'percentage'/'%' or remove value_representation.",
+            field=field_name,
+        )
+    elif normalized is None:
+        report.add(
+            "labels.percent.representation",
+            WARN,
+            "Percent values do not declare whether raw numbers are fractions or percentage points.",
+            suggestion=(
+                "Declare value_representation='fraction' for 0.42 meaning 42%, or "
+                "'percentage_points' for 42 meaning 42%."
+            ),
+            field=field_name,
+        )
+    elif is_supported_percent_representation(normalized):
+        report.add(
+            "labels.percent.representation",
+            PASS,
+            f"Percent value representation is explicitly declared as {normalized!r}.",
+        )
+    else:
+        report.add(
+            "labels.percent.representation",
+            FAIL,
+            f"Unsupported percent value representation: {representation!r}.",
+            suggestion="Use 'fraction' or 'percentage_points'; chart-contract never guesses or rescales silently.",
+            field=field_name,
+        )
+
+
+def _audit_percent_format(
+    report: AuditReport,
+    *,
+    encoding: Any,
+    representation: str | None,
+    percent_presentation: bool,
+) -> None:
+    if not percent_presentation:
+        return
+    normalized = representation.strip().lower() if isinstance(representation, str) else None
+    if normalized not in {"fraction", "percentage_points"}:
+        return
+
+    uses_percent_format = _encoding_uses_percent_format(encoding)
+    if normalized == "fraction":
+        if uses_percent_format:
+            report.add(
+                "labels.percent.format",
+                PASS,
+                "Fractional percent values use percent axis formatting without mutating the data.",
+            )
+        else:
+            report.add(
+                "labels.percent.format",
+                WARN,
+                "Fractional percent values are declared but the quantitative axis does not use percent formatting.",
+                suggestion="Use an axis percent format so 0.42 is presented as 42%, or use the first-party renderer.",
+                field="encoding",
+            )
+    elif uses_percent_format:
+        report.add(
+            "labels.percent.format",
+            FAIL,
+            "Percentage-point values use a percent formatter that scales values by 100.",
+            suggestion="Remove the percent formatter for percentage-point data; keep the percent unit in the title/metadata.",
+            field="encoding",
+        )
+    else:
+        report.add(
+            "labels.percent.format",
+            PASS,
+            "Percentage-point values are not passed through a fraction-scaling percent formatter.",
+        )
+
+
+def _encoding_uses_percent_format(encoding: Any) -> bool:
+    if not isinstance(encoding, Mapping):
+        return False
+    for _, definition in _iter_encoding_definitions(encoding):
+        if not isinstance(definition, Mapping) or _encoding_type(definition) != "quantitative":
+            continue
+        axis = definition.get("axis")
+        if not isinstance(axis, Mapping):
+            continue
+        format_value = axis.get("format")
+        if isinstance(format_value, str) and "%" in format_value:
+            return True
+    return False
 
 
 def _primary_analytical_spec(spec: Mapping[str, Any]) -> Mapping[str, Any]:

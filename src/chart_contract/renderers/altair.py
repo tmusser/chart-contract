@@ -7,7 +7,7 @@ from typing import Any
 import altair as alt
 import pandas as pd
 
-from ..contracts import is_datetime_like, is_numeric_series
+from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..set_membership import membership_summary, venn_layout_records
 from ..statistics import (
@@ -70,6 +70,7 @@ def render_chart(chart: Any) -> alt.Chart:
         "claim": chart.claim,
         "source": chart.source,
         "unit": chart.unit,
+        "value_representation": chart.value_representation,
         "caveat": chart.caveat,
         "filters": chart.filters,
     }.items():
@@ -131,10 +132,10 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         tooltip_type = "nominal"
     line = base.mark_line(point=True).encode(
         x=alt.X(f"{chart.x}:{x_type}", title=chart.x.replace("_", " ").title()),
-        y=alt.Y(f"{chart.y}:Q", title=_y_title(chart)),
+        y=alt.Y(f"{chart.y}:Q", title=_y_title(chart), **_metric_axis_kwargs(chart)),
         tooltip=[
             alt.Tooltip(field=chart.x, type=tooltip_type),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ],
     )
 
@@ -163,11 +164,16 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
 
 def _render_rank(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
     return alt.Chart(alt.InlineData(values=records)).mark_bar().encode(
-        x=alt.X(f"{chart.y}:Q", title=_y_title(chart), scale=alt.Scale(zero=True)),
+        x=alt.X(
+            f"{chart.y}:Q",
+            title=_y_title(chart),
+            scale=alt.Scale(zero=True),
+            **_metric_axis_kwargs(chart),
+        ),
         y=alt.Y(f"{chart.x}:N", title=chart.x.replace("_", " ").title(), sort="-x"),
         tooltip=[
             alt.Tooltip(field=chart.x, type="nominal"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ],
     )
 
@@ -175,10 +181,15 @@ def _render_rank(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
 def _render_compare(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
     encoding: dict[str, Any] = {
         "x": alt.X(f"{chart.x}:N", title=chart.x.replace("_", " ").title()),
-        "y": alt.Y(f"{chart.y}:Q", title=_y_title(chart), scale=alt.Scale(zero=True)),
+        "y": alt.Y(
+            f"{chart.y}:Q",
+            title=_y_title(chart),
+            scale=alt.Scale(zero=True),
+            **_metric_axis_kwargs(chart),
+        ),
         "tooltip": [
             alt.Tooltip(field=chart.x, type="nominal"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ],
     }
     if chart.group:
@@ -187,7 +198,7 @@ def _render_compare(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         encoding["tooltip"] = [
             alt.Tooltip(field=chart.x, type="nominal"),
             alt.Tooltip(field=chart.group, type="nominal"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ]
     return alt.Chart(alt.InlineData(values=records)).mark_bar().encode(**encoding)
 
@@ -202,17 +213,32 @@ def _render_histogram(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         bin_config = alt.Bin(maxbins=chart.bins)
 
     encoding: dict[str, Any] = {
-        "x": alt.X(f"{value_field}:Q", bin=bin_config, title=_metric_title(value_field, chart.unit)),
+        "x": alt.X(
+            f"{value_field}:Q",
+            bin=bin_config,
+            title=_metric_title(value_field, chart.unit),
+            **_metric_axis_kwargs(chart),
+        ),
         "y": alt.Y("count():Q", title="Count"),
         "tooltip": [
-            alt.Tooltip(f"{value_field}:Q", bin=bin_config, title=_metric_title(value_field, chart.unit)),
+            alt.Tooltip(
+                f"{value_field}:Q",
+                bin=bin_config,
+                title=_metric_title(value_field, chart.unit),
+                **_metric_tooltip_kwargs(chart),
+            ),
             alt.Tooltip("count():Q", title="Count"),
         ],
     }
     if chart.group:
         encoding["color"] = alt.Color(f"{chart.group}:N", title=chart.group.replace("_", " ").title())
         encoding["tooltip"] = [
-            alt.Tooltip(f"{value_field}:Q", bin=bin_config, title=_metric_title(value_field, chart.unit)),
+            alt.Tooltip(
+                f"{value_field}:Q",
+                bin=bin_config,
+                title=_metric_title(value_field, chart.unit),
+                **_metric_tooltip_kwargs(chart),
+            ),
             alt.Tooltip(field=chart.group, type="nominal"),
             alt.Tooltip("count():Q", title="Count"),
         ]
@@ -232,10 +258,14 @@ def _render_boxplot(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
 
     encoding: dict[str, Any] = {
         "x": alt.X(f"{category_field}:N", title=category_field.replace("_", " ").title()),
-        "y": alt.Y(f"{chart.y}:Q", title=_metric_title(chart.y, chart.unit)),
+        "y": alt.Y(
+            f"{chart.y}:Q",
+            title=_metric_title(chart.y, chart.unit),
+            **_metric_axis_kwargs(chart),
+        ),
         "tooltip": [
             alt.Tooltip(field=category_field, type="nominal"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ],
     }
     if group_field:
@@ -243,7 +273,7 @@ def _render_boxplot(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         encoding["tooltip"] = [
             alt.Tooltip(field=category_field, type="nominal"),
             alt.Tooltip(field=group_field, type="nominal"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ]
     return alt.Chart(alt.InlineData(values=working_records)).mark_boxplot().encode(**encoding)
 
@@ -267,11 +297,20 @@ def _render_violin(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
     )
     violin = base.mark_area(orient="horizontal", opacity=0.6).encode(
         x=alt.X("density:Q", title="Density"),
-        y=alt.Y("value:Q", title=_metric_title(chart.y, chart.unit)),
+        y=alt.Y(
+            "value:Q",
+            title=_metric_title(chart.y, chart.unit),
+            **_metric_axis_kwargs(chart),
+        ),
         color=alt.Color(f"{category_field}:N", title=category_field.replace("_", " ").title()),
         tooltip=[
             alt.Tooltip(field=category_field, type="nominal"),
-            alt.Tooltip(field="value", type="quantitative", title=_metric_title(chart.y, chart.unit)),
+            alt.Tooltip(
+                field="value",
+                type="quantitative",
+                title=_metric_title(chart.y, chart.unit),
+                **_metric_tooltip_kwargs(chart),
+            ),
             alt.Tooltip("density:Q", title="Density"),
         ],
     )
@@ -289,10 +328,18 @@ def _render_qq(chart: Any) -> alt.Chart:
     )
     point_encoding: dict[str, Any] = {
         "x": alt.X(f"{QQ_THEORETICAL_FIELD}:Q", title="Theoretical normal quantile"),
-        "y": alt.Y(f"{QQ_SAMPLE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+        "y": alt.Y(
+            f"{QQ_SAMPLE_FIELD}:Q",
+            title=_metric_title(chart.value, chart.unit),
+            **_metric_axis_kwargs(chart),
+        ),
         "tooltip": [
             alt.Tooltip(f"{QQ_THEORETICAL_FIELD}:Q", title="Theoretical quantile"),
-            alt.Tooltip(f"{QQ_SAMPLE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+            alt.Tooltip(
+                f"{QQ_SAMPLE_FIELD}:Q",
+                title=_metric_title(chart.value, chart.unit),
+                **_metric_tooltip_kwargs(chart),
+            ),
         ],
     }
     line_encoding: dict[str, Any] = {
@@ -322,7 +369,11 @@ def _render_ecdf(chart: Any) -> alt.Chart:
         raise ValueError("ECDF charts require a value field.")
     records = ecdf_records(chart.data, value=chart.value, group=chart.group)
     encoding: dict[str, Any] = {
-        "x": alt.X(f"{ECDF_VALUE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+        "x": alt.X(
+            f"{ECDF_VALUE_FIELD}:Q",
+            title=_metric_title(chart.value, chart.unit),
+            **_metric_axis_kwargs(chart),
+        ),
         "y": alt.Y(
             f"{ECDF_PROBABILITY_FIELD}:Q",
             title="Cumulative probability",
@@ -330,7 +381,11 @@ def _render_ecdf(chart: Any) -> alt.Chart:
             axis=alt.Axis(format=".0%"),
         ),
         "tooltip": [
-            alt.Tooltip(f"{ECDF_VALUE_FIELD}:Q", title=_metric_title(chart.value, chart.unit)),
+            alt.Tooltip(
+                f"{ECDF_VALUE_FIELD}:Q",
+                title=_metric_title(chart.value, chart.unit),
+                **_metric_tooltip_kwargs(chart),
+            ),
             alt.Tooltip(f"{ECDF_PROBABILITY_FIELD}:Q", title="Cumulative probability", format=".1%"),
         ],
     }
@@ -346,10 +401,14 @@ def _render_residual(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         raise ValueError("Residual charts require fitted and residual fields.")
     encoding: dict[str, Any] = {
         "x": alt.X(f"{chart.x}:Q", title=chart.x.replace("_", " ").title()),
-        "y": alt.Y(f"{chart.y}:Q", title=_metric_title(chart.y, chart.unit)),
+        "y": alt.Y(
+            f"{chart.y}:Q",
+            title=_metric_title(chart.y, chart.unit),
+            **_metric_axis_kwargs(chart),
+        ),
         "tooltip": [
             alt.Tooltip(field=chart.x, type="quantitative"),
-            alt.Tooltip(field=chart.y, type="quantitative"),
+            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ],
     }
     if chart.group:
@@ -474,6 +533,28 @@ def _render_process_tree(chart: Any) -> alt.Chart:
         )
         rendered = rendered + branches
     return rendered
+
+
+def _metric_axis_kwargs(chart: Any) -> dict[str, Any]:
+    representation = (
+        chart.value_representation.strip().lower()
+        if isinstance(chart.value_representation, str)
+        else None
+    )
+    if is_percent_unit(chart.unit) and representation == "fraction":
+        return {"axis": alt.Axis(format=".1%")}
+    return {}
+
+
+def _metric_tooltip_kwargs(chart: Any) -> dict[str, Any]:
+    representation = (
+        chart.value_representation.strip().lower()
+        if isinstance(chart.value_representation, str)
+        else None
+    )
+    if is_percent_unit(chart.unit) and representation == "fraction":
+        return {"format": ".1%"}
+    return {}
 
 
 def _metric_title(field_name: str | None, unit: str | None) -> str:

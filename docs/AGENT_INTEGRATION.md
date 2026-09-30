@@ -33,6 +33,8 @@ Policy:
 
 - The agent must stop on `BLOCK`.
 - Do not swap the claim attached to a chart artifact. If `usermeta.claim` exists, audit that claim or supply the exact same text; `contract.claim.consistency` blocks conflicting claim sources.
+- When percent presentation is explicit, declare `usermeta.value_representation` as `fraction` or `percentage_points`; never infer the scale from observed values and never rescale the data merely to satisfy the audit.
+- Do not assume a generic `rate` unit means percent. Preserve the actual denominator/unit semantics supplied by the analytical contract.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.

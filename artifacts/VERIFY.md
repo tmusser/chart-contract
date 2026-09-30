@@ -1,5 +1,41 @@
 # VERIFY
 
+2026-09-30 - Make percent value representation explicit
+
+Environment:
+- Branch: `agent/percent-representation-contract`
+- Base: `main` at `0ef60fb788c5ad4a24878c06905424e65a15be61`
+- Pull request: #15 (`feat: make percent value representation explicit`)
+- GitHub Actions CI run #205 (`36785086891`) -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict and statistical diagnostic trap checks -> PASSED on every Python lane
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI smoke -> PASSED
+
+Verified behavior:
+- quantitative first-party chart constructors accept `value_representation`;
+- explicit percent presentation supports `fraction` and `percentage_points`;
+- missing percent representation emits `WARN` / `REVIEW`;
+- malformed, unsupported, or representation-without-percent declarations emit `FAIL` / `BLOCK`;
+- first-party fractional values use percent axis/tooltip formatting while chart data remain unchanged;
+- first-party percentage-point values remain on their raw numeric scale;
+- external fractional percent specs without percent formatting warn;
+- external percentage-point specs using a fraction-scaling percent formatter block;
+- percent-formatted external specs without representation warn;
+- generic `rate` units are not treated as percent;
+- machine-readable profile/documentation parity moves from 51 to 53 rules.
+
+Remaining risks:
+- Percent metadata cannot prove the upstream numerator, denominator, population, or aggregation is correct.
+- The generic spec rule inspects explicit quantitative axis formatting; it does not reconstruct arbitrary formatting expressions or hidden preprocessing.
+- `percentage_points` is a representation declaration, not evidence that a metric difference is statistically meaningful.
+- Audit-profile semantic identity intentionally changes with the two new rules; older schema-0.4 reports require re-audit for a current profile match.
+
+Next safest task:
+- Review and merge PR #15 if the explicit representation names and REVIEW/BLOCK boundaries are desirable.
+- Keep broader rate/ratio denominator semantics as a separate future contract rather than inferring them from percent behavior.
+
 2026-09-29 - Harden durable report integrity and audit-policy identity
 
 Environment:
