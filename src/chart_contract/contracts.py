@@ -171,12 +171,10 @@ def declared_unit_from_spec(spec: Mapping[str, Any]) -> str | None:
     return None
 
 
-def declared_value_representation_from_spec(spec: Mapping[str, Any]) -> str | None:
+def declared_value_representation_from_spec(spec: Mapping[str, Any]) -> Any:
     usermeta = spec.get("usermeta", {})
     if isinstance(usermeta, Mapping):
-        representation = usermeta.get("value_representation")
-        if isinstance(representation, str) and representation.strip():
-            return representation.strip()
+        return usermeta.get("value_representation")
     return None
 
 
