@@ -536,13 +536,23 @@ def _render_process_tree(chart: Any) -> alt.Chart:
 
 
 def _metric_axis_kwargs(chart: Any) -> dict[str, Any]:
-    if is_percent_unit(chart.unit) and chart.value_representation == "fraction":
+    representation = (
+        chart.value_representation.strip().lower()
+        if isinstance(chart.value_representation, str)
+        else None
+    )
+    if is_percent_unit(chart.unit) and representation == "fraction":
         return {"axis": alt.Axis(format=".1%")}
     return {}
 
 
 def _metric_tooltip_kwargs(chart: Any) -> dict[str, Any]:
-    if is_percent_unit(chart.unit) and chart.value_representation == "fraction":
+    representation = (
+        chart.value_representation.strip().lower()
+        if isinstance(chart.value_representation, str)
+        else None
+    )
+    if is_percent_unit(chart.unit) and representation == "fraction":
         return {"format": ".1%"}
     return {}
 
