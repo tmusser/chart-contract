@@ -18,6 +18,8 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 | `data.y.column` | Chart audits | `FAIL` when the y field is absent. | Verifies the dependent metric column exists. | Add or rename the y column in the data. |
 | `data.y.numeric` | Chart audits | `PASS` when y is numeric; `FAIL` when y exists but is not numeric. | Verifies the metric is quantitative. | Convert the field to numeric or choose a numeric metric. |
 | `labels.unit.present` | Chart audits and spec audits | `PASS` when the quantitative metric declares a unit; `WARN` when it does not. | Checks that units are visible for quantitative values. | Add a unit such as percent, count, dollars, or rate. |
+| `labels.percent.representation` | Chart audits and spec audits with explicit percent presentation | `PASS` for `fraction` or `percentage_points`; `WARN` when percent presentation is explicit but representation is missing; `FAIL` for malformed, unsupported, or representation-without-percent declarations. | Makes the raw numeric scale behind percent values explicit instead of guessing whether `0.42` or `42` means 42%. | Declare `value_representation="fraction"` or `"percentage_points"`; do not use the field for non-percent metrics. |
+| `labels.percent.format` | Spec audits with explicit percent presentation and valid representation | `PASS` when formatter semantics match the declared representation; `WARN` when fractional values lack percent formatting; `FAIL` when percentage-point values use a formatter that multiplies by 100. | Prevents Vega-Lite percent formatting from silently changing the displayed scale. | Format fractional values as percent; leave percentage-point values on their raw scale and keep percent semantics in metadata/title. |
 | `data.required.column` | Chart audits | `FAIL` when a required x, y, or group column is missing. | Verifies all referenced data columns exist. | Add the missing column or change the encoding to an existing field. |
 | `data.encoding.fields` | Spec audits with data | `PASS` when every encoded field exists; `FAIL` when any encoded field is absent. | Verifies object and shorthand Vega-Lite encodings reference real columns. | Add the missing columns or update the encodings. |
 | `data.encoding.quantitative` | Spec audits with data | `PASS` when quantitative encoded fields are numeric; `FAIL` when any are non-numeric. | Verifies `quantitative` / `:Q` encodings match the supplied data. | Convert the fields to numeric or change their encoding type. |
@@ -78,6 +80,8 @@ Audits catch common analytical and visual-integrity failure modes. They do not p
 - Deterministic thresholds identify obvious structure; they do not exhaust every possible diagnostic pattern.
 - Audits cannot replace domain review.
 - Audits depend on metadata quality.
+- Percent semantics are not inferred from observed value ranges; `0.42` versus `42` remains an explicit representation contract.
+- Generic `rate` units are not assumed to be percentages; rates may have denominators or scales unrelated to percent.
 - First-party statistical spec semantics require `usermeta.chart_contract_intent`.
 - Scale/normalization authorization checks cover native Vega-Lite scale and stack controls; they cannot reconstruct semantic normalization hidden in arbitrary calculations or data that was normalized before the spec was produced.
 - Dynamic `domainRaw` is treated as a scale override requiring authorization, but generic spec audits do not prove whether an arbitrary `domainRaw` expression preserves zero for a bar baseline.
