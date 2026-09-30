@@ -54,6 +54,9 @@ DECORATIVE_TERMS = (
     "extrude",
 )
 
+PERCENT_UNITS = {"percent", "percentage", "%"}
+PERCENT_REPRESENTATIONS = {"fraction", "percentage_points"}
+
 
 def has_causal_language(text: str | None) -> bool:
     normalized = (text or "").strip().lower()
@@ -117,6 +120,7 @@ def find_decorative_terms(payload: Any) -> list[str]:
         "filters",
         "source",
         "unit",
+        "value_representation",
         "values",
     }
 
@@ -165,6 +169,23 @@ def declared_unit_from_spec(spec: Mapping[str, Any]) -> str | None:
         if isinstance(unit, str) and unit.strip():
             return unit
     return None
+
+
+def declared_value_representation_from_spec(spec: Mapping[str, Any]) -> str | None:
+    usermeta = spec.get("usermeta", {})
+    if isinstance(usermeta, Mapping):
+        representation = usermeta.get("value_representation")
+        if isinstance(representation, str) and representation.strip():
+            return representation.strip()
+    return None
+
+
+def is_percent_unit(unit: str | None) -> bool:
+    return bool(unit and unit.strip().lower() in PERCENT_UNITS)
+
+
+def is_supported_percent_representation(representation: str | None) -> bool:
+    return bool(representation and representation.strip().lower() in PERCENT_REPRESENTATIONS)
 
 
 def declared_source_from_spec(spec: Mapping[str, Any]) -> str | None:
