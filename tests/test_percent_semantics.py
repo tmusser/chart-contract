@@ -164,3 +164,47 @@ def test_percent_formatted_external_spec_without_representation_warns() -> None:
     report = audit_spec(spec=spec, data=data, claim="Observed conversion increased.")
 
     assert _severity(report, "labels.percent.representation") == "WARN"
+
+
+def test_malformed_external_representation_blocks() -> None:
+    spec = {
+        "mark": "line",
+        "title": "Observed conversion comparison",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "conversion", "type": "quantitative"},
+        },
+        "usermeta": {
+            "source": "synthetic.funnel",
+            "unit": "percent",
+            "value_representation": 100,
+        },
+    }
+    data = pd.DataFrame({"week": ["W1", "W2"], "conversion": [0.42, 0.47]})
+
+    report = audit_spec(spec=spec, data=data, claim="Observed conversion increased.")
+
+    assert _severity(report, "labels.percent.representation") == "FAIL"
+    assert report.verdict == "BLOCK"
+
+
+def test_external_percentage_points_without_fraction_formatter_passes_format_rule() -> None:
+    spec = {
+        "mark": "line",
+        "title": "Observed conversion comparison",
+        "encoding": {
+            "x": {"field": "week", "type": "ordinal"},
+            "y": {"field": "conversion", "type": "quantitative"},
+        },
+        "usermeta": {
+            "source": "synthetic.funnel",
+            "unit": "percent",
+            "value_representation": "percentage_points",
+        },
+    }
+    data = pd.DataFrame({"week": ["W1", "W2"], "conversion": [42.0, 47.0]})
+
+    report = audit_spec(spec=spec, data=data, claim="Observed conversion increased.")
+
+    assert _severity(report, "labels.percent.representation") == "PASS"
+    assert _severity(report, "labels.percent.format") == "PASS"
