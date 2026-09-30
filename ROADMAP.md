@@ -24,6 +24,7 @@ The current unreleased line adds and hardens:
 - mechanical saved-profile diffs covering rule additions/removals, field changes, order drift, and tool-metadata drift without an automatic compatibility judgment
 - self-contained first-party Vega-Lite claim identity via `usermeta.claim`, with deterministic conflict blocking when an external audit claim disagrees
 - `Chart.process_tree()` for audited rooted decision/process trees with deterministic top-down layout, directed edges, and optional branch labels
+- explicit percent value representation so raw `0.42` versus `42` semantics remain inspectable without range-based guessing or silent rescaling
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
