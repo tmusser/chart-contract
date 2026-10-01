@@ -190,5 +190,15 @@
         "amount": 12
       }
     ]
+  },
+  "usermeta": {
+    "transform_contract": {
+      "declared": [
+        "density"
+      ]
+    },
+    "claim": "SMB and Enterprise have different amount shapes.",
+    "source": "synthetic.amounts",
+    "unit": "count"
   }
 }
