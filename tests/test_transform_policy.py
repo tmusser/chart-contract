@@ -230,6 +230,29 @@ def test_encoding_aggregate_bin_timeunit_and_shorthand_are_inventoried() -> None
     assert "encoding.tooltip[0]" in locations
 
 
+def test_density_extent_parameter_is_not_misclassified_as_second_transform() -> None:
+    spec = {
+        "mark": "area",
+        "transform": [
+            {
+                "density": "revenue",
+                "extent": [0, 200],
+                "as": ["value", "density"],
+            }
+        ],
+        "encoding": {
+            "x": {"field": "density", "type": "quantitative"},
+            "y": {"field": "value", "type": "quantitative"},
+        },
+    }
+
+    inventory = collect_transform_inventory(spec)
+
+    assert inventory.kinds == ("density",)
+    assert inventory.malformed_locations == ()
+    assert inventory.occurrences[0].location == "transform[0].density"
+
+
 def test_first_party_histogram_declares_emitted_transforms() -> None:
     data = pd.DataFrame({"amount": list(range(30))})
 
