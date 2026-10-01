@@ -215,6 +215,31 @@ Generic `rate` units are deliberately **not** assumed to be percentages. See
 [Percent value semantics](docs/PERCENT_SEMANTICS.md) for the deterministic contract and
 external Vega-Lite behavior.
 
+### Vega-Lite transforms: make them visible
+
+External specs with explicit analytical transforms must declare the exact transform kinds they
+contain:
+
+```json
+{
+  "transform": [{"filter": "datum.region === 'East'"}],
+  "usermeta": {
+    "transform_contract": {
+      "declared": ["filter"]
+    }
+  }
+}
+```
+
+The audit emits one `transform.inventory` finding per transform occurrence, including its
+exact spec location, and `transform.declaration` blocks missing, stale, malformed, or
+incomplete declarations. Encoding-level `aggregate`, `bin`, `stack`, and `timeUnit`
+operations are inventoried too.
+
+This is structural transparency, not transform execution: a matching declaration does not
+prove a calculation, filter, window, lookup, or regression is analytically correct. See
+[Vega-Lite transform contract](docs/TRANSFORM_CONTRACT.md).
+
 For a minimal pre-share gate, inspect `report.verdict` before you send the chart onward: `READY` means the audit found only `PASS` checks, `REVIEW` means warnings need human judgment, and `BLOCK` means at least one failure should stop sharing until fixed. `report.verdict` is the authoritative gate field; `report.passed` only means there are no `FAIL` findings, so a `REVIEW` report can still have `passed=True`.
 
 Supported Python API front-door intents:
