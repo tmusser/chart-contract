@@ -1,5 +1,49 @@
 # VERIFY
 
+2026-10-01 - Audit Vega-Lite transform contracts
+
+Environment:
+- Branch: `agent/audit-vega-transforms`
+- Base: `main` at `8435a29cb09e47275bdad2e5af46eb34f61fc919`
+- Pull request: #16 (`feat: audit Vega-Lite transform contracts`)
+- Initial GitHub Actions CI run #208 (`36938360165`) -> FAILED on one stale exact-metadata regression expectation
+- Follow-up GitHub Actions CI run #209 (`36938459089`) on code-bearing head `13871a589c60e7f25d2a4156c3bfb603be0ab283` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, and undeclared-transform trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- explicit Vega-Lite transform arrays are inventoried recursively through layered/concatenated/faceted specs;
+- encoding-level `aggregate`, `bin`, `stack`, and `timeUnit` semantics are inventoried, including supported shorthand;
+- each detected occurrence emits `transform.inventory` with the exact spec location;
+- malformed transform entries that cannot be classified as exactly one supported operator block;
+- density transforms using an `extent` parameter are classified as density rather than falsely treated as two operators;
+- `usermeta.transform_contract.declared` must exactly match the unique detected transform kinds;
+- hidden, stale, malformed, duplicate, or incomplete transform declarations block;
+- first-party histogram specs declare `aggregate` + `bin`;
+- first-party violin specs declare `density`;
+- the runnable hidden-filter CLI trap blocks and exposes both inventory and declaration findings;
+- machine-readable profile/documentation parity moves from 53 to 55 rules.
+
+CI correction note:
+- Run #208 exposed `tests/test_hidden_regressions.py::test_generated_spec_preserves_audit_metadata`, which asserted the complete histogram `usermeta` mapping before transform metadata existed.
+- The production output was correct; the regression expectation was updated to include `transform_contract={"declared": ["aggregate", "bin"]}`.
+- Run #209 then passed the complete matrix.
+
+Remaining risks:
+- Transform inventory is structural only and does not execute `calculate`, `filter`, `window`, lookup, regression/loess, or other arbitrary transform semantics.
+- A matching declaration does not prove analytical appropriateness, user consent, correct upstream preprocessing, or correct derived values.
+- Encoded fields produced only by arbitrary transforms may still fail independent raw-data field checks when chart-contract cannot deterministically reconstruct them.
+- The bounded operator list follows explicit Vega-Lite transform structure; future Vega-Lite operators require an intentional profile update rather than silent acceptance.
+- Adding the two rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for a current profile match.
+
+Next safest task:
+- Confirm the final documentation-only head remains green.
+- Review and merge PR #16 if exact transform-kind declaration is the desired external-spec contract.
+- Keep transform execution/replay and broader lineage receipts as separate future work.
+
 2026-09-30 - Make percent value representation explicit
 
 Environment:
