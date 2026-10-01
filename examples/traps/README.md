@@ -30,6 +30,20 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `undeclared_filter_transform`
+
+Demonstrates a renderable line chart with a Vega-Lite `filter` transform that changes the displayed population without a matching transform declaration.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/undeclared_filter_transform.vl.json \
+  --data examples/traps/undeclared_filter_transform.csv \
+  --claim "$(cat examples/traps/undeclared_filter_transform.claim.txt)"
+```
+
+Expected findings: `transform.inventory` and `transform.declaration`
+
 ### `missing_source_or_unit`
 
 Demonstrates a chart with missing provenance and missing units.

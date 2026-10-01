@@ -1,0 +1,24 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "mark": "line",
+  "title": "Observed weekly signups",
+  "transform": [
+    {
+      "filter": "datum.region === 'East'"
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "signups",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.signups",
+    "unit": "accounts"
+  }
+}

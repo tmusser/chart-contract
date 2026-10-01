@@ -17,6 +17,9 @@
 - Never infer percent representation from observed value ranges. When percent presentation is explicit, require `value_representation` to distinguish fractional values from percentage-point values.
 - Do not rescale percent data to obtain a passing audit. Preserve raw values and use display formatting that matches the declared representation.
 - Do not treat a generic `rate` unit as percent; rates may use unrelated denominators or scales.
+- Treat explicit Vega-Lite analytical transforms as part of the audited contract. Inventory their kind and exact location and require `usermeta.transform_contract.declared` to exactly match the detected transform-kind set.
+- A matching transform declaration is visibility/provenance only. Do not translate it into approval, user consent, analytical correctness, or evidence that chart-contract executed the transform.
+- Do not evaluate arbitrary Vega-Lite expressions merely to make a transformed spec pass; preserve the boundary between structural transform auditing and data reconstruction.
 - Treat the machine-readable audit profile as descriptive ruleset metadata, not another audit or scientific approval artifact.
 - Do not recompute a report binding to legitimize post-audit edits to findings or verdict fields; rerun the audit and emit a new report.
 - Treat a saved-report audit-profile mismatch as stale policy identity that requires re-audit for current verification, not as proof that either policy is better or scientifically valid.

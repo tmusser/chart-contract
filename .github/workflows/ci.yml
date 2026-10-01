@@ -79,6 +79,18 @@ jobs:
           test "$block_code" -eq 1
           test "$review_code" -eq 1
 
+          set +e
+          transform_output=$(chart-contract audit spec examples/traps/undeclared_filter_transform.vl.json \
+            --data examples/traps/undeclared_filter_transform.csv \
+            --claim "$(cat examples/traps/undeclared_filter_transform.claim.txt)" 2>&1)
+          transform_exit=$?
+          set -e
+          echo "$transform_output"
+          test "$transform_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$transform_output"
+          grep -q "transform.inventory" <<<"$transform_output"
+          grep -q "transform.declaration" <<<"$transform_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |

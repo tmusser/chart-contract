@@ -11,6 +11,7 @@ import pandas as pd
 from .audit import FAIL, PASS, AuditReport, audit_spec as _base_audit_spec
 from .contracts import resolve_spec_claim
 from .input_binding import BoundAuditReport, bind_spec_report
+from .transforms import collect_transform_inventory, parse_transform_declaration
 
 SCALE_OVERRIDE_KEYS = {"domain", "domainMin", "domainMax", "domainRaw"}
 SCALE_REQUEST_FLAG = "user_requested_scale_override"
@@ -26,8 +27,104 @@ def audit_spec(
 
     resolved_claim = resolve_spec_claim(spec, claim)
     report = _base_audit_spec(spec=spec, data=data, claim=claim)
+    _audit_transform_contract(report, spec)
     _audit_visual_default_consent(report, spec)
     return bind_spec_report(report, spec=spec, data=data, claim=resolved_claim)
+
+
+def _audit_transform_contract(report: AuditReport, spec: Mapping[str, Any]) -> None:
+    inventory = collect_transform_inventory(spec)
+
+    if inventory.occurrences:
+        for occurrence in inventory.occurrences:
+            report.add(
+                "transform.inventory",
+                PASS,
+                f"Detected explicit Vega-Lite transform kind {occurrence.kind!r}.",
+                field=occurrence.location,
+            )
+    else:
+        report.add(
+            "transform.inventory",
+            PASS,
+            "No explicit Vega-Lite analytical transforms were detected.",
+        )
+
+    for location in inventory.malformed_locations:
+        report.add(
+            "transform.inventory",
+            FAIL,
+            "Transform entry could not be classified as exactly one supported Vega-Lite transform.",
+            suggestion="Use one supported transform operator per transform entry.",
+            field=location,
+        )
+
+    try:
+        declared = parse_transform_declaration(spec)
+    except ValueError as exc:
+        report.add(
+            "transform.declaration",
+            FAIL,
+            str(exc),
+            suggestion=(
+                "Declare the exact detected transform kinds as "
+                "spec['usermeta']['transform_contract']['declared']."
+            ),
+            field="usermeta.transform_contract",
+        )
+        return
+
+    detected = inventory.kinds
+    if declared is None:
+        if detected:
+            report.add(
+                "transform.declaration",
+                FAIL,
+                "Spec contains explicit analytical transforms without a transform declaration: "
+                + ", ".join(detected)
+                + ".",
+                suggestion=(
+                    "Add spec['usermeta']['transform_contract']={'declared': [...]} "
+                    "with the exact detected transform kinds."
+                ),
+                field="usermeta.transform_contract",
+            )
+        else:
+            report.add(
+                "transform.declaration",
+                PASS,
+                "No explicit analytical transforms require declaration.",
+            )
+        return
+
+    if declared == detected and not inventory.malformed_locations:
+        report.add(
+            "transform.declaration",
+            PASS,
+            "Transform declaration exactly matches the detected transform kinds: "
+            + (", ".join(detected) if detected else "none")
+            + ".",
+        )
+        return
+
+    declared_set = set(declared)
+    detected_set = set(detected)
+    missing = sorted(detected_set - declared_set)
+    stale = sorted(declared_set - detected_set)
+    details: list[str] = []
+    if missing:
+        details.append("undeclared detected kinds: " + ", ".join(missing))
+    if stale:
+        details.append("declared but not detected kinds: " + ", ".join(stale))
+    if inventory.malformed_locations:
+        details.append("unclassified transform entries are present")
+    report.add(
+        "transform.declaration",
+        FAIL,
+        "Transform declaration does not match the audited spec (" + "; ".join(details) + ").",
+        suggestion="Update the declaration to exactly match the spec and rerun the audit.",
+        field="usermeta.transform_contract.declared",
+    )
 
 
 def _audit_visual_default_consent(report: AuditReport, spec: Mapping[str, Any]) -> None:
