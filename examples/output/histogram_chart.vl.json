@@ -173,5 +173,16 @@
         "amount": 12
       }
     ]
+  },
+  "usermeta": {
+    "transform_contract": {
+      "declared": [
+        "aggregate",
+        "bin"
+      ]
+    },
+    "claim": "The amount values are spread across the observed range.",
+    "source": "synthetic.amounts",
+    "unit": "count"
   }
 }
