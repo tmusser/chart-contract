@@ -85,7 +85,7 @@ def test_exact_transform_declaration_passes_policy() -> None:
                 "sort": [{"field": "revenue", "order": "descending"}],
             },
         ],
-        declaration={"declared": ["window", "filter", "calculate"]},
+        declaration={"declared": ["window", "filter", "calculate", "timeUnit"]},
     )
     spec["encoding"]["x"]["timeUnit"] = "yearmonth"
 
