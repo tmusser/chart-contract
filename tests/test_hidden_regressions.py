@@ -160,6 +160,7 @@ def test_generated_spec_preserves_audit_metadata() -> None:
     ).to_vega_lite()
 
     assert spec["usermeta"] == {
+        "transform_contract": {"declared": ["aggregate", "bin"]},
         "claim": "Amounts span the observed range.",
         "source": "warehouse.amounts",
         "unit": "dollars",
