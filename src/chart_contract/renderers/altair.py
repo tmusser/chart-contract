@@ -10,6 +10,7 @@ import pandas as pd
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..set_membership import membership_summary, venn_layout_records
+from ..transforms import first_party_transform_declaration
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
     ECDF_VALUE_FIELD,
@@ -32,6 +33,9 @@ def render_chart(chart: Any) -> alt.Chart:
         subtitle.append(f"Filters: {chart.filters}")
 
     usermeta = dict(chart.metadata or {})
+    declared_transforms = first_party_transform_declaration(chart.intent)
+    if declared_transforms:
+        usermeta["transform_contract"] = {"declared": list(declared_transforms)}
     if chart.intent in {"qq", "ecdf", "residual", "set_membership", "process_tree"}:
         usermeta.setdefault("chart_contract_intent", chart.intent)
     if chart.intent == "qq":
