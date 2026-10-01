@@ -123,7 +123,7 @@ def collect_transform_inventory(spec: Mapping[str, Any]) -> TransformInventory:
                         malformed.append(location)
                         continue
 
-                    kinds = [kind for kind in TRANSFORM_KINDS if kind in transform]
+                    kinds = _explicit_transform_kinds(transform)
                     if len(kinds) != 1:
                         malformed.append(location)
                     for kind in kinds:
@@ -192,11 +192,11 @@ def parse_transform_declaration(spec: Mapping[str, Any]) -> tuple[str, ...] | No
     if not isinstance(contract, Mapping):
         raise ValueError("usermeta.transform_contract must be an object.")
 
-    unexpected = sorted(set(contract) - {"declared"})
+    unexpected = sorted(str(field) for field in contract if field != "declared")
     if unexpected:
         raise ValueError(
             "usermeta.transform_contract has unsupported field(s): "
-            + ", ".join(str(field) for field in unexpected)
+            + ", ".join(unexpected)
         )
 
     declared = contract.get("declared")
@@ -248,6 +248,19 @@ def _iter_views_with_paths(
     nested_spec = spec.get("spec")
     if isinstance(nested_spec, Mapping):
         yield from _iter_views_with_paths(nested_spec, _path(path, "spec"))
+
+
+def _explicit_transform_kinds(transform: Mapping[str, Any]) -> list[str]:
+    kinds = [kind for kind in TRANSFORM_KINDS if kind in transform]
+
+    # Vega-Lite density uses an optional top-level "extent" parameter, while
+    # {"extent": "field", "param": "..."} is also a standalone extent transform.
+    # When density is present, extent describes density bounds rather than a
+    # second transform operator.
+    if "density" in kinds and "extent" in kinds:
+        kinds.remove("extent")
+
+    return kinds
 
 
 def _encoding_transform_present(kind: str, definition: Mapping[str, Any]) -> bool:
