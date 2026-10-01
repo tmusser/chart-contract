@@ -35,6 +35,8 @@ Policy:
 - Do not swap the claim attached to a chart artifact. If `usermeta.claim` exists, audit that claim or supply the exact same text; `contract.claim.consistency` blocks conflicting claim sources.
 - When percent presentation is explicit, declare `usermeta.value_representation` as `fraction` or `percentage_points`; never infer the scale from observed values and never rescale the data merely to satisfy the audit.
 - Do not assume a generic `rate` unit means percent. Preserve the actual denominator/unit semantics supplied by the analytical contract.
+- Before sharing an external spec with explicit Vega-Lite transforms, inspect the `transform.inventory` findings and require `usermeta.transform_contract.declared` to exactly match the detected transform kinds.
+- Treat the transform declaration as a visibility contract only. It does not mean the transform was requested, executed by chart-contract, or analytically valid.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.
