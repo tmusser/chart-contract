@@ -46,6 +46,23 @@ ENCODING_TYPE_CODES = {
     "G": "geojson",
 }
 
+EVIDENCE_COVERAGE_PASS_RATIO = 0.90
+EVIDENCE_COVERAGE_FAIL_RATIO = 0.50
+GROUP_COVERAGE_WARN_GAP = 0.20
+GROUP_COVERAGE_MIN_ROWS = 5
+COVERAGE_ENCODING_CHANNELS = {
+    "x",
+    "y",
+    "color",
+    "theta",
+    "radius",
+    "row",
+    "column",
+    "detail",
+    "size",
+    "shape",
+}
+
 
 @dataclass(slots=True)
 class AuditFinding:
@@ -243,6 +260,17 @@ def audit_chart(chart: Any) -> AuditReport:
         )
     else:
         report.add("data.not_empty", PASS, "Chart data is not empty.")
+
+    coverage_group = getattr(chart, "group", None)
+    if distribution_intent and not coverage_group:
+        coverage_group = category_field
+    _audit_evidence_coverage(
+        report,
+        chart.data,
+        required_columns,
+        group_field=coverage_group,
+        surface_label=f"{chart.intent.title()} chart",
+    )
 
     if distribution_intent:
         _audit_distribution_sample_size(report, chart, category_field, metric_field)
@@ -485,6 +513,15 @@ def audit_spec(
         )
 
     _audit_spec_encoding_fields(report, encoding, resolved_frame)
+
+    if resolved_frame is not None:
+        _audit_evidence_coverage(
+            report,
+            resolved_frame,
+            _spec_coverage_fields(encoding),
+            group_field=_spec_group_field(mark, x_encoding, color_encoding),
+            surface_label="Spec evidence",
+        )
 
     if is_generic_title(title):
         report.add(
@@ -848,6 +885,132 @@ def _iter_encoding_definitions(encoding: Mapping[str, Any]) -> Iterator[tuple[st
                 yield channel, item
         else:
             yield channel, definition
+
+
+def _audit_evidence_coverage(
+    report: AuditReport,
+    frame: pd.DataFrame,
+    fields: Sequence[str | None],
+    *,
+    group_field: str | None,
+    surface_label: str,
+) -> None:
+    required = _unique_fields(fields)
+    if frame.empty or not required or any(field not in frame.columns for field in required):
+        return
+
+    total_rows = len(frame)
+    usable_mask = frame[required].notna().all(axis=1)
+    usable_rows = int(usable_mask.sum())
+    coverage = usable_rows / total_rows
+
+    message = (
+        f"{surface_label} uses {usable_rows} / {total_rows} rows "
+        f"({coverage:.1%}) complete across {', '.join(required)}."
+    )
+    if coverage < EVIDENCE_COVERAGE_FAIL_RATIO:
+        report.add(
+            "data.coverage.usable_rows",
+            FAIL,
+            message + " Fewer than half of source rows are usable for the visible evidence.",
+            suggestion="Investigate missing analytical fields or narrow the claim to the usable population before sharing.",
+            field=", ".join(required),
+        )
+    elif coverage < EVIDENCE_COVERAGE_PASS_RATIO:
+        report.add(
+            "data.coverage.usable_rows",
+            WARN,
+            message + " Missing analytical fields materially reduce the evidence shown.",
+            suggestion="Review why rows are excluded and disclose or repair material missingness before sharing.",
+            field=", ".join(required),
+        )
+    else:
+        report.add(
+            "data.coverage.usable_rows",
+            PASS,
+            message,
+            field=", ".join(required),
+        )
+
+    if not group_field or group_field not in frame.columns:
+        return
+
+    measure_fields = [field for field in required if field != group_field]
+    if not measure_fields:
+        return
+
+    group_rates: list[float] = []
+    group_count = 0
+    grouped = frame.loc[frame[group_field].notna()].groupby(group_field, sort=False, dropna=True)
+    for _, group in grouped:
+        if len(group) < GROUP_COVERAGE_MIN_ROWS:
+            continue
+        group_count += 1
+        group_rates.append(float(group[measure_fields].notna().all(axis=1).mean()))
+
+    if group_count < 2:
+        return
+
+    low = min(group_rates)
+    high = max(group_rates)
+    gap = high - low
+    group_message = (
+        f"Grouped usable-row coverage spans {low:.1%}-{high:.1%} across "
+        f"{group_count} groups in '{group_field}' ({gap:.1%} gap)."
+    )
+    if gap >= GROUP_COVERAGE_WARN_GAP:
+        report.add(
+            "data.coverage.group_balance",
+            WARN,
+            group_message + " Missingness is uneven across comparison groups.",
+            suggestion="Review group-specific missingness before interpreting between-group differences.",
+            field=group_field,
+        )
+    else:
+        report.add(
+            "data.coverage.group_balance",
+            PASS,
+            group_message,
+            field=group_field,
+        )
+
+
+def _spec_coverage_fields(encoding: Any) -> list[str]:
+    if not isinstance(encoding, Mapping):
+        return []
+
+    fields: list[str] = []
+    for channel, definition in encoding.items():
+        if channel not in COVERAGE_ENCODING_CHANNELS:
+            continue
+        definitions = definition if isinstance(definition, list) else [definition]
+        for item in definitions:
+            field = _encoding_field(item)
+            if field:
+                fields.append(field)
+    return _unique_fields(fields)
+
+
+def _spec_group_field(mark: str, x_encoding: Any, color_encoding: Any) -> str | None:
+    color_field = _encoding_field(color_encoding)
+    color_type = _encoding_type(color_encoding)
+    if color_field and color_type in {"nominal", "ordinal"}:
+        return color_field
+
+    if mark in {"bar", "boxplot", "area"}:
+        x_field = _encoding_field(x_encoding)
+        x_type = _encoding_type(x_encoding)
+        if x_field and x_type in {"nominal", "ordinal"}:
+            return x_field
+    return None
+
+
+def _unique_fields(fields: Sequence[str | None]) -> list[str]:
+    unique: list[str] = []
+    for field in fields:
+        if isinstance(field, str) and field and field not in unique:
+            unique.append(field)
+    return unique
 
 
 def _category_count(records: list[dict[str, Any]] | None, encoding: Any) -> int | None:
