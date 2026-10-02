@@ -29,6 +29,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - external-spec policy checks that block undeclared quantitative scale overrides and native normalization
 - explicit percent value representation via `value_representation="fraction" | "percentage_points"`, preserved in first-party spec metadata
 - deterministic Vega-Lite transform inventory plus exact `usermeta.transform_contract.declared` matching for explicit analytical transforms
+- deterministic evidence-coverage checks over visible analytical fields, including usable-row retention and grouped missingness imbalance
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -51,6 +52,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Generic rate units are not assumed to be percentages, and percent representation checks do not validate upstream numerator/denominator logic.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
+- Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
+- Group coverage imbalance is a review signal only and does not establish that missingness caused an observed group difference.
 - Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
 - Report-result fingerprints detect saved finding/verdict drift but are not signatures; someone with write access can deliberately recompute them.
 - Audit-profile digests identify declared ruleset semantics; they do not authenticate execution, prove the implementation correct, or establish that any chart is safe or scientifically sound.
@@ -72,6 +75,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - backfilling audit-profile/result identity into historical report schema `0.3`; durable `0.4` verification requires re-audit
 - automatic audit-profile compatibility classification
 - general-purpose execution or validation of arbitrary Vega-Lite transform expressions
+- statistical imputation, missingness-mechanism classification, or automatic correction of incomplete evidence
 
 ## Acceptance Criteria
 
@@ -92,6 +96,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Every explicit Vega-Lite transform occurrence is inventoried by kind and exact spec location; malformed or ambiguous transform entries block.
 - Specs with explicit transforms block unless `usermeta.transform_contract.declared` exactly matches the unique detected transform-kind set; stale declarations block too.
 - First-party histogram and violin output carries exact transform declarations for the transforms those renderers emit.
+- Chart/spec evidence coverage PASSes at 90%+ complete rows across visible analytical fields, WARNs from 50% to below 90%, and FAILs below 50%.
+- Grouped evidence with at least two eligible groups of five source rows each WARNs when usable-row coverage differs by at least 20 percentage points.
+- Coverage excludes tooltip-only fields from the main visible-evidence denominator and is not fabricated when required fields are absent or transform-derived output cannot be reconstructed.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -132,11 +139,13 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 55-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 57-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
 For Vega-Lite transforms, run `python -m pytest tests/test_transform_policy.py` and verify exact inventory locations, declaration drift failures, malformed-transform blocking, encoding-level detection, and first-party transform metadata.
+
+For evidence coverage, run `python -m pytest tests/test_evidence_coverage.py` and verify the 90% PASS boundary, 50% BLOCK boundary, grouped 20-point review threshold, tooltip exclusion, and missing-field non-duplication.
 
 ## Open Questions
 
