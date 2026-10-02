@@ -91,6 +91,18 @@ jobs:
           grep -q "transform.inventory" <<<"$transform_output"
           grep -q "transform.declaration" <<<"$transform_output"
 
+          set +e
+          coverage_output=$(chart-contract audit spec examples/traps/low_evidence_coverage.vl.json \
+            --data examples/traps/low_evidence_coverage.csv \
+            --claim "$(cat examples/traps/low_evidence_coverage.claim.txt)" 2>&1)
+          coverage_exit=$?
+          set -e
+          echo "$coverage_output"
+          test "$coverage_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$coverage_output"
+          grep -q "data.coverage.usable_rows" <<<"$coverage_output"
+          grep -q "4 / 10 rows (40.0%)" <<<"$coverage_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
