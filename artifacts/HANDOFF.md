@@ -2,54 +2,58 @@
 
 ## Resume Packet
 
-- Goal: make explicit Vega-Lite analytical transforms impossible to hide inside an otherwise plausible chart spec.
-- Branch: `agent/audit-vega-transforms`.
-- Base: `main` at `8435a29cb09e47275bdad2e5af46eb34f61fc919`.
-- Pull request: #16 (`feat: audit Vega-Lite transform contracts`).
-- Current slice: recursive transform inventory, exact transform-kind declaration matching, first-party transform metadata, CLI trap, two new audit-profile rules, tests, and docs.
-- Read first: `src/chart_contract/transforms.py`, `src/chart_contract/spec_policy.py`, `tests/test_transform_policy.py`, `docs/TRANSFORM_CONTRACT.md`, and `docs/AUDIT_RULES.md`.
+- Goal: make the amount of supplied evidence that actually survives into visible chart fields explicit before sharing.
+- Branch: `agent/evidence-coverage-audit`.
+- Base: `main` at `556e8f1df5bbbcf4b0d336b0d754383039f8bd33`.
+- Pull request: #17 (`feat: audit evidence coverage and missingness`).
+- Current slice: usable-row evidence coverage, grouped missingness imbalance, CLI trap, two new audit-profile rules, tests, and docs.
+- Read first: `src/chart_contract/audit.py`, `tests/test_evidence_coverage.py`, `docs/EVIDENCE_COVERAGE.md`, and `docs/AUDIT_RULES.md`.
 
 ## Current Repo State
 
-- External spec audits recursively inventory explicit Vega-Lite transforms and emit one `transform.inventory` finding per occurrence with an exact field path.
-- Explicit transform operators covered are `aggregate`, `bin`, `calculate`, `density`, `extent`, `filter`, `flatten`, `fold`, `impute`, `joinaggregate`, `loess`, `lookup`, `pivot`, `quantile`, `regression`, `sample`, `stack`, `timeUnit`, and `window`.
-- Encoding-level `aggregate`, `bin`, `stack`, and `timeUnit` are inventoried too, including supported aggregate/bin/time-unit shorthand.
-- Malformed transform entries block rather than disappearing from the report.
-- Density's optional top-level `extent` parameter is disambiguated from the standalone extent transform.
-- `usermeta.transform_contract.declared` is a closed list contract and must exactly equal the detected unique transform-kind set.
-- Missing, stale, unsupported, duplicate, malformed, or incomplete declarations block.
-- A no-transform spec with no declaration passes the transform policy.
-- First-party `Chart.histogram()` output declares `aggregate` and `bin`.
-- First-party `Chart.violin()` output declares `density`.
-- The checked histogram/violin proof specs now expose that transform metadata.
-- `examples/traps/undeclared_filter_transform.*` provides a CLI-level hidden-transform failure case.
-- The `audit-v0.2` profile now contains 55 rules, intentionally changing semantic profile identity.
+- Common first-party quantitative/statistical chart audits now emit `data.coverage.usable_rows` when required analytical fields are available.
+- External spec audits compute coverage from visible analytical encoding channels rather than tooltip-only metadata.
+- Usable-row coverage thresholds are:
+  - 90%+ -> PASS
+  - 50%-<90% -> WARN / REVIEW
+  - below 50% -> FAIL / BLOCK
+- The finding reports an inspectable receipt such as `8 / 10 rows (80.0%) complete across period, value`.
+- If a required encoded field is absent, `data.encoding.fields` remains authoritative and coverage is skipped rather than fabricated.
+- Grouped evidence emits `data.coverage.group_balance` when at least two groups each have at least five source rows.
+- Eligible group coverage gaps below 20 percentage points PASS; gaps of 20 points or more WARN.
+- Group labels are not copied into the portable finding message; only coverage range, group count, and grouping field are reported.
+- The low-evidence CLI trap supplies ten rows but only four complete plotted rows and deterministically BLOCKs.
+- The `audit-v0.2` profile now contains 57 rules, intentionally changing semantic profile identity.
 
 ## Important Decisions
 
-- Transform auditing is structural. Do not execute arbitrary Vega-Lite expressions merely to make a spec auditable.
-- A matching transform declaration means the spec is transparent about explicit transform kinds. It does not mean the transform is correct, approved, user-requested, scientifically justified, or faithfully reproduced.
-- Transform declaration and scale/normalization user-request metadata remain separate contracts.
-- Exact-set matching catches both newly hidden transforms and stale declarations after transforms are removed.
-- Inventory findings preserve occurrence-level locations even though the declaration is kind-level.
-- The detector intentionally fails closed on transform entries that cannot be classified as exactly one supported operator.
-- New Vega-Lite transform operators should require an explicit implementation/profile/docs update instead of silent fallback.
-- Existing data/evidence rules remain independent; a declared transform does not waive missing-field or reconstructability failures.
+- Evidence coverage is a complete-case visibility contract, not missing-data inference.
+- A PASS does not prove retained rows are representative or missingness is random.
+- A WARN/FAIL does not prove missingness caused bias; it says the visible chart is supported by materially less complete evidence than the source row count suggests.
+- Group imbalance is a human-review signal, not a causal statement about group differences.
+- Exactly 90% coverage PASSes; exactly 50% coverage WARNs rather than BLOCKs.
+- Exactly a 20-percentage-point eligible-group gap WARNs.
+- Groups below five source rows are excluded from the imbalance percentage to avoid tiny-denominator precision; their rows still affect overall coverage.
+- Tooltip-only nulls do not reduce the main visible-evidence coverage.
+- Null group labels reduce overall coverage because the visible grouping contract is incomplete, but null labels are excluded from per-group comparisons.
+- Arbitrary transform-derived fields are not executed/reconstructed to manufacture coverage.
+- Infinity and empty strings are not automatically classified as missing; that remains separate data/type-quality semantics.
 - Older schema-0.4 reports correctly become stale-policy artifacts because the two new rules change `audit-profile-semantics-v1`.
 
 ## Verification
 
-Initial CI run #208 failed only because an existing exact-`usermeta` regression expected the pre-transform-contract histogram metadata.
+Initial CI run #213 exposed a floating-point edge at the exact 20-point grouped threshold.
 
-After updating that expected contract, GitHub Actions CI run #209 (`36938459089`) passed on code-bearing head `13871a589c60e7f25d2a4156c3bfb603be0ab283`:
+The comparison was hardened with a tiny numeric tolerance, preserving the public threshold. GitHub Actions CI run #214 (`37053969737`) then passed on code-bearing head `8694d3a5b16d2f069ebdf5f186c05788eead8a55`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
 - Python 3.12 -> PASSED
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
-- CLI verdict + diagnostic traps -> PASSED
-- undeclared-filter transform CLI trap -> PASSED
+- CLI verdict + statistical diagnostic traps -> PASSED
+- undeclared-transform CLI trap -> PASSED
+- low-evidence-coverage CLI trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -57,14 +61,14 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- The transform contract does not execute arbitrary expressions or reconstruct transformed result sets.
-- The operator inventory is bounded to known explicit Vega-Lite transform structure and must evolve deliberately with Vega-Lite.
-- A transform declaration can be truthful about structure while the transform itself is analytically poor or semantically misleading.
-- Raw-data encoding checks can still block transformed output fields when deterministic reconstruction is unavailable.
-- This PR does not add per-transform expression hashing separate from the existing whole-spec input binding; the exact full spec is already content-bound.
+- The thresholds are deterministic guardrails, not statistical missing-data theory.
+- Coverage does not distinguish structural missingness from data-quality defects or intentionally inapplicable fields.
+- The group-gap rule does not identify which group is low in the portable message.
+- Coverage does not replay arbitrary transforms or infer the evidence population before upstream preprocessing.
+- Very small groups are intentionally excluded from group-gap inference rather than assigned unstable percentages.
 
 ## Next Recommended Task
 
-- Confirm final PR #16 CI remains green after these documentation-only commits.
-- Review the public `usermeta.transform_contract.declared` shape and merge if it matches the desired contract.
-- Keep transform replay/execution or a richer transformation-lineage receipt as a separate future PR.
+- Confirm final PR #17 CI remains green after these documentation-only commits.
+- Review the public 90% / 50% / 20-point thresholds and merge if they match the desired contract.
+- Keep imputation, missingness mechanism classification, and richer upstream population lineage as separate future PRs.
