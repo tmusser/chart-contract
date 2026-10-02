@@ -958,7 +958,7 @@ def _audit_evidence_coverage(
         f"Grouped usable-row coverage spans {low:.1%}-{high:.1%} across "
         f"{group_count} groups in '{group_field}' ({gap:.1%} gap)."
     )
-    if gap >= GROUP_COVERAGE_WARN_GAP:
+    if gap + 1e-12 >= GROUP_COVERAGE_WARN_GAP:
         report.add(
             "data.coverage.group_balance",
             WARN,
