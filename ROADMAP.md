@@ -26,6 +26,7 @@ The current unreleased line adds and hardens:
 - `Chart.process_tree()` for audited rooted decision/process trees with deterministic top-down layout, directed edges, and optional branch labels
 - explicit percent value representation so raw `0.42` versus `42` semantics remain inspectable without range-based guessing or silent rescaling
 - explicit Vega-Lite transform inventory and exact declaration matching so analytical filters, calculations, aggregates, bins, windows, and related transforms cannot remain hidden in the spec
+- deterministic evidence-coverage reporting so charts expose how many supplied rows are actually complete for visible analytical fields, plus uneven grouped missingness review
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 

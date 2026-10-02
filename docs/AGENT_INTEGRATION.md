@@ -37,6 +37,8 @@ Policy:
 - Do not assume a generic `rate` unit means percent. Preserve the actual denominator/unit semantics supplied by the analytical contract.
 - Before sharing an external spec with explicit Vega-Lite transforms, inspect the `transform.inventory` findings and require `usermeta.transform_contract.declared` to exactly match the detected transform kinds.
 - Treat the transform declaration as a visibility contract only. It does not mean the transform was requested, executed by chart-contract, or analytically valid.
+- Inspect `data.coverage.usable_rows` before sharing: below 50% blocks, 50%-<90% requires review, and 90%+ only means the visible analytical fields are mostly complete.
+- If `data.coverage.group_balance` warns, surface the unequal evidence retention to the human reviewer; do not infer that missingness caused the group result.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.

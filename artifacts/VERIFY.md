@@ -1,5 +1,50 @@
 # VERIFY
 
+2026-10-02 - Audit evidence coverage and missingness
+
+Environment:
+- Branch: `agent/evidence-coverage-audit`
+- Base: `main` at `556e8f1df5bbbcf4b0d336b0d754383039f8bd33`
+- Pull request: #17 (`feat: audit evidence coverage and missingness`)
+- Initial GitHub Actions CI run #213 (`37053882710`) -> FAILED on the exact 20-percentage-point group threshold because floating-point subtraction produced a value infinitesimally below `0.20`
+- Follow-up GitHub Actions CI run #214 (`37053969737`) on code-bearing head `8694d3a5b16d2f069ebdf5f186c05788eead8a55` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, undeclared-transform, and low-evidence-coverage trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- usable-row evidence coverage is computed over fields required by the visible chart/spec evidence;
+- 90%+ usable rows PASS, 50%-<90% WARN/REVIEW, and below 50% FAIL/BLOCK;
+- exactly 90% PASSes and exactly 50% WARNs;
+- a 4/10 complete-row chart blocks through `data.coverage.usable_rows`;
+- tooltip-only null fields do not lower the visible-evidence coverage denominator;
+- absent required encoded fields remain owned by `data.encoding.fields` rather than producing a fabricated coverage percentage;
+- grouped evidence uses only groups with at least five source rows and requires at least two eligible groups;
+- a group-coverage gap of exactly 20 percentage points WARNs after the floating-point boundary fix;
+- balanced group missingness PASSes;
+- group values are not emitted in the portable finding message; only the coverage range, eligible group count, and grouping field are reported;
+- infinity is not silently reclassified as missingness;
+- machine-readable profile/documentation parity moves from 55 to 57 rules.
+
+CI correction note:
+- Run #213 exposed that `1.0 - 0.8` can be represented slightly below `0.20`, which incorrectly made the public 20-point boundary PASS.
+- The comparison now applies a tiny numeric tolerance while preserving the exact documented threshold.
+- Run #214 passed the complete matrix.
+
+Remaining risks:
+- Coverage is complete-case visibility only; it does not classify MCAR/MAR/MNAR, prove representativeness, or establish that retained rows are unbiased.
+- A group-coverage warning does not prove that missingness caused an observed group difference.
+- Coverage does not execute arbitrary Vega-Lite transforms or reconstruct unavailable derived fields.
+- Empty strings and infinities are not treated as nulls by this rule; separate type/data-quality checks remain responsible for those semantics.
+- Adding the two rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for a current profile match.
+
+Next safest task:
+- Confirm the final documentation-only head remains green.
+- Review and merge PR #17 if the 90% / 50% / 20-point thresholds are the desired deterministic contract.
+- Keep imputation, missingness-mechanism inference, and richer evidence-population lineage as separate future work.
+
 2026-10-01 - Audit Vega-Lite transform contracts
 
 Environment:
