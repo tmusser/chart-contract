@@ -30,6 +30,20 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `low_evidence_coverage`
+
+Demonstrates a line chart that can still render from four complete rows even though six of ten source rows are missing the plotted metric.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/low_evidence_coverage.vl.json \
+  --data examples/traps/low_evidence_coverage.csv \
+  --claim "$(cat examples/traps/low_evidence_coverage.claim.txt)"
+```
+
+Expected finding: `data.coverage.usable_rows` with `4 / 10 rows (40.0%)`.
+
 ### `undeclared_filter_transform`
 
 Demonstrates a renderable line chart with a Vega-Lite `filter` transform that changes the displayed population without a matching transform declaration.
