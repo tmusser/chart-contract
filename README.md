@@ -240,6 +240,25 @@ This is structural transparency, not transform execution: a matching declaration
 prove a calculation, filter, window, lookup, or regression is analytically correct. See
 [Vega-Lite transform contract](docs/TRANSFORM_CONTRACT.md).
 
+### Evidence coverage: show how much data survives
+
+A chart can still look convincing after null analytical fields silently remove many source
+rows. `chart-contract` now reports complete-case evidence coverage for the fields that drive
+the visible chart:
+
+```text
+PASS   90%+ usable rows
+REVIEW 50%-<90%
+BLOCK  <50%
+```
+
+Grouped comparisons also warn when eligible groups differ by 20 percentage points or more in
+usable-row coverage. That is a missingness-review signal, not proof of bias or causality.
+
+Tooltip-only fields do not reduce the main evidence coverage, and chart-contract does not
+invent coverage for transform-derived fields it cannot reconstruct. See
+[Evidence coverage and missingness](docs/EVIDENCE_COVERAGE.md).
+
 For a minimal pre-share gate, inspect `report.verdict` before you send the chart onward: `READY` means the audit found only `PASS` checks, `REVIEW` means warnings need human judgment, and `BLOCK` means at least one failure should stop sharing until fixed. `report.verdict` is the authoritative gate field; `report.passed` only means there are no `FAIL` findings, so a `REVIEW` report can still have `passed=True`.
 
 Supported Python API front-door intents:
