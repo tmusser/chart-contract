@@ -1,0 +1,19 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "mark": "line",
+  "title": "Observed weekly signups",
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "signups",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.signups",
+    "unit": "accounts"
+  }
+}
