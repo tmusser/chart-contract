@@ -218,5 +218,5 @@ def test_first_party_violin_stamps_density_field_lineage() -> None:
     )
 
     assert lineage == build_transform_lineage(spec)
-    assert density_receipt["input_fields"] == ["amount"]
+    assert density_receipt["input_fields"] == ["_distribution", "amount"]
     assert density_receipt["output_fields"] == ["density", "value"]
