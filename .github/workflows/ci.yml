@@ -103,6 +103,18 @@ jobs:
           grep -q "data.coverage.usable_rows" <<<"$coverage_output"
           grep -q "4 / 10 rows (40.0%)" <<<"$coverage_output"
 
+          set +e
+          lineage_output=$(chart-contract audit spec examples/traps/stale_transform_lineage.vl.json \
+            --data examples/traps/stale_transform_lineage.csv \
+            --claim "$(cat examples/traps/stale_transform_lineage.claim.txt)" 2>&1)
+          lineage_exit=$?
+          set -e
+          echo "$lineage_output"
+          test "$lineage_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$lineage_output"
+          grep -q "transform.lineage.receipts" <<<"$lineage_output"
+          grep -q "changed receipt(s): transform\[0\].filter" <<<"$lineage_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
