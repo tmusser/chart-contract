@@ -11,7 +11,12 @@ import pandas as pd
 from .audit import FAIL, PASS, AuditReport, audit_spec as _base_audit_spec
 from .contracts import resolve_spec_claim
 from .input_binding import BoundAuditReport, bind_spec_report
-from .transforms import collect_transform_inventory, parse_transform_declaration
+from .transforms import (
+    build_transform_lineage,
+    collect_transform_inventory,
+    parse_transform_declaration,
+    parse_transform_lineage,
+)
 
 SCALE_OVERRIDE_KEYS = {"domain", "domainMin", "domainMax", "domainRaw"}
 SCALE_REQUEST_FLAG = "user_requested_scale_override"
@@ -28,6 +33,7 @@ def audit_spec(
     resolved_claim = resolve_spec_claim(spec, claim)
     report = _base_audit_spec(spec=spec, data=data, claim=claim)
     _audit_transform_contract(report, spec)
+    _audit_transform_lineage(report, spec)
     _audit_visual_default_consent(report, spec)
     return bind_spec_report(report, spec=spec, data=data, claim=resolved_claim)
 
@@ -124,6 +130,97 @@ def _audit_transform_contract(report: AuditReport, spec: Mapping[str, Any]) -> N
         "Transform declaration does not match the audited spec (" + "; ".join(details) + ").",
         suggestion="Update the declaration to exactly match the spec and rerun the audit.",
         field="usermeta.transform_contract.declared",
+    )
+
+
+def _audit_transform_lineage(report: AuditReport, spec: Mapping[str, Any]) -> None:
+    expected = build_transform_lineage(spec)
+    expected_receipts = expected["receipts"]
+
+    try:
+        declared = parse_transform_lineage(spec)
+    except ValueError as exc:
+        report.add(
+            "transform.lineage.receipts",
+            FAIL,
+            str(exc),
+            suggestion=(
+                "Regenerate spec['usermeta']['transform_lineage'] with "
+                "chart_contract.build_transform_lineage(spec)."
+            ),
+            field="usermeta.transform_lineage",
+        )
+        return
+
+    if not expected_receipts:
+        if declared is None or declared == expected:
+            report.add(
+                "transform.lineage.receipts",
+                PASS,
+                "No transform lineage receipts are required for this spec.",
+            )
+        else:
+            report.add(
+                "transform.lineage.receipts",
+                FAIL,
+                "Transform lineage metadata is stale: receipts are present but no auditable transforms remain.",
+                suggestion="Remove stale lineage metadata or regenerate it from the current spec.",
+                field="usermeta.transform_lineage",
+            )
+        return
+
+    if declared is None:
+        report.add(
+            "transform.lineage.receipts",
+            FAIL,
+            f"Spec contains {len(expected_receipts)} auditable transform occurrence(s) without lineage receipts.",
+            suggestion=(
+                "Set spec['usermeta']['transform_lineage'] = "
+                "chart_contract.build_transform_lineage(spec) after the transform structure is final."
+            ),
+            field="usermeta.transform_lineage",
+        )
+        return
+
+    if declared == expected:
+        derived_outputs = sorted(
+            {
+                field
+                for receipt in expected_receipts
+                for field in receipt["output_fields"]
+            }
+        )
+        message = (
+            f"Transform lineage receipts exactly match {len(expected_receipts)} "
+            "audited transform occurrence(s)."
+        )
+        if derived_outputs:
+            message += " Declared derived output field(s): " + ", ".join(derived_outputs) + "."
+        report.add("transform.lineage.receipts", PASS, message)
+        return
+
+    expected_by_location = {receipt["location"]: receipt for receipt in expected_receipts}
+    declared_by_location = {receipt["location"]: receipt for receipt in declared["receipts"]}
+    missing = sorted(set(expected_by_location) - set(declared_by_location))
+    stale = sorted(set(declared_by_location) - set(expected_by_location))
+    changed = sorted(
+        location
+        for location in set(expected_by_location) & set(declared_by_location)
+        if expected_by_location[location] != declared_by_location[location]
+    )
+    details: list[str] = []
+    if missing:
+        details.append("missing receipt(s): " + ", ".join(missing))
+    if stale:
+        details.append("stale receipt(s): " + ", ".join(stale))
+    if changed:
+        details.append("changed receipt(s): " + ", ".join(changed))
+    report.add(
+        "transform.lineage.receipts",
+        FAIL,
+        "Transform lineage does not match the current spec (" + "; ".join(details) + ").",
+        suggestion="Regenerate lineage receipts from the final transform structure.",
+        field="usermeta.transform_lineage.receipts",
     )
 
 
