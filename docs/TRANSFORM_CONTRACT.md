@@ -84,6 +84,33 @@ Current examples:
 The declaration is preserved in Vega-Lite `usermeta` so a later spec audit can compare the
 artifact with its declared transform kinds.
 
+## Occurrence-level lineage receipts
+
+Transform-kind declaration is intentionally coarse. A spec can keep the same `filter` kind
+while changing the actual filter expression.
+
+For stronger structural identity, transformed specs also carry
+`usermeta.transform_lineage`. Each receipt binds one transform occurrence to:
+
+- exact spec location;
+- transform kind;
+- SHA-256 of its canonical structural payload;
+- bounded input fields;
+- bounded output fields.
+
+Build receipts from the final spec with:
+
+```python
+from chart_contract import build_transform_lineage
+
+spec["usermeta"]["transform_lineage"] = build_transform_lineage(spec)
+```
+
+A fresh audit fails missing, malformed, stale, or changed receipts. First-party renderers stamp
+their own receipts after Altair has produced the emitted transform structure.
+
+See [Transform lineage receipts](TRANSFORM_LINEAGE.md) for the exact contract and boundaries.
+
 ## Important boundary: inventory is not execution
 
 `chart-contract` does **not** execute arbitrary Vega-Lite transforms as part of this policy.

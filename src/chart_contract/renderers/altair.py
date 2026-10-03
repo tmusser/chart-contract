@@ -10,7 +10,7 @@ import pandas as pd
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..set_membership import membership_summary, venn_layout_records
-from ..transforms import first_party_transform_declaration
+from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
     ECDF_VALUE_FIELD,
@@ -119,7 +119,12 @@ def render_chart(chart: Any) -> alt.Chart:
     else:
         raise ValueError(f"Unsupported chart intent: {chart.intent}")
 
-    return rendered.properties(**properties)
+    finalized = rendered.properties(**properties)
+    lineage = build_transform_lineage(finalized.to_dict())
+    if lineage["receipts"]:
+        usermeta["transform_lineage"] = lineage
+        finalized = finalized.properties(usermeta=usermeta)
+    return finalized
 
 
 def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:

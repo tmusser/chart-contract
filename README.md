@@ -240,6 +240,24 @@ This is structural transparency, not transform execution: a matching declaration
 prove a calculation, filter, window, lookup, or regression is analytically correct. See
 [Vega-Lite transform contract](docs/TRANSFORM_CONTRACT.md).
 
+### Transform receipts: bind the exact operation
+
+Kind declarations catch hidden `filter` versus `calculate` semantics; lineage receipts go one
+step further and bind each transform occurrence to its exact canonical structural payload:
+
+```python
+from chart_contract import build_transform_lineage
+
+spec["usermeta"]["transform_lineage"] = build_transform_lineage(spec)
+```
+
+A changed filter expression, grouping field, window sort, calculate formula, or stale receipt
+then `BLOCK`s even when the transform kind itself is unchanged. Receipts also expose bounded
+input/output field lineage where Vega-Lite makes it structurally recoverable.
+
+This is still provenance-by-structure, not transform execution or upstream SQL/dbt/Python
+attestation. See [Transform lineage receipts](docs/TRANSFORM_LINEAGE.md).
+
 ### Evidence coverage: show how much data survives
 
 A chart can still look convincing after null analytical fields silently remove many source

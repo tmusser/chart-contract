@@ -2,58 +2,58 @@
 
 ## Resume Packet
 
-- Goal: make the amount of supplied evidence that actually survives into visible chart fields explicit before sharing.
-- Branch: `agent/evidence-coverage-audit`.
-- Base: `main` at `556e8f1df5bbbcf4b0d336b0d754383039f8bd33`.
-- Pull request: #17 (`feat: audit evidence coverage and missingness`).
-- Current slice: usable-row evidence coverage, grouped missingness imbalance, CLI trap, two new audit-profile rules, tests, and docs.
-- Read first: `src/chart_contract/audit.py`, `tests/test_evidence_coverage.py`, `docs/EVIDENCE_COVERAGE.md`, and `docs/AUDIT_RULES.md`.
+- Goal: bind each auditable Vega-Lite transform occurrence to exact structural identity plus bounded field lineage.
+- Branch: `agent/transform-lineage-receipts`.
+- Base: `main` at `0a76d4c53c4f1d6206d5415d28bb1484eff9a464`.
+- Pull request: #18 (`feat: add transform lineage receipts`).
+- Current slice: public receipt builder, exact spec-audit receipt parity, first-party renderer stamping, stale-receipt CLI trap, one new profile rule, tests, and docs.
+- Read first: `src/chart_contract/transforms.py`, `src/chart_contract/spec_policy.py`, `tests/test_transform_lineage.py`, `docs/TRANSFORM_LINEAGE.md`, and `docs/TRANSFORM_CONTRACT.md`.
 
 ## Current Repo State
 
-- Common first-party quantitative/statistical chart audits now emit `data.coverage.usable_rows` when required analytical fields are available.
-- External spec audits compute coverage from visible analytical encoding channels rather than tooltip-only metadata.
-- Usable-row coverage thresholds are:
-  - 90%+ -> PASS
-  - 50%-<90% -> WARN / REVIEW
-  - below 50% -> FAIL / BLOCK
-- The finding reports an inspectable receipt such as `8 / 10 rows (80.0%) complete across period, value`.
-- If a required encoded field is absent, `data.encoding.fields` remains authoritative and coverage is skipped rather than fabricated.
-- Grouped evidence emits `data.coverage.group_balance` when at least two groups each have at least five source rows.
-- Eligible group coverage gaps below 20 percentage points PASS; gaps of 20 points or more WARN.
-- Group labels are not copied into the portable finding message; only coverage range, group count, and grouping field are reported.
-- The low-evidence CLI trap supplies ten rows but only four complete plotted rows and deterministically BLOCKs.
-- The `audit-v0.2` profile now contains 57 rules, intentionally changing semantic profile identity.
+- `build_transform_lineage(spec)` returns `{"version": 1, "receipts": [...]}`.
+- Each receipt contains exactly:
+  - `kind`
+  - `location`
+  - `operation_sha256`
+  - sorted unique `input_fields`
+  - sorted unique `output_fields`
+- Explicit transform-array digests cover the complete canonical transform object.
+- Encoding-level aggregate/bin/stack/timeUnit receipts hash a bounded payload containing field + operator configuration.
+- JSON key-order changes do not change receipt digests.
+- `transform.lineage.receipts` blocks missing, malformed, changed, missing-location, and stale receipts.
+- A no-transform spec passes without lineage; stale non-empty lineage on a no-transform spec blocks.
+- First-party renderers compute receipts after Altair has emitted the final Vega-Lite structure.
+- Histograms preserve encoding-level aggregate/bin receipts.
+- Violins preserve density receipts; ungrouped Altair violins may expose the renderer-generated `_distribution` grouping field in lineage.
+- `examples/traps/stale_transform_lineage.*` demonstrates a same-kind filter edit that passes kind declaration but fails occurrence receipt parity.
+- The `audit-v0.2` profile now contains 58 rules.
 
 ## Important Decisions
 
-- Evidence coverage is a complete-case visibility contract, not missing-data inference.
-- A PASS does not prove retained rows are representative or missingness is random.
-- A WARN/FAIL does not prove missingness caused bias; it says the visible chart is supported by materially less complete evidence than the source row count suggests.
-- Group imbalance is a human-review signal, not a causal statement about group differences.
-- Exactly 90% coverage PASSes; exactly 50% coverage WARNs rather than BLOCKs.
-- Exactly a 20-percentage-point eligible-group gap WARNs.
-- Groups below five source rows are excluded from the imbalance percentage to avoid tiny-denominator precision; their rows still affect overall coverage.
-- Tooltip-only nulls do not reduce the main visible-evidence coverage.
-- Null group labels reduce overall coverage because the visible grouping contract is incomplete, but null labels are excluded from per-group comparisons.
-- Arbitrary transform-derived fields are not executed/reconstructed to manufacture coverage.
-- Infinity and empty strings are not automatically classified as missing; that remains separate data/type-quality semantics.
-- Older schema-0.4 reports correctly become stale-policy artifacts because the two new rules change `audit-profile-semantics-v1`.
+- Receipt identity is separate from transform-kind declaration and full report/spec input binding.
+- Same-kind transform edits must invalidate receipts.
+- Receipts bind actual emitted structure; renderer-generated fields are not sanitized away merely to make lineage prettier.
+- Field lineage is bounded and structural, not an arbitrary expression evaluator.
+- Calculate-expression parsing recognizes direct `datum.field` and bracket references only.
+- A matching receipt is not proof of transform execution, correctness, user intent, scientific validity, or upstream provenance.
+- Do not hand-edit receipt hashes; regenerate from the final spec.
+- First-party stamping occurs after rendering so metadata reflects emitted Vega-Lite rather than an approximation of intended transforms.
+- Upstream SQL/dbt/Python lineage remains out of scope.
+- Older schema-0.4 reports correctly become stale-policy artifacts because adding `transform.lineage.receipts` changes profile semantic identity.
 
 ## Verification
 
-Initial CI run #213 exposed a floating-point edge at the exact 20-point grouped threshold.
+Initial CI run #217 failed because one test expected an ungrouped violin density receipt to list only the source metric, while Altair also emits an internal `_distribution` grouping field.
 
-The comparison was hardened with a tiny numeric tolerance, preserving the public threshold. GitHub Actions CI run #214 (`37053969737`) then passed on code-bearing head `8694d3a5b16d2f069ebdf5f186c05788eead8a55`:
+The test was corrected to preserve actual emitted structure. GitHub Actions CI run #218 (`37160779607`) then passed on code-bearing head `eaf70a7f74917c3f0f8f408b7678deeb4f3a85bc`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
 - Python 3.12 -> PASSED
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
-- CLI verdict + statistical diagnostic traps -> PASSED
-- undeclared-transform CLI trap -> PASSED
-- low-evidence-coverage CLI trap -> PASSED
+- all CLI trap paths, including stale-transform-lineage -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -61,14 +61,14 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- The thresholds are deterministic guardrails, not statistical missing-data theory.
-- Coverage does not distinguish structural missingness from data-quality defects or intentionally inapplicable fields.
-- The group-gap rule does not identify which group is low in the portable message.
-- Coverage does not replay arbitrary transforms or infer the evidence population before upstream preprocessing.
-- Very small groups are intentionally excluded from group-gap inference rather than assigned unstable percentages.
+- Structural hashes are not signatures, execution evidence, or remote attestation.
+- Bounded field extraction may omit semantically referenced fields hidden inside unsupported expression patterns.
+- Renderer-generated intermediate fields may appear in first-party receipts.
+- Receipt version 1 intentionally does not model upstream transformation systems, dataset versions, or cross-artifact DAGs.
+- A malicious writer can recompute consistent receipts after changing a spec; the receipt is deterministic drift detection, not tamper-proof authorship.
 
 ## Next Recommended Task
 
-- Confirm final PR #17 CI remains green after these documentation-only commits.
-- Review the public 90% / 50% / 20-point thresholds and merge if they match the desired contract.
-- Keep imputation, missingness mechanism classification, and richer upstream population lineage as separate future PRs.
+- Confirm final PR #18 CI remains green after these documentation-only commits.
+- Review and merge if the v1 receipt schema and structural-field-lineage boundary are desirable.
+- Keep transform replay/execution and upstream lineage DAG integration as separate future PRs.

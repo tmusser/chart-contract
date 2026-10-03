@@ -199,6 +199,24 @@
     },
     "claim": "SMB and Enterprise have different amount shapes.",
     "source": "synthetic.amounts",
-    "unit": "count"
+    "unit": "count",
+    "transform_lineage": {
+      "version": 1,
+      "receipts": [
+        {
+          "kind": "density",
+          "location": "transform[0].density",
+          "operation_sha256": "4a778e9d3437f222754956079d751890b5faae130437eea7bf98172114eb1c7a",
+          "input_fields": [
+            "amount",
+            "segment"
+          ],
+          "output_fields": [
+            "density",
+            "value"
+          ]
+        }
+      ]
+    }
   }
 }

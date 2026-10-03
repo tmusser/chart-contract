@@ -30,6 +30,21 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `stale_transform_lineage`
+
+Demonstrates a spec whose transform kind declaration is still correct (`filter`) but whose
+lineage receipt was generated for a different filter expression.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/stale_transform_lineage.vl.json \
+  --data examples/traps/stale_transform_lineage.csv \
+  --claim "$(cat examples/traps/stale_transform_lineage.claim.txt)"
+```
+
+Expected finding: `transform.lineage.receipts` with a changed `transform[0].filter` receipt.
+
 ### `low_evidence_coverage`
 
 Demonstrates a line chart that can still render from four complete rows even though six of ten source rows are missing the plotted metric.

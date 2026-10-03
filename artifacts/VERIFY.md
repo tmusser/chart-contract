@@ -1,5 +1,52 @@
 # VERIFY
 
+2026-10-03 - Add transform lineage receipts
+
+Environment:
+- Branch: `agent/transform-lineage-receipts`
+- Base: `main` at `0a76d4c53c4f1d6206d5415d28bb1484eff9a464`
+- Pull request: #18 (`feat: add transform lineage receipts`)
+- Initial GitHub Actions CI run #217 (`37160736462`) -> FAILED on one first-party violin lineage expectation
+- Follow-up GitHub Actions CI run #218 (`37160779607`) on code-bearing head `eaf70a7f74917c3f0f8f408b7678deeb4f3a85bc` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, undeclared-transform, low-evidence-coverage, and stale-lineage trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- public `build_transform_lineage(spec)` emits deterministic version-1 occurrence receipts;
+- explicit transform-array receipts hash the complete canonical transform object;
+- encoding-level aggregate/bin/stack/timeUnit receipts bind source field plus operator configuration;
+- transform-object mapping key order does not change `operation_sha256`;
+- receipts include exact transform location and bounded sorted input/output field lineage;
+- calculate expressions recover `datum.field` and `datum["field"]` references without executing them;
+- missing lineage on an auditable transformed spec blocks;
+- malformed receipt schemas/hashes block;
+- same-kind payload edits invalidate existing receipts and block;
+- stale receipts after transform removal block;
+- first-party histogram/violin specs stamp lineage after Altair emits the final transform structure;
+- first-party receipt metadata exactly reproduces `build_transform_lineage(spec)`;
+- machine-readable profile/documentation parity moves from 57 to 58 rules.
+
+CI correction note:
+- Run #217 showed that Altair's ungrouped violin renderer emits an internal `_distribution` grouping field in the density transform.
+- Because lineage receipts intentionally bind emitted structure, the receipt correctly reported `["_distribution", "amount"]` rather than only `["amount"]`.
+- The regression expectation was updated to preserve renderer truth rather than strip the internal field.
+- Run #218 then passed the complete matrix.
+
+Remaining risks:
+- Receipts are structural identity metadata, not execution traces or proof that arbitrary expressions produce correct values.
+- Field lineage is bounded to structurally recoverable Vega-Lite syntax and may include renderer-generated fields.
+- Expression field extraction intentionally covers explicit `datum.field` / bracket references rather than implementing the Vega expression language.
+- Receipts do not attest upstream SQL/dbt/Python lineage or prove source data were created by the represented transform.
+- Adding the rule intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for a current profile match.
+
+Next safest task:
+- Confirm the final documentation-only head remains green.
+- Review and merge PR #18 if version-1 occurrence receipts and the public helper are the desired lineage contract.
+- Keep transform execution/replay or upstream-system lineage attestation as separate future work.
+
 2026-10-02 - Audit evidence coverage and missingness
 
 Environment:

@@ -159,14 +159,14 @@ def test_generated_spec_preserves_audit_metadata() -> None:
         filters={"region": "US"},
     ).to_vega_lite()
 
-    assert spec["usermeta"] == {
-        "transform_contract": {"declared": ["aggregate", "bin"]},
-        "claim": "Amounts span the observed range.",
-        "source": "warehouse.amounts",
-        "unit": "dollars",
-        "caveat": "Synthetic example.",
-        "filters": {"region": "US"},
-    }
+    assert spec["usermeta"]["transform_contract"] == {"declared": ["aggregate", "bin"]}
+    assert spec["usermeta"]["transform_lineage"]["version"] == 1
+    assert len(spec["usermeta"]["transform_lineage"]["receipts"]) == 4
+    assert spec["usermeta"]["claim"] == "Amounts span the observed range."
+    assert spec["usermeta"]["source"] == "warehouse.amounts"
+    assert spec["usermeta"]["unit"] == "dollars"
+    assert spec["usermeta"]["caveat"] == "Synthetic example."
+    assert spec["usermeta"]["filters"] == {"region": "US"}
 
 
 def test_dataset_hash_and_provenance_do_not_trigger_decorative_warning() -> None:
