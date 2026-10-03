@@ -17,6 +17,7 @@ from .profiles import (
     get_profile_manifest,
 )
 from .spec_policy import audit_spec
+from .transforms import build_transform_lineage
 
 __all__ = [
     "AuditFinding",
@@ -33,5 +34,6 @@ __all__ = [
     "bound_report_from_dict",
     "build_audit_profile_binding",
     "build_profile_diff",
+    "build_transform_lineage",
     "get_profile_manifest",
 ]
