@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from chart_contract import Chart, audit_spec
+from chart_contract import Chart, audit_spec, build_transform_lineage
 from chart_contract.transforms import collect_transform_inventory
 
 
@@ -88,6 +88,7 @@ def test_exact_transform_declaration_passes_policy() -> None:
         declaration={"declared": ["window", "filter", "calculate", "timeUnit"]},
     )
     spec["encoding"]["x"]["timeUnit"] = "yearmonth"
+    spec["usermeta"]["transform_lineage"] = build_transform_lineage(spec)
 
     report = audit_spec(
         spec=spec,
@@ -195,6 +196,8 @@ def test_nested_layer_transform_is_inventoried_with_exact_location() -> None:
         ],
     }
 
+    spec["usermeta"]["transform_lineage"] = build_transform_lineage(spec)
+
     report = audit_spec(
         spec=spec,
         data=_data(),
@@ -272,6 +275,7 @@ def test_first_party_histogram_declares_emitted_transforms() -> None:
 
     inventory = collect_transform_inventory(spec)
     assert inventory.kinds == ("aggregate", "bin")
+    assert spec["usermeta"]["transform_lineage"] == build_transform_lineage(spec)
 
 
 def test_first_party_violin_declares_density_transform() -> None:
@@ -290,3 +294,4 @@ def test_first_party_violin_declares_density_transform() -> None:
 
     inventory = collect_transform_inventory(spec)
     assert "density" in inventory.kinds
+    assert spec["usermeta"]["transform_lineage"] == build_transform_lineage(spec)
