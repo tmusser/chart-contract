@@ -183,6 +183,43 @@
     },
     "claim": "The amount values are spread across the observed range.",
     "source": "synthetic.amounts",
-    "unit": "count"
+    "unit": "count",
+    "transform_lineage": {
+      "version": 1,
+      "receipts": [
+        {
+          "kind": "bin",
+          "location": "encoding.tooltip[0].bin",
+          "operation_sha256": "d7594f4b2c6077435577a6f71beb29b41603ea50adf1951d503ce100b18c7a3b",
+          "input_fields": [
+            "amount"
+          ],
+          "output_fields": []
+        },
+        {
+          "kind": "aggregate",
+          "location": "encoding.tooltip[1].aggregate",
+          "operation_sha256": "3bbdb8f74b8aa911528331b825780e708013c0304d575331a6d90f33fff4cdee",
+          "input_fields": [],
+          "output_fields": []
+        },
+        {
+          "kind": "bin",
+          "location": "encoding.x.bin",
+          "operation_sha256": "d7594f4b2c6077435577a6f71beb29b41603ea50adf1951d503ce100b18c7a3b",
+          "input_fields": [
+            "amount"
+          ],
+          "output_fields": []
+        },
+        {
+          "kind": "aggregate",
+          "location": "encoding.y.aggregate",
+          "operation_sha256": "3bbdb8f74b8aa911528331b825780e708013c0304d575331a6d90f33fff4cdee",
+          "input_fields": [],
+          "output_fields": []
+        }
+      ]
+    }
   }
 }
