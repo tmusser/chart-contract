@@ -258,6 +258,21 @@ input/output field lineage where Vega-Lite makes it structurally recoverable.
 This is still provenance-by-structure, not transform execution or upstream SQL/dbt/Python
 attestation. See [Transform lineage receipts](docs/TRANSFORM_LINEAGE.md).
 
+### Rank charts: explicit top-N, ties, and omissions
+
+`Chart.rank(..., top_n=N)` now treats truncation as part of the analytical contract rather
+than a display convenience.
+
+- duplicate categories `BLOCK` instead of being silently aggregated;
+- bars use explicit descending metric order;
+- exact cutoff ties are all included, producing `REVIEW` when displayed count exceeds N;
+- first-party specs preserve the full source rows and declare eligible/displayed/omitted
+  category counts;
+- the selected top-N category filter is itself transform-declared and lineage-bound.
+
+That means a later audit can catch a stale count, reordered rank, or tampered selected set.
+See [Rank and top-N contract](docs/RANK_CONTRACT.md).
+
 ### Evidence coverage: show how much data survives
 
 A chart can still look convincing after null analytical fields silently remove many source
