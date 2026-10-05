@@ -28,6 +28,7 @@ The current unreleased line adds and hardens:
 - explicit Vega-Lite transform inventory and exact declaration matching so analytical filters, calculations, aggregates, bins, windows, and related transforms cannot remain hidden in the spec
 - deterministic evidence-coverage reporting so charts expose how many supplied rows are actually complete for visible analytical fields, plus uneven grouped missingness review
 - occurrence-level transform lineage receipts binding exact transform payloads plus bounded input/output field lineage without executing arbitrary expressions
+- explicit rank/top-N contracts covering unique categories, descending sort, tie-safe cutoffs, full-source preservation, and omitted-category receipts
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
