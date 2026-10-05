@@ -126,6 +126,19 @@ def test_cutoff_ties_expand_display_instead_of_breaking_equal_values() -> None:
     assert spec_report.verdict == "REVIEW"
 
 
+def test_rank_order_preserves_large_integer_precision() -> None:
+    frame = pd.DataFrame(
+        {
+            "segment": ["A", "B", "C"],
+            "score": [2**60, 2**60 + 1, 2**60 - 1],
+        }
+    )
+
+    spec = _chart(frame).to_vega_lite()
+
+    assert spec["encoding"]["y"]["sort"] == ["B", "A", "C"]
+
+
 def test_equal_metrics_have_deterministic_display_order_without_false_rank_separation() -> None:
     frame = pd.DataFrame(
         {
