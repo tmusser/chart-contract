@@ -31,6 +31,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - deterministic Vega-Lite transform inventory plus exact `usermeta.transform_contract.declared` matching for explicit analytical transforms
 - deterministic evidence-coverage checks over visible analytical fields, including usable-row retention and grouped missingness imbalance
 - occurrence-level transform lineage receipts binding exact transform payloads plus bounded input/output field lineage
+- explicit rank/top-N contracts with unique categories, descending order, tie-safe cutoff expansion, and omitted-category receipts
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -56,6 +57,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
 - Group coverage imbalance is a review signal only and does not establish that missingness caused an observed group difference.
 - Transform lineage receipts are structural identity metadata only; they do not prove expression execution, analytical correctness, or upstream SQL/Python/dbt provenance.
+- Rank truncation metadata is reproducible against supplied evidence but does not prove the externally supplied category population is complete or that top-N is the best presentation.
 - Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
 - Report-result fingerprints detect saved finding/verdict drift but are not signatures; someone with write access can deliberately recompute them.
 - Audit-profile digests identify declared ruleset semantics; they do not authenticate execution, prove the implementation correct, or establish that any chart is safe or scientifically sound.
@@ -79,6 +81,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - general-purpose execution or validation of arbitrary Vega-Lite transform expressions
 - statistical imputation, missingness-mechanism classification, or automatic correction of incomplete evidence
 - execution tracing or attestation of upstream transformation systems
+- implicit aggregation of duplicate rank categories or hidden arbitrary tie-breaking at top-N cutoffs
 
 ## Acceptance Criteria
 
@@ -103,6 +106,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Grouped evidence with at least two eligible groups of five source rows each WARNs when usable-row coverage differs by at least 20 percentage points.
 - Coverage excludes tooltip-only fields from the main visible-evidence denominator and is not fabricated when required fields are absent or transform-derived output cannot be reconstructed.
 - Every auditable transform occurrence in a passing transformed spec has an exact version-1 lineage receipt; same-kind payload edits, missing receipts, malformed receipts, and stale receipts block.
+- Rank charts require one row per non-null category, deterministic descending metric order, and explicit top-N intent; cutoff ties are included rather than silently split.
+- First-party top-N rank specs preserve the full supplied rows, declare eligible/displayed/omitted category counts, and use one bounded category filter whose selected set is reproducible from the supplied evidence.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -143,7 +148,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 58-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 63-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -152,6 +157,8 @@ For Vega-Lite transforms, run `python -m pytest tests/test_transform_policy.py` 
 For evidence coverage, run `python -m pytest tests/test_evidence_coverage.py` and verify the 90% PASS boundary, 50% BLOCK boundary, grouped 20-point review threshold, tooltip exclusion, and missing-field non-duplication.
 
 For transform lineage, run `python -m pytest tests/test_transform_lineage.py tests/test_transform_policy.py` and verify exact operation digests, bounded field lineage, stale-receipt blocking, and first-party receipt parity.
+
+For rank/top-N semantics, run `python -m pytest tests/test_rank_contract.py` and verify duplicate-category blocking, descending sort parity, full-source preservation, omitted-category reconciliation, bounded-filter parity, and cutoff-tie expansion.
 
 ## Open Questions
 

@@ -9,6 +9,7 @@ import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..process_tree import process_tree_layout_records, process_tree_summary
+from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..statistics import (
@@ -33,9 +34,34 @@ def render_chart(chart: Any) -> alt.Chart:
         subtitle.append(f"Filters: {chart.filters}")
 
     usermeta = dict(chart.metadata or {})
-    declared_transforms = first_party_transform_declaration(chart.intent)
+    rank_selection: RankSelection | None = None
+    if chart.intent == "rank":
+        usermeta.setdefault("chart_contract_intent", "rank")
+        top_n = validate_top_n(getattr(chart, "top_n", None))
+        category_ok = chart.x in chart.data.columns and not duplicate_rank_categories(chart.data, chart.x)
+        metric_ok = chart.y in chart.data.columns and is_numeric_series(chart.data[chart.y])
+        if top_n is not None and not category_ok:
+            raise ValueError("Rank top_n rendering requires exactly one row per non-null category.")
+        if top_n is not None and not metric_ok:
+            raise ValueError("Rank top_n rendering requires a numeric metric field.")
+        if category_ok and metric_ok:
+            rank_selection = build_rank_selection(
+                chart.data,
+                category_field=chart.x,
+                metric_field=chart.y,
+                top_n=top_n,
+            )
+            usermeta["rank_contract"] = rank_selection.summary.to_dict()
+
+    declared_transforms = list(first_party_transform_declaration(chart.intent))
+    if (
+        rank_selection is not None
+        and rank_selection.summary.omitted_category_count > 0
+        and "filter" not in declared_transforms
+    ):
+        declared_transforms.append("filter")
     if declared_transforms:
-        usermeta["transform_contract"] = {"declared": list(declared_transforms)}
+        usermeta["transform_contract"] = {"declared": sorted(declared_transforms)}
     if chart.intent in {"qq", "ecdf", "residual", "set_membership", "process_tree"}:
         usermeta.setdefault("chart_contract_intent", chart.intent)
     if chart.intent == "qq":
@@ -97,7 +123,7 @@ def render_chart(chart: Any) -> alt.Chart:
     if chart.intent == "trend":
         rendered = _render_trend(chart, records)
     elif chart.intent == "rank":
-        rendered = _render_rank(chart, records)
+        rendered = _render_rank(chart, records, rank_selection)
     elif chart.intent == "compare":
         rendered = _render_compare(chart, records)
     elif chart.intent == "histogram":
@@ -171,15 +197,35 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
     return line + rule + text
 
 
-def _render_rank(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
-    return alt.Chart(alt.InlineData(values=records)).mark_bar().encode(
+def _render_rank(
+    chart: Any,
+    records: list[dict[str, Any]],
+    selection: RankSelection | None,
+) -> alt.Chart:
+    base = alt.Chart(alt.InlineData(values=records))
+    sort: Any = "-x"
+    if selection is not None:
+        sort = list(selection.displayed_categories)
+        if selection.summary.omitted_category_count > 0:
+            base = base.transform_filter(
+                alt.FieldOneOfPredicate(
+                    field=chart.x,
+                    oneOf=list(selection.displayed_categories),
+                )
+            )
+
+    return base.mark_bar().encode(
         x=alt.X(
             f"{chart.y}:Q",
             title=_y_title(chart),
             scale=alt.Scale(zero=True),
             **_metric_axis_kwargs(chart),
         ),
-        y=alt.Y(f"{chart.x}:N", title=chart.x.replace("_", " ").title(), sort="-x"),
+        y=alt.Y(
+            f"{chart.x}:N",
+            title=chart.x.replace("_", " ").title(),
+            sort=sort,
+        ),
         tooltip=[
             alt.Tooltip(field=chart.x, type="nominal"),
             alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),

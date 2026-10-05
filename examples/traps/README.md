@@ -30,6 +30,23 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `wrong_rank_topn_filter`
+
+Demonstrates an opt-in rank spec whose generic transform declaration and lineage receipt are
+internally consistent, but whose top-N category filter selects `S4` instead of the
+reproducible third-ranked category `S3`.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/wrong_rank_topn_filter.vl.json \
+  --data examples/traps/wrong_rank_topn_filter.csv \
+  --claim "$(cat examples/traps/wrong_rank_topn_filter.claim.txt)"
+```
+
+Expected finding: `contract.rank.truncation` reporting that the filter does not select the
+reproducible top-N category set.
+
 ### `stale_transform_lineage`
 
 Demonstrates a spec whose transform kind declaration is still correct (`filter`) but whose

@@ -27,6 +27,7 @@ from .contracts import (
     is_percent_unit,
     is_supported_percent_representation,
 )
+from .rank import build_rank_selection, duplicate_rank_categories, validate_top_n
 
 PASS = "PASS"
 WARN = "WARN"
@@ -308,18 +309,8 @@ def audit_chart(chart: Any) -> AuditReport:
                 field=chart.x,
             )
 
-    if chart.intent == "rank" and chart.x in chart.data.columns:
-        category_count = chart.data[chart.x].nunique(dropna=True)
-        if category_count > 12:
-            report.add(
-                "readability.rank.category_count",
-                WARN,
-                f"Rank chart has {category_count} categories, which may be hard to read.",
-                suggestion="Reduce categories or aggregate a long tail before sharing.",
-                field=chart.x,
-            )
-        else:
-            report.add("readability.rank.category_count", PASS, "Rank chart category count is readable.")
+    if chart.intent == "rank":
+        _audit_rank_chart(report, chart)
 
     if chart.group and chart.group in chart.data.columns:
         group_count = chart.data[chart.group].nunique(dropna=True)
@@ -405,6 +396,123 @@ def audit_chart(chart: Any) -> AuditReport:
         )
 
     return report
+
+
+def _audit_rank_chart(report: AuditReport, chart: Any) -> None:
+    category_field = chart.x
+    metric_field = chart.y
+
+    if category_field in chart.data.columns:
+        duplicates = duplicate_rank_categories(chart.data, category_field)
+        if duplicates:
+            report.add(
+                "data.rank.category_unique",
+                FAIL,
+                f"Rank chart category field '{category_field}' contains duplicate categories.",
+                suggestion="Provide exactly one row per ranked category; do not silently aggregate duplicates.",
+                field=category_field,
+            )
+        else:
+            report.add(
+                "data.rank.category_unique",
+                PASS,
+                "Rank chart has at most one row per non-null category.",
+            )
+    else:
+        duplicates = ()
+
+    try:
+        top_n = validate_top_n(getattr(chart, "top_n", None))
+    except ValueError as exc:
+        report.add(
+            "contract.rank.top_n",
+            FAIL,
+            str(exc),
+            suggestion="Use top_n=None for the full ranking or a positive integer for explicit truncation.",
+            field="top_n",
+        )
+        return
+
+    if top_n is None:
+        report.add(
+            "contract.rank.top_n",
+            PASS,
+            "Rank chart requests the full eligible category set.",
+        )
+    else:
+        report.add(
+            "contract.rank.top_n",
+            PASS,
+            f"Rank chart explicitly requests top_n={top_n} with cutoff ties included.",
+            field="top_n",
+        )
+
+    report.add(
+        "visual.rank.sort_order",
+        PASS,
+        "First-party rank rendering orders the metric descending and uses category order only to stabilize equal-value display.",
+    )
+
+    if (
+        category_field not in chart.data.columns
+        or metric_field not in chart.data.columns
+        or not is_numeric_series(chart.data[metric_field])
+        or duplicates
+    ):
+        return
+
+    selection = build_rank_selection(
+        chart.data,
+        category_field=category_field,
+        metric_field=metric_field,
+        top_n=top_n,
+    )
+    summary = selection.summary
+
+    report.add(
+        "contract.rank.truncation",
+        PASS,
+        (
+            f"Rank truncation is explicit: {summary.displayed_category_count} displayed of "
+            f"{summary.eligible_category_count} eligible categories; "
+            f"{summary.omitted_category_count} omitted."
+        ),
+        field="top_n" if top_n is not None else None,
+    )
+
+    if summary.cutoff_tie_expanded:
+        report.add(
+            "data.rank.cutoff_tie",
+            WARN,
+            (
+                f"top_n={top_n} expands to {summary.displayed_category_count} categories because "
+                "the cutoff metric is tied; all cutoff ties are preserved."
+            ),
+            suggestion="Keep the tie-inclusive result or choose a cutoff that does not split equal metric values.",
+            field=metric_field,
+        )
+    else:
+        report.add(
+            "data.rank.cutoff_tie",
+            PASS,
+            "Rank cutoff does not split equal metric values.",
+        )
+
+    category_count = summary.displayed_category_count
+    if category_count > 12:
+        report.add(
+            "readability.rank.category_count",
+            WARN,
+            f"Rank chart displays {category_count} categories, which may be hard to read.",
+            suggestion="Use an explicit top_n or another long-tail summary before sharing.",
+            field=category_field,
+        )
+    else:
+        report.add(
+            "readability.rank.category_count",
+            PASS,
+            f"Rank chart displays {category_count} categories, within the readability limit.",
+        )
 
 
 def audit_spec(
@@ -633,8 +741,10 @@ def audit_spec(
     else:
         report.add("visual.integrity.decoration", PASS, "No decorative chartjunk-like spec fields detected.")
 
+    from .rank_audit import audit_rank_spec
     from .statistical_audit import audit_statistical_spec
 
+    audit_rank_spec(report, spec, analytical_spec, resolved_frame)
     audit_statistical_spec(report, spec, resolved_frame, resolved_claim)
 
     return report

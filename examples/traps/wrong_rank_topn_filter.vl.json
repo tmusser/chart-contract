@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "mark": "bar",
+  "title": "Observed segment ranking",
+  "transform": [
+    {
+      "filter": {
+        "field": "segment",
+        "oneOf": ["S1", "S2", "S4"]
+      }
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "score",
+      "type": "quantitative",
+      "scale": {"zero": true}
+    },
+    "y": {
+      "field": "segment",
+      "type": "nominal",
+      "sort": ["S1", "S2", "S3"]
+    }
+  },
+  "usermeta": {
+    "chart_contract_intent": "rank",
+    "source": "synthetic.rank",
+    "unit": "points",
+    "rank_contract": {
+      "version": 1,
+      "category_field": "segment",
+      "metric_field": "score",
+      "order": "descending",
+      "top_n": 3,
+      "tie_policy": "include_cutoff_ties",
+      "eligible_category_count": 5,
+      "displayed_category_count": 3,
+      "omitted_category_count": 2,
+      "cutoff_tie_expanded": false
+    },
+    "transform_contract": {
+      "declared": ["filter"]
+    },
+    "transform_lineage": {
+      "version": 1,
+      "receipts": [
+        {
+          "kind": "filter",
+          "location": "transform[0].filter",
+          "operation_sha256": "8bc3e8aec254ff96119ffc0fb6bc00a7158c9cbf9fc0cc042ff2430190249610",
+          "input_fields": ["segment"],
+          "output_fields": []
+        }
+      ]
+    }
+  }
+}
