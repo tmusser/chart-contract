@@ -115,6 +115,18 @@ jobs:
           grep -q "transform.lineage.receipts" <<<"$lineage_output"
           grep -q "changed receipt(s): transform\[0\].filter" <<<"$lineage_output"
 
+          set +e
+          rank_output=$(chart-contract audit spec examples/traps/wrong_rank_topn_filter.vl.json \
+            --data examples/traps/wrong_rank_topn_filter.csv \
+            --claim "$(cat examples/traps/wrong_rank_topn_filter.claim.txt)" 2>&1)
+          rank_exit=$?
+          set -e
+          echo "$rank_output"
+          test "$rank_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$rank_output"
+          grep -q "contract.rank.truncation" <<<"$rank_output"
+          grep -q "top-N category set" <<<"$rank_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
