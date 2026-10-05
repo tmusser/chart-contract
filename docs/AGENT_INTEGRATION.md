@@ -41,6 +41,9 @@ Policy:
 - Treat receipt hashes as structural identity only, not proof that expressions executed correctly or that upstream transformation lineage is complete.
 - Inspect `data.coverage.usable_rows` before sharing: below 50% blocks, 50%-<90% requires review, and 90%+ only means the visible analytical fields are mostly complete.
 - If `data.coverage.group_balance` warns, surface the unequal evidence retention to the human reviewer; do not infer that missingness caused the group result.
+- For rank charts, require `data.rank.category_unique`, `contract.rank.truncation`, and `visual.rank.sort_order` to pass before sharing.
+- Treat `data.rank.cutoff_tie` as a review signal: top-N may display more than N categories because exact cutoff ties are intentionally preserved.
+- Do not summarize omitted categories as absent from the source; first-party top-N specs retain full source rows and declare how many eligible categories are omitted from display.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.
