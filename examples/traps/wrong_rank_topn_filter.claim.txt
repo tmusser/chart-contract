@@ -1,0 +1,1 @@
+Segments are ranked by observed score.
