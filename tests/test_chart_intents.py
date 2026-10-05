@@ -72,7 +72,9 @@ def test_rank_chart_declares_sort() -> None:
         unit="accounts",
     ).to_vega_lite()
 
-    assert spec["encoding"]["y"]["sort"] == "-x"
+    assert spec["encoding"]["y"]["sort"] == ["Starter", "Pro", "Free"]
+    assert spec["usermeta"]["chart_contract_intent"] == "rank"
+    assert spec["usermeta"]["rank_contract"]["omitted_category_count"] == 0
 
 
 def test_compare_chart_supports_grouped_bars() -> None:
