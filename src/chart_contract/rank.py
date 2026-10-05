@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from functools import cmp_to_key
 from typing import Any
 
 import pandas as pd
@@ -90,7 +91,7 @@ def build_rank_selection(
         (row[category_field], row[metric_field])
         for _, row in eligible.iterrows()
     ]
-    records.sort(key=lambda item: (-float(item[1]), _category_sort_key(item[0])))
+    records.sort(key=cmp_to_key(_compare_rank_items))
 
     eligible_count = len(records)
     cutoff_tie_expanded = False
@@ -232,6 +233,16 @@ def rank_filter_categories(spec: Mapping[str, Any], category_field: str) -> tupl
     if not isinstance(one_of, list):
         return ()
     return tuple(one_of)
+
+
+def _compare_rank_items(left: tuple[Any, Any], right: tuple[Any, Any]) -> int:
+    if left[1] > right[1]:
+        return -1
+    if left[1] < right[1]:
+        return 1
+    left_key = _category_sort_key(left[0])
+    right_key = _category_sort_key(right[0])
+    return (left_key > right_key) - (left_key < right_key)
 
 
 def _category_sort_key(value: Any) -> tuple[str, str]:
