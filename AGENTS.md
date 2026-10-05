@@ -25,6 +25,9 @@
 - Treat usable-row coverage as a visibility contract over fields required by the chart/spec. Do not describe a high coverage percentage as proof of representativeness or random missingness.
 - Treat materially uneven group coverage as a human-review signal, not evidence that missingness caused the observed group difference.
 - Do not invent coverage for transform-derived fields that cannot be deterministically reconstructed from the supplied evidence.
+- Rank charts require one explicit row per category; do not silently aggregate duplicate categories to make a ranking pass.
+- Top-N rank truncation must be explicit, preserve full source evidence in first-party specs, declare omitted-category counts, and include all exact metric ties at the cutoff rather than applying an arbitrary hidden tie-break.
+- Deterministic category ordering inside equal metric values is display stabilization only; do not describe it as distinct analytical rank.
 - Treat the machine-readable audit profile as descriptive ruleset metadata, not another audit or scientific approval artifact.
 - Do not recompute a report binding to legitimize post-audit edits to findings or verdict fields; rerun the audit and emit a new report.
 - Treat a saved-report audit-profile mismatch as stale policy identity that requires re-audit for current verification, not as proof that either policy is better or scientifically valid.
