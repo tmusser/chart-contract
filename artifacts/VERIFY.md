@@ -1,5 +1,52 @@
 # VERIFY
 
+2026-10-05 - Harden rank and top-N contracts
+
+Environment:
+- Branch: `agent/rank-topn-contract`
+- Base: `main` at `9e9ec644fbe60ca941e8712de7b41e98ce497944`
+- Pull request: #19 (`feat: harden rank and top-N contracts`)
+- Initial GitHub Actions CI run #222 (`37378919342`) -> FAILED on one stale rank-rendering regression that expected Vega shorthand `sort="-x"`
+- Follow-up GitHub Actions CI run #223 (`37379008106`) on code-bearing head `f4110be16eda85b6ac94d0aeda80e86f5e8fba46` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, transform, coverage, stale-lineage, and wrong-rank-top-N trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- `Chart.rank(..., top_n=N)` accepts only `None` or positive integers;
+- rank evidence blocks duplicate non-null categories instead of silently aggregating them;
+- first-party rank ordering is deterministic metric-descending with category identity used only to stabilize exact ties;
+- ordering compares original numeric values directly and preserves large-integer precision;
+- top-N cutoffs include all categories tied at the boundary and surface REVIEW when displayed count exceeds N;
+- readability uses displayed category count rather than the untruncated source count;
+- first-party rank specs declare a closed v1 `rank_contract` with eligible/displayed/omitted counts;
+- first-party top-N specs preserve full supplied source rows and apply one bounded category `oneOf` filter;
+- that filter is covered independently by transform declaration + transform-lineage receipt checks;
+- opt-in rank spec audits reproduce expected counts, selected category set, and exact visual category order from full supplied evidence;
+- stale/tampered sort order, selected-set filters, duplicate categories, malformed/missing rank contracts, and count drift block;
+- machine-readable profile/documentation parity moves from 58 to 63 rules.
+
+CI correction note:
+- Run #222 exposed `tests/test_chart_intents.py::test_rank_chart_declares_sort`, which asserted the previous Vega shorthand `sort="-x"`.
+- The production output intentionally changed to an explicit ordered category list so later audits can verify exact visual rank order and tie stabilization.
+- The regression expectation was updated to assert the stronger category order plus rank metadata.
+- Run #223 then passed the complete matrix.
+
+Remaining risks:
+- A passing rank contract proves reproducibility against supplied evidence, not that the supplied external population is complete.
+- Top-N remains a presentation choice; the audit does not establish that truncation is analytically preferable.
+- Equal metric values remain analytically tied even though deterministic category ordering stabilizes their visual placement.
+- The bounded first-party top-N filter is intentionally narrow; arbitrary external ranking transforms remain outside the rank-specific reconstruction path.
+- Missing category/metric rows are handled separately by evidence-coverage rules and are not counted as intentional top-N omissions.
+- Adding five new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current profile identity.
+
+Next safest task:
+- Confirm the final documentation/proof-artifact head remains green.
+- Review and merge PR #19 if the v1 rank contract and tie-inclusive cutoff policy are desired.
+- Keep richer ranking policies such as user-specified secondary analytical tiebreak fields as separate future work.
+
 2026-10-03 - Add transform lineage receipts
 
 Environment:
