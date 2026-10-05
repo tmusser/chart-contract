@@ -40,6 +40,7 @@ class Chart:
     parent: str | None = None
     label: str | None = None
     branch: str | None = None
+    top_n: int | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -90,6 +91,7 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        top_n: int | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
         metadata: Mapping[str, Any] | None = None,
@@ -105,6 +107,7 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            top_n=top_n,
             caveat=caveat,
             filters=filters,
             metadata=metadata,
