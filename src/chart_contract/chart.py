@@ -41,6 +41,10 @@ class Chart:
     label: str | None = None
     branch: str | None = None
     top_n: int | None = None
+    numerator: str | None = None
+    denominator: str | None = None
+    cohort: str | None = None
+    denominator_basis_field: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -58,6 +62,10 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        numerator: str | None = None,
+        denominator: str | None = None,
+        cohort: str | None = None,
+        denominator_basis_field: str | None = None,
         event: Mapping[str, Any] | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
@@ -73,6 +81,10 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            numerator=numerator,
+            denominator=denominator,
+            cohort=cohort,
+            denominator_basis_field=denominator_basis_field,
             event=event,
             caveat=caveat,
             filters=filters,
@@ -91,6 +103,10 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        numerator: str | None = None,
+        denominator: str | None = None,
+        cohort: str | None = None,
+        denominator_basis_field: str | None = None,
         top_n: int | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
@@ -107,6 +123,10 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            numerator=numerator,
+            denominator=denominator,
+            cohort=cohort,
+            denominator_basis_field=denominator_basis_field,
             top_n=top_n,
             caveat=caveat,
             filters=filters,
@@ -126,6 +146,10 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        numerator: str | None = None,
+        denominator: str | None = None,
+        cohort: str | None = None,
+        denominator_basis_field: str | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
         metadata: Mapping[str, Any] | None = None,
@@ -142,6 +166,10 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            numerator=numerator,
+            denominator=denominator,
+            cohort=cohort,
+            denominator_basis_field=denominator_basis_field,
             caveat=caveat,
             filters=filters,
             metadata=metadata,
