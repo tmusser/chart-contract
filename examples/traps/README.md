@@ -30,6 +30,21 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `mixed_denominator_basis`
+
+Demonstrates a chart whose displayed metric is consistently labeled `conversion rate` while
+the row-level denominator identity changes from `visitors` to `signups`.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/mixed_denominator_basis.vl.json \
+  --data examples/traps/mixed_denominator_basis.csv \
+  --claim "$(cat examples/traps/mixed_denominator_basis.claim.txt)"
+```
+
+Expected finding: `data.ratio.denominator_basis` reporting mixed denominator identities.
+
 ### `wrong_rank_topn_filter`
 
 Demonstrates an opt-in rank spec whose generic transform declaration and lineage receipt are

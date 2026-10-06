@@ -2,71 +2,75 @@
 
 ## Resume Packet
 
-- Goal: make rank ordering, duplicate categories, top-N truncation, cutoff ties, and omitted-category evidence explicitly auditable.
-- Branch: `agent/rank-topn-contract`.
-- Base: `main` at `9e9ec644fbe60ca941e8712de7b41e98ce497944`.
-- Pull request: #19 (`feat: harden rank and top-N contracts`).
-- Current slice: `top_n` API, deterministic rank selection, chart/spec rank audits, full-source top-N filtering, five new profile rules, CLI trap, tests, docs, and refreshed hero proof spec.
-- Read first: `src/chart_contract/rank.py`, `src/chart_contract/rank_audit.py`, `src/chart_contract/renderers/altair.py`, `tests/test_rank_contract.py`, and `docs/RANK_CONTRACT.md`.
+- Goal: make numerator, denominator, cohort identity, and denominator-basis consistency auditable for ratio-like analytical metrics.
+- Branch: `agent/denominator-cohort-contract`.
+- Base: `main` at `f8dc6151453053ad193fa255d4b5d8655b4ccb1d`.
+- Pull request: #20 (`feat: add denominator and cohort contracts`).
+- Current slice: first-party API fields, closed v1 ratio metadata, chart/spec audits, mixed-denominator CLI trap, two new profile rules, tests, docs, and refreshed proof artifacts.
+- Read first: `src/chart_contract/ratio.py`, `src/chart_contract/ratio_audit.py`, `tests/test_ratio_contract.py`, and `docs/RATIO_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.rank()` accepts optional `top_n`.
-- `top_n=None` means the full eligible category set; positive integers request explicit truncation.
-- Duplicate non-null categories fail `data.rank.category_unique`; rank code never silently aggregates duplicates.
-- Rank ordering is metric-descending with category identity used only as deterministic display order among exact metric ties.
-- Numeric ranking compares original values rather than coercing to float.
-- Top-N uses `include_cutoff_ties`; exact ties crossing the cutoff are all displayed and produce `data.rank.cutoff_tie=WARN`.
-- First-party rank specs carry `chart_contract_intent="rank"` and a closed v1 `rank_contract`.
-- Rank contract metadata declares category/metric fields, order, top_n, tie policy, eligible/displayed/omitted counts, and whether cutoff ties expanded the view.
-- Eligible categories require non-null category + metric; incomplete rows remain visible to evidence-coverage auditing.
-- First-party top-N rendering preserves full source rows and applies one category `oneOf` filter for the displayed set.
-- Top-N filters are also covered by `transform.declaration` and `transform.lineage.receipts`.
-- Opt-in rank spec audits reproduce the expected rank contract and selected set from supplied full evidence.
-- Exact visual category sort is audited, so a bar reorder blocks even when values are unchanged.
-- `examples/traps/wrong_rank_topn_filter.*` proves a transform-consistent but analytically wrong selected category set blocks through the rank contract.
-- The `audit-v0.2` profile now contains 63 rules.
+- `Chart.trend()`, `Chart.rank()`, and `Chart.compare()` accept:
+  - `numerator`
+  - `denominator`
+  - optional `cohort`
+  - optional `denominator_basis_field`
+- Missing denominator semantics on recognized ratio-like units produces `contract.ratio.denominator=WARN`.
+- Declared contracts are closed version 1 and bind `metric_field`, numerator, denominator, cohort, and denominator basis field.
+- Partial/malformed/extra-field contracts fail.
+- Spec contracts must bind to a quantitative field actually shown by the audited spec.
+- First-party renderers preserve `usermeta.ratio_contract` only for the supported v1 metric intents.
+- A denominator basis field is checked across every supplied row for presence, non-null/non-empty string identity, invariance, and exact agreement with the declared denominator.
+- Mixed identities such as `visitors` / `signups` fail `data.ratio.denominator_basis`.
+- Different denominator numeric sizes are not a failure; version 1 audits denominator meaning, not magnitude.
+- `cohort` is descriptive identity only and is not parsed or validated as row membership.
+- `value_representation` remains the independent percent-scaling contract.
+- `examples/traps/mixed_denominator_basis.*` demonstrates a renderable comparison that blocks solely because denominator meaning changes across rows.
+- The `audit-v0.2` profile now contains 65 rules.
 
 ## Important Decisions
 
-- One row per category is a hard contract; aggregation policy must be explicit upstream.
-- `top_n` is truncation intent, not inferred from displayed row count.
-- Cutoff ties are never silently split; all exact ties are included.
-- Category ordering inside exact metric ties is presentation stabilization only and does not create distinct analytical ranks.
-- First-party specs retain full source evidence specifically so omitted-category counts and selected sets remain re-auditable.
-- Rank omissions count only eligible categories, not rows missing category/metric values.
-- External specs must explicitly opt into rank semantics with `usermeta.chart_contract_intent="rank"`.
-- The supported top-N filter is intentionally bounded to one category `oneOf` predicate; generic transform execution remains out of scope.
-- A passing rank contract does not prove top-N is the right presentation or that an externally supplied source population is complete.
-- Older schema-0.4 reports correctly become stale-policy artifacts because five new rank rules change profile semantic identity.
+- Missing denominator identity is REVIEW; contradictory or malformed declared identity is BLOCK.
+- No numerator/denominator identity is inferred from field names, source names, claim text, or value ranges.
+- An explicit ratio contract is allowed even when the unit string is nonstandard and not recognized by the heuristic.
+- Row-level denominator basis stores semantic labels, not counts.
+- The v1 first-party contract is deliberately scoped to `trend`, `rank`, and `compare`; distributions do not emit or require it.
+- Ratio metadata does not recompute or validate upstream arithmetic.
+- Cohort prose is preserved for inspectability but not treated as machine-verified population membership.
+- Existing filters remain the explicit surface for chart filter/window declarations.
+- Older schema-0.4 reports become stale-policy artifacts because two new rules change profile semantic identity.
 
 ## Verification
 
-Initial CI run #222 failed only because an existing regression still expected `sort="-x"`.
+Initial CI run #230 failed because five legacy READY fixtures used `conversion rate` / `rate` without declaring what the metric was of.
 
-The new renderer intentionally emits the exact deterministic category order, so the regression was updated to assert that stronger contract. GitHub Actions CI run #223 (`37379008106`) then passed on code-bearing head `f4110be16eda85b6ac94d0aeda80e86f5e8fba46`:
+Those fixtures were corrected to declare actual numerator/denominator identity rather than weakening the new policy.
+
+GitHub Actions CI run #236 (`37475378812`) then passed on code-bearing head `2fb9889dd3c65a25ed1127f02cd8fd2de8746bc9`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
 - Python 3.12 -> PASSED
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
-- all CLI trap paths, including `wrong_rank_topn_filter` -> PASSED
+- all prior CLI trap paths -> PASSED
+- `mixed_denominator_basis` installed-CLI trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
-The final VERIFY/HANDOFF/proof-artifact commits are documentation/data-only. Treat the final-head Actions run as the merge gate.
+The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Actions run as the merge gate.
 
 ## Remaining Risks
 
-- First-party full-source preservation makes top-N auditable but can increase emitted spec size for very large rank datasets.
-- The v1 contract has one fixed descending order and one tie policy; user-defined analytical secondary tiebreakers are not yet modeled.
-- The rank-specific filter reconstruction supports the first-party bounded `oneOf` shape only.
-- External rank metadata can still lie about evidence not supplied to the audit; the contract verifies the supplied evidence, not remote source completeness.
-- Very long tie groups can intentionally make a top-N chart display materially more than N categories.
+- The v1 contract does not carry numeric numerator/denominator values, so it cannot replay the rate arithmetic.
+- A malicious or mistaken upstream producer can label all rows with the same denominator identity even when source construction differs; this contract detects declared semantic inconsistency, not hidden upstream fraud.
+- The recognized unit heuristic is intentionally conservative and does not attempt to classify every possible `per ...` unit.
+- Cohort identity has no canonical ontology in v1.
+- External specs can carry ratio metadata for broader quantitative shapes, but first-party API enforcement remains intentionally narrower.
 
 ## Next Recommended Task
 
-- Confirm final PR #19 CI remains green after the verification/handoff/proof-artifact commits.
-- Merge if the explicit v1 rank contract and tie-inclusive top-N behavior match the intended policy.
-- Consider user-declared secondary tiebreak semantics only as a separate future contract rather than weakening the current no-hidden-tiebreak rule.
+- Confirm final PR #20 CI remains green after VERIFY/HANDOFF.
+- Merge if the REVIEW-on-missing / BLOCK-on-contradiction policy and closed v1 schema match the intended semantics.
+- Keep ratio arithmetic verification, time-varying denominator populations, and cohort equivalence as separate future work.

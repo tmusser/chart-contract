@@ -91,7 +91,7 @@
     ]
   },
   "width": 640,
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
   "datasets": {
     "data-89a6f5a0d51458e583a40d63981be75e": [
       {
@@ -117,5 +117,19 @@
         "label": "Onboarding launch"
       }
     ]
+  },
+  "usermeta": {
+    "ratio_contract": {
+      "version": 1,
+      "metric_field": "conversion_rate",
+      "numerator": "converted_sessions",
+      "denominator": "eligible_sessions",
+      "cohort": "eligible onboarding sessions",
+      "denominator_basis_field": null
+    },
+    "claim": "Conversion improved after the onboarding launch window.",
+    "source": "synthetic.funnel_events",
+    "unit": "conversion rate",
+    "caveat": "Observational trend; not causal proof."
   }
 }

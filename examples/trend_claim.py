@@ -27,6 +27,9 @@ def main() -> None:
         claim="Conversion improved after the onboarding launch window.",
         source="synthetic.funnel_events",
         unit="conversion rate",
+        numerator="converted_sessions",
+        denominator="eligible_sessions",
+        cohort="eligible onboarding sessions",
         event={"x": "2026-05-08", "label": "Onboarding launch"},
         caveat="Observational trend; not causal proof.",
     )

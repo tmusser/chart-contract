@@ -24,6 +24,8 @@ def _trend(*, representation: str | None) -> Chart:
         unit="percent",
         value_representation=representation,
         title="Observed conversion comparison",
+        numerator="converted_sessions",
+        denominator="eligible_sessions",
     )
 
 

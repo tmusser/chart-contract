@@ -1,0 +1,30 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "mark": "bar",
+  "title": "Segment conversion rate",
+  "encoding": {
+    "x": {
+      "field": "segment",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "conversion_rate",
+      "type": "quantitative",
+      "scale": {
+        "zero": true
+      }
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.funnel",
+    "unit": "conversion rate",
+    "ratio_contract": {
+      "version": 1,
+      "metric_field": "conversion_rate",
+      "numerator": "converted_users",
+      "denominator": "visitors",
+      "cohort": "all observed funnel traffic",
+      "denominator_basis_field": "denominator_basis"
+    }
+  }
+}

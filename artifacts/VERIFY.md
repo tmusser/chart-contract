@@ -1,5 +1,53 @@
 # VERIFY
 
+2026-10-06 - Add denominator and cohort contracts
+
+Environment:
+- Branch: `agent/denominator-cohort-contract`
+- Base: `main` at `f8dc6151453053ad193fa255d4b5d8655b4ccb1d`
+- Pull request: #20 (`feat: add denominator and cohort contracts`)
+- Initial final-slice GitHub Actions CI run #230 (`37474791931`) -> FAILED on five legacy READY fixtures that used `rate` / `conversion rate` without denominator identity
+- Corrected code-bearing GitHub Actions CI run #236 (`37475378812`) on head `2fb9889dd3c65a25ed1127f02cd8fd2de8746bc9` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, transform, evidence-coverage, stale-lineage, wrong-rank-top-N, and mixed-denominator traps -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend`, `rank`, and `compare` accept explicit `numerator`, `denominator`, optional `cohort`, and optional `denominator_basis_field`;
+- ratio-like units include percent/percentage/`%`, `rate`, `ratio`, and units ending in ` rate` or ` ratio`;
+- missing numerator/denominator identity on a ratio-like metric produces `contract.ratio.denominator=WARN` / REVIEW;
+- partial, malformed, extra-field, unsupported-version, blank-identity, or shown-metric-binding drift produces FAIL/BLOCK;
+- explicit ratio contracts can define semantics for nonstandard units that the unit-name heuristic does not recognize;
+- first-party specs preserve the closed version-1 ratio contract in `usermeta.ratio_contract`;
+- denominator-basis fields must exist, contain no null/blank/non-string identities, use one identity across supplied rows, and exactly match the declared denominator;
+- mixed denominator meanings such as `visitors` versus `signups` block even when the displayed metric label is identical;
+- denominator-basis identity is semantic identity, not denominator magnitude;
+- cohort metadata is preserved descriptively but not parsed as proof of population membership;
+- percent `value_representation` and ratio denominator semantics remain separate contracts;
+- distribution intents do not inherit the first-party v1 denominator requirement or emit first-party ratio metadata;
+- machine-readable profile/documentation parity moves from 63 to 65 rules.
+
+CI correction note:
+- Run #230 exposed five fixtures that claimed `READY` while using `conversion rate` / `rate` with no denominator semantics.
+- Those fixtures were upgraded to declare real numerator/denominator identities rather than weakening the new rule.
+- The correction included the pass-only chart audit, embedded-claim spec audit, and shared CLI READY fixture.
+- Run #236 then passed the complete matrix, including the installed-CLI `mixed_denominator_basis` trap.
+
+Remaining risks:
+- Ratio contracts are semantic metadata, not arithmetic replay: passing does not prove the displayed metric equals numerator divided by denominator.
+- A matching denominator-basis field does not prove source rows actually belong to the declared denominator population or cohort.
+- Unit-name detection is intentionally bounded; unrecognized ratio-like units require explicit contract metadata rather than inference.
+- Version 1 applies first-party enforcement only to `trend`, `rank`, and `compare`; distribution intents remain out of scope.
+- Cohort prose is preserved but not normalized, parsed, or compared semantically.
+- Adding two new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #20 if the version-1 denominator/cohort schema and REVIEW-vs-BLOCK boundary are desired.
+- Keep arithmetic recomputation, denominator counts, and richer cohort equivalence as separate future contracts.
+
 2026-10-05 - Harden rank and top-N contracts
 
 Environment:

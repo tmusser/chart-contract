@@ -104,6 +104,14 @@
     "claim": "Enterprise and startup segments show the highest observed conversion rates.",
     "source": "synthetic.segment_conversion",
     "unit": "conversion rate",
-    "caveat": "Observational segment summary; not causal proof for the onboarding launch."
+    "caveat": "Observational segment summary; not causal proof for the onboarding launch.",
+    "ratio_contract": {
+      "version": 1,
+      "metric_field": "conversion_rate",
+      "numerator": "converted_sessions",
+      "denominator": "eligible_sessions",
+      "cohort": "eligible onboarding sessions",
+      "denominator_basis_field": null
+    }
   }
 }

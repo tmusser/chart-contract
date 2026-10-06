@@ -180,6 +180,9 @@ chart = Chart.trend(
     claim="Conversion improved after onboarding launch",
     source="warehouse.funnel_events",
     unit="conversion rate",
+    numerator="converted_sessions",
+    denominator="eligible_sessions",
+    cohort="sessions eligible for the onboarding funnel",
     event={"x": "2026-05-08", "label": "Onboarding launch"},
     caveat="Observational trend; not causal proof.",
 )
@@ -214,6 +217,31 @@ rescales the underlying data.
 Generic `rate` units are deliberately **not** assumed to be percentages. See
 [Percent value semantics](docs/PERCENT_SEMANTICS.md) for the deterministic contract and
 external Vega-Lite behavior.
+
+### Rates and ratios: declare what they are "of"
+
+A percentage, rate, or ratio is not semantically complete without numerator/denominator identity:
+
+```python
+chart = Chart.compare(
+    data=df,
+    x="segment",
+    y="conversion_rate",
+    claim="Enterprise has the higher observed conversion rate.",
+    source="warehouse.funnel_summary",
+    unit="conversion rate",
+    numerator="converted_users",
+    denominator="eligible_sessions",
+    cohort="sessions eligible for the onboarding funnel",
+)
+```
+
+Missing numerator/denominator identity on a ratio-like metric produces `REVIEW`. A declared
+`denominator_basis_field` can make row-level semantics auditable: mixed identities such as
+`visitors` and `signups` under one displayed conversion-rate metric `BLOCK`.
+
+This contract records semantic identity only. It does not recompute the rate or certify
+upstream SQL arithmetic. See [Ratio denominator and cohort contract](docs/RATIO_CONTRACT.md).
 
 ### Vega-Lite transforms: make them visible
 
