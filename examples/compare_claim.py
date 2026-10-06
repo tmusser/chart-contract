@@ -29,6 +29,9 @@ def main() -> None:
         claim="Enterprise win rate leads SMB in both regions.",
         source="synthetic.pipeline_summary",
         unit="win rate",
+        numerator="won_opportunities",
+        denominator="closed_opportunities",
+        cohort="closed opportunities in the summarized pipeline",
         caveat="Observed pipeline summary; not a causal attribution statement.",
     )
     report = chart.audit()
