@@ -10,6 +10,7 @@ import pandas as pd
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
+from ..ratio import chart_ratio_contract
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..statistics import (
@@ -52,6 +53,10 @@ def render_chart(chart: Any) -> alt.Chart:
                 top_n=top_n,
             )
             usermeta["rank_contract"] = rank_selection.summary.to_dict()
+
+    ratio_contract = chart_ratio_contract(chart)
+    if ratio_contract is not None:
+        usermeta["ratio_contract"] = ratio_contract
 
     declared_transforms = list(first_party_transform_declaration(chart.intent))
     if (
