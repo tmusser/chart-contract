@@ -29,6 +29,7 @@ The current unreleased line adds and hardens:
 - deterministic evidence-coverage reporting so charts expose how many supplied rows are actually complete for visible analytical fields, plus uneven grouped missingness review
 - occurrence-level transform lineage receipts binding exact transform payloads plus bounded input/output field lineage without executing arbitrary expressions
 - explicit rank/top-N contracts covering unique categories, descending sort, tie-safe cutoffs, full-source preservation, and omitted-category receipts
+- explicit numerator/denominator/cohort contracts for ratio-like metrics, with optional row-level denominator-basis consistency checks
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
