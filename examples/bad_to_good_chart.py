@@ -111,6 +111,9 @@ def main() -> None:
         claim="Enterprise and startup segments show the highest observed conversion rates.",
         source="synthetic.segment_conversion",
         unit="conversion rate",
+        numerator="converted_sessions",
+        denominator="eligible_sessions",
+        cohort="eligible onboarding sessions",
         caveat="Observational segment summary; not causal proof for the onboarding launch.",
     )
     corrected_report = corrected_chart.audit()
