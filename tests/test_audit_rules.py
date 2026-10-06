@@ -136,6 +136,8 @@ def test_audit_report_verdict_ready_for_pass_only_report() -> None:
         source="warehouse.funnel_events",
         unit="conversion rate",
         title="Weekly conversion rate improved",
+        numerator="converted_sessions",
+        denominator="eligible_sessions",
     ).audit()
 
     assert report.verdict == "READY"
