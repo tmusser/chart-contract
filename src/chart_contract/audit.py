@@ -191,6 +191,10 @@ def audit_chart(chart: Any) -> AuditReport:
         surface="chart",
     )
 
+    from .ratio_audit import audit_ratio_chart
+
+    audit_ratio_chart(report, chart)
+
     if claim:
         report.add("contract.claim.present", PASS, "Claim is declared.")
     else:
@@ -620,6 +624,9 @@ def audit_spec(
             surface="spec",
         )
 
+    from .ratio_audit import audit_ratio_spec
+
+    audit_ratio_spec(report, spec, encoding, resolved_frame, unit)
     _audit_spec_encoding_fields(report, encoding, resolved_frame)
 
     if resolved_frame is not None:
