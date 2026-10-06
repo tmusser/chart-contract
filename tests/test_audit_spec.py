@@ -21,6 +21,14 @@ def test_embedded_claim_can_drive_spec_audit() -> None:
             "claim": "Conversion increased from W1 to W2.",
             "source": "synthetic.conversion",
             "unit": "rate",
+            "ratio_contract": {
+                "version": 1,
+                "metric_field": "conversion",
+                "numerator": "converted_sessions",
+                "denominator": "eligible_sessions",
+                "cohort": None,
+                "denominator_basis_field": None,
+            },
         },
     }
 
