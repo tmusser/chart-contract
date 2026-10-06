@@ -40,11 +40,13 @@ def test_distribution_intents_do_not_inherit_metric_ratio_requirement() -> None:
     )
 
     report = chart.audit()
+    spec = chart.to_vega_lite()
 
     assert all(
         finding.rule_id != "contract.ratio.denominator"
         for finding in report.findings
     )
+    assert "ratio_contract" not in spec.get("usermeta", {})
 
 
 def test_ratio_like_metric_without_denominator_requires_review() -> None:
