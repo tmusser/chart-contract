@@ -32,6 +32,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - deterministic evidence-coverage checks over visible analytical fields, including usable-row retention and grouped missingness imbalance
 - occurrence-level transform lineage receipts binding exact transform payloads plus bounded input/output field lineage
 - explicit rank/top-N contracts with unique categories, descending order, tie-safe cutoff expansion, and omitted-category receipts
+- explicit numerator/denominator/cohort contracts for ratio-like trend/rank/compare metrics, plus optional row-level denominator-basis consistency checks
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -52,6 +53,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - The scale/normalization policy does not infer semantic normalization hidden in arbitrary transforms or data that was preprocessed before reaching the audited spec.
 - Percent representation is never inferred from observed value ranges; `0.42` versus `42` must be declared when percent presentation is explicit.
 - Generic rate units are not assumed to be percentages, and percent representation checks do not validate upstream numerator/denominator logic.
+- Ratio contracts make numerator/denominator/cohort identity inspectable but do not recompute rates, validate upstream arithmetic, or prove source-population completeness.
+- A denominator basis field validates supplied semantic labels only; it does not prove each row belongs to the declared cohort or denominator population.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -82,6 +85,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - statistical imputation, missingness-mechanism classification, or automatic correction of incomplete evidence
 - execution tracing or attestation of upstream transformation systems
 - implicit aggregation of duplicate rank categories or hidden arbitrary tie-breaking at top-N cutoffs
+- automatic reconstruction or recomputation of ratio numerators, denominators, cohorts, or upstream rate arithmetic
 
 ## Acceptance Criteria
 
@@ -108,6 +112,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Every auditable transform occurrence in a passing transformed spec has an exact version-1 lineage receipt; same-kind payload edits, missing receipts, malformed receipts, and stale receipts block.
 - Rank charts require one row per non-null category, deterministic descending metric order, and explicit top-N intent; cutoff ties are included rather than silently split.
 - First-party top-N rank specs preserve the full supplied rows, declare eligible/displayed/omitted category counts, and use one bounded category filter whose selected set is reproducible from the supplied evidence.
+- Ratio-like trend/rank/compare metrics WARN when numerator/denominator identity is absent; malformed or partial declared ratio contracts block.
+- First-party specs preserve a closed version-1 ratio contract binding the shown metric to numerator, denominator, optional cohort, and optional denominator basis field.
+- When a denominator basis field is declared, missing/null/mixed identities or a basis identity that disagrees with the declared denominator block.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -148,7 +155,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 63-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 65-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -159,6 +166,8 @@ For evidence coverage, run `python -m pytest tests/test_evidence_coverage.py` an
 For transform lineage, run `python -m pytest tests/test_transform_lineage.py tests/test_transform_policy.py` and verify exact operation digests, bounded field lineage, stale-receipt blocking, and first-party receipt parity.
 
 For rank/top-N semantics, run `python -m pytest tests/test_rank_contract.py` and verify duplicate-category blocking, descending sort parity, full-source preservation, omitted-category reconciliation, bounded-filter parity, and cutoff-tie expansion.
+
+For denominator/cohort semantics, run `python -m pytest tests/test_ratio_contract.py` and verify missing-contract review, closed-schema validation, first-party metadata preservation, mixed-basis blocking, quantitative metric binding, and unreconstructable basis evidence blocking.
 
 ## Open Questions
 
