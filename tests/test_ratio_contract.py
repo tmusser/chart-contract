@@ -28,6 +28,25 @@ def _trend(**kwargs) -> Chart:
     return Chart.trend(**params)
 
 
+def test_distribution_intents_do_not_inherit_metric_ratio_requirement() -> None:
+    chart = Chart.histogram(
+        data=pd.DataFrame({"conversion_rate": [0.10, 0.20, 0.30, 0.40, 0.50]}),
+        value="conversion_rate",
+        claim="Observed conversion-rate distribution.",
+        source="synthetic.funnel",
+        unit="percent",
+        value_representation="fraction",
+        title="Conversion-rate distribution",
+    )
+
+    report = chart.audit()
+
+    assert all(
+        finding.rule_id != "contract.ratio.denominator"
+        for finding in report.findings
+    )
+
+
 def test_ratio_like_metric_without_denominator_requires_review() -> None:
     report = _trend().audit()
 
