@@ -18,6 +18,7 @@ from .audit import (
 )
 from .contracts import is_ratio_like_unit
 from .ratio import (
+    RATIO_INTENTS,
     chart_ratio_contract,
     denominator_basis_status,
     parse_ratio_contract,
@@ -25,6 +26,9 @@ from .ratio import (
 
 
 def audit_ratio_chart(report: AuditReport, chart: Any) -> None:
+    if getattr(chart, "intent", None) not in RATIO_INTENTS:
+        return
+
     raw_contract = chart_ratio_contract(chart)
     ratio_like = is_ratio_like_unit(getattr(chart, "unit", None))
 
