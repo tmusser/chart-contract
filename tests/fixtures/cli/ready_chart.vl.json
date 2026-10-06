@@ -13,6 +13,14 @@
   },
   "usermeta": {
     "source": "warehouse.funnel_events",
-    "unit": "conversion rate"
+    "unit": "conversion rate",
+    "ratio_contract": {
+      "version": 1,
+      "metric_field": "conversion_rate",
+      "numerator": "converted_sessions",
+      "denominator": "eligible_sessions",
+      "cohort": null,
+      "denominator_basis_field": null
+    }
   }
 }
