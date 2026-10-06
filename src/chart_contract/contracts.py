@@ -56,6 +56,7 @@ DECORATIVE_TERMS = (
 
 PERCENT_UNITS = {"percent", "percentage", "%"}
 PERCENT_REPRESENTATIONS = {"fraction", "percentage_points"}
+RATIO_UNITS = {"rate", "ratio"}
 
 
 def has_causal_language(text: str | None) -> bool:
@@ -180,6 +181,18 @@ def declared_value_representation_from_spec(spec: Mapping[str, Any]) -> Any:
 
 def is_percent_unit(unit: str | None) -> bool:
     return bool(unit and unit.strip().lower() in PERCENT_UNITS)
+
+
+def is_ratio_like_unit(unit: str | None) -> bool:
+    if not unit or not unit.strip():
+        return False
+    normalized = unit.strip().lower()
+    return (
+        normalized in PERCENT_UNITS
+        or normalized in RATIO_UNITS
+        or normalized.endswith(" rate")
+        or normalized.endswith(" ratio")
+    )
 
 
 def is_supported_percent_representation(representation: str | None) -> bool:
