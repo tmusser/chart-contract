@@ -119,6 +119,7 @@ def find_decorative_terms(payload: Any) -> list[str]:
         "data",
         "datasets",
         "filters",
+        "ratio_contract",
         "source",
         "unit",
         "value_representation",
