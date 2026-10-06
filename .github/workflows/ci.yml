@@ -127,6 +127,18 @@ jobs:
           grep -q "contract.rank.truncation" <<<"$rank_output"
           grep -q "top-N category set" <<<"$rank_output"
 
+          set +e
+          denominator_output=$(chart-contract audit spec examples/traps/mixed_denominator_basis.vl.json \
+            --data examples/traps/mixed_denominator_basis.csv \
+            --claim "$(cat examples/traps/mixed_denominator_basis.claim.txt)" 2>&1)
+          denominator_exit=$?
+          set -e
+          echo "$denominator_output"
+          test "$denominator_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$denominator_output"
+          grep -q "data.ratio.denominator_basis" <<<"$denominator_output"
+          grep -q "mixed denominator identities" <<<"$denominator_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
