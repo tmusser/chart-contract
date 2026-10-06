@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit numerator/denominator/cohort semantics for ratio-like `trend`, `rank`, and `compare` metrics, preserved as closed version-1 `usermeta.ratio_contract` metadata.
+- Optional row-level denominator-basis checks that block mixed identities such as `visitors` versus `signups` under one displayed rate/ratio metric.
 - Explicit `Chart.rank(..., top_n=N)` truncation with tie-inclusive cutoff semantics and deterministic descending display order.
 - Rank contracts declaring eligible, displayed, and omitted category counts while first-party top-N specs preserve full source rows behind a bounded category filter.
 - Rank audits that block duplicate categories, sort/filter/count drift, and malformed truncation metadata while warning when cutoff ties expand beyond N.
@@ -31,7 +33,7 @@
 - Machine-readable `audit-v0.2` profile inspection via `chart-contract profile show`, covering the documented audit rule IDs, applicable audit surfaces, allowed severities, triggers, and known boundaries.
 - Deterministic `audit-profile-semantics-v1` SHA-256 identities that exclude top-level tool/package metadata so version-only changes do not masquerade as audit-policy drift.
 - `chart-contract profile diff <before.json> <after.json>` for mechanical profile/rule/order/tool drift with no automatic compatibility judgment.
-- Published audit-profile and profile-diff schemas plus regression coverage for 63-rule reference parity, semantic binding drift, and CLI inspection.
+- Published audit-profile and profile-diff schemas plus regression coverage for 65-rule reference parity, semantic binding drift, and CLI inspection.
 - CLI verification for saved bound JSON audit reports via `chart-contract verify report`, with component-level spec, data, and claim drift output.
 - Serialized binding self-checks that reject malformed hashes and bundle hashes inconsistent with their recorded components before live-input comparison.
 - Deterministic SHA-256 input bindings for public spec audits and first-party chart audit reports, covering the audited subject, explicit data, claim, and installed package version.
