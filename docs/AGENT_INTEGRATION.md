@@ -44,6 +44,9 @@ Policy:
 - For rank charts, require `data.rank.category_unique`, `contract.rank.truncation`, and `visual.rank.sort_order` to pass before sharing.
 - Treat `data.rank.cutoff_tie` as a review signal: top-N may display more than N categories because exact cutoff ties are intentionally preserved.
 - Do not summarize omitted categories as absent from the source; first-party top-N specs retain full source rows and declare how many eligible categories are omitted from display.
+- For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
+- If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
+- A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.
