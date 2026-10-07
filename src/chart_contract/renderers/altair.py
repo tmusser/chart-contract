@@ -8,7 +8,7 @@ import altair as alt
 import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
-from ..comparison import COMPARISON_INTENTS, build_comparison_summary, comparison_declaration
+from ..comparison import COMPARISON_INTENTS, build_comparison_summary, changes_match, comparison_declaration
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
 from ..ratio import RATIO_INTENTS, chart_ratio_contract
@@ -69,12 +69,20 @@ def render_chart(chart: Any) -> alt.Chart:
         else None
     )
     if comparison_raw is not None:
-        usermeta["comparison_contract"] = build_comparison_summary(
+        comparison_summary = build_comparison_summary(
             chart.data,
             **comparison_raw,
             unit=chart.unit,
             value_representation=chart.value_representation,
-        ).to_dict()
+        )
+        if not changes_match(
+            comparison_summary.declared_change,
+            comparison_summary.computed_change,
+        ):
+            raise ValueError(
+                "Declared comparison change does not match the selected baseline/target evidence."
+            )
+        usermeta["comparison_contract"] = comparison_summary.to_dict()
 
     declared_transforms = list(first_party_transform_declaration(chart.intent))
     if (
