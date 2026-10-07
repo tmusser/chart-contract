@@ -1,0 +1,34 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "mark": "line",
+  "title": "Observed conversion comparison",
+  "encoding": {
+    "x": {"field": "period", "type": "ordinal"},
+    "y": {"field": "conversion", "type": "quantitative"}
+  },
+  "usermeta": {
+    "source": "synthetic.baseline",
+    "unit": "percent",
+    "value_representation": "percentage_points",
+    "ratio_contract": {
+      "version": 1,
+      "metric_field": "conversion",
+      "numerator": "converted_sessions",
+      "denominator": "eligible_sessions",
+      "cohort": null,
+      "denominator_basis_field": null
+    },
+    "comparison_contract": {
+      "version": 1,
+      "metric_field": "conversion",
+      "baseline_field": "period",
+      "baseline_value": "2025",
+      "target_value": "2026",
+      "change_type": "percentage_points",
+      "declared_change": 20.0,
+      "baseline_metric_value": 40.0,
+      "target_metric_value": 60.0,
+      "computed_change": 20.0
+    }
+  }
+}
