@@ -139,6 +139,20 @@ jobs:
           grep -q "data.ratio.denominator_basis" <<<"$denominator_output"
           grep -q "mixed denominator identities" <<<"$denominator_output"
 
+          set +e
+          comparison_output=$(chart-contract audit spec examples/traps/percent_vs_percentage_points.vl.json \
+            --data examples/traps/percent_vs_percentage_points.csv \
+            --claim "$(cat examples/traps/percent_vs_percentage_points.claim.txt)" 2>&1)
+          comparison_exit=$?
+          set -e
+          echo "$comparison_output"
+          test "$comparison_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$comparison_output"
+          grep -q "contract.comparison.change" <<<"$comparison_output"
+          grep -q "claim.comparison.change_semantics" <<<"$comparison_output"
+          grep -q "percent_change" <<<"$comparison_output"
+          grep -q "percentage_points" <<<"$comparison_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |

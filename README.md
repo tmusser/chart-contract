@@ -243,6 +243,35 @@ Missing numerator/denominator identity on a ratio-like metric produces `REVIEW`.
 This contract records semantic identity only. It does not recompute the rate or certify
 upstream SQL arithmetic. See [Ratio denominator and cohort contract](docs/RATIO_CONTRACT.md).
 
+### Comparisons: bind the baseline and the arithmetic
+
+For explicit change claims, declare exactly which observations are being compared and what
+kind of change is meant:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="year",
+    y="revenue",
+    claim="Revenue increased by 20%.",
+    source="warehouse.revenue",
+    unit="dollars",
+    baseline_field="year",
+    baseline_value="2025",
+    target_value="2026",
+    change_type="percent_change",
+    declared_change=20.0,
+)
+```
+
+Supported change types are `absolute`, `percentage_points`, `percent_change`, and
+`ratio`. First-party specs preserve the baseline/target metric values and recomputed change
+as receipts, so stale arithmetic can be caught later.
+
+The claim checker deliberately recognizes only narrow explicit numeric phrases. That is enough
+to catch the classic `40% -> 60%` error: it is +20 percentage points or +50% relative
+change, not “up 20%.” See [Comparison baseline contract](docs/COMPARISON_CONTRACT.md).
+
 ### Vega-Lite transforms: make them visible
 
 External specs with explicit analytical transforms must declare the exact transform kinds they

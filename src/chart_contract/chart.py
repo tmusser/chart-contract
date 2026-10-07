@@ -45,6 +45,11 @@ class Chart:
     denominator: str | None = None
     cohort: str | None = None
     denominator_basis_field: str | None = None
+    baseline_field: str | None = None
+    baseline_value: str | int | float | None = None
+    target_value: str | int | float | None = None
+    change_type: str | None = None
+    declared_change: float | int | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -66,6 +71,11 @@ class Chart:
         denominator: str | None = None,
         cohort: str | None = None,
         denominator_basis_field: str | None = None,
+        baseline_field: str | None = None,
+        baseline_value: str | int | float | None = None,
+        target_value: str | int | float | None = None,
+        change_type: str | None = None,
+        declared_change: float | int | None = None,
         event: Mapping[str, Any] | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
@@ -85,6 +95,11 @@ class Chart:
             denominator=denominator,
             cohort=cohort,
             denominator_basis_field=denominator_basis_field,
+            baseline_field=baseline_field,
+            baseline_value=baseline_value,
+            target_value=target_value,
+            change_type=change_type,
+            declared_change=declared_change,
             event=event,
             caveat=caveat,
             filters=filters,
@@ -150,6 +165,11 @@ class Chart:
         denominator: str | None = None,
         cohort: str | None = None,
         denominator_basis_field: str | None = None,
+        baseline_field: str | None = None,
+        baseline_value: str | int | float | None = None,
+        target_value: str | int | float | None = None,
+        change_type: str | None = None,
+        declared_change: float | int | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
         metadata: Mapping[str, Any] | None = None,
@@ -170,6 +190,11 @@ class Chart:
             denominator=denominator,
             cohort=cohort,
             denominator_basis_field=denominator_basis_field,
+            baseline_field=baseline_field,
+            baseline_value=baseline_value,
+            target_value=target_value,
+            change_type=change_type,
+            declared_change=declared_change,
             caveat=caveat,
             filters=filters,
             metadata=metadata,

@@ -1,5 +1,54 @@
 # VERIFY
 
+2026-10-07 - Add comparison baseline contracts
+
+Environment:
+- Branch: `agent/comparison-baseline-contract`
+- Base: `main` at `bffef92074de321e286a346f57e59f44e4559360`
+- Pull request: #21 (`feat: add comparison baseline contracts`)
+- Initial GitHub Actions CI run #239 (`37664260545`) -> FAILED in the CLI trap because CSV evidence inferred numeric period selectors while the fixture contract used string selector values
+- Corrected code-bearing GitHub Actions CI run #240 (`37664376592`) on head `ff899ed89d4a57c5e31ca893552a1bffcd83fae2` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, transform, coverage, stale-lineage, wrong-rank-top-N, mixed-denominator, and percent-vs-percentage-points trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- `trend` and `compare` accept explicit baseline field/value, target value, change type, and declared change;
+- supported change modes are `absolute`, `percentage_points`, `percent_change`, and `ratio`;
+- baseline and target selectors must be distinct and each resolve to exactly one supplied row;
+- first-party baseline fields must be visible `x` or `group` dimensions;
+- percent change and ratio block on a zero baseline;
+- percentage-point change requires explicit percent unit semantics plus supported value representation;
+- first-party specs preserve closed v1 comparison contracts including observed baseline/target metric values and recomputed change receipts;
+- stale receipt values or declared arithmetic drift block on spec re-audit;
+- first-party rendering refuses to stamp a comparison contract whose declared change disagrees with recomputation;
+- explicit numeric claim phrases for percent, percentage points, and ratio multipliers must match the contract's type and value;
+- `40% -> 60%` correctly distinguishes +20 percentage points from +50% relative change;
+- explicit numeric change wording without a comparison contract produces REVIEW rather than inferred baseline semantics;
+- selector value types are exact: v1 does not silently coerce string `"2025"` to integer `2025`;
+- machine-readable profile/documentation parity moves from 65 to 69 rules.
+
+CI correction note:
+- Run #239 showed the CLI CSV parser inferred the `period` column as integers while the adversarial fixture declared string selectors.
+- The contract intentionally treats selector identity as typed evidence rather than coercing strings/numbers to make a match.
+- The fixture was corrected to use numeric selector values; production comparison semantics were unchanged.
+- Run #240 then passed the complete matrix.
+
+Remaining risks:
+- Exact claim-number parity does not model arbitrary display rounding; v1 expects the explicit numeric claim phrase to match the declared value.
+- General comparative prose such as “improved versus last year” is not parsed into a change mode.
+- One-field selectors intentionally do not model composite keys; grouped comparisons with multiple rows per selector must use a future richer selector contract rather than silent aggregation.
+- Float-based arithmetic is deterministic for supported numeric evidence but is not a decimal-accounting engine.
+- A passing baseline contract proves arithmetic reproducibility against supplied evidence, not baseline appropriateness, causal comparability, seasonality control, or cohort stability.
+- Adding four new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #21 if the v1 one-field selector and exact claim-number semantics are desired.
+- Keep composite selectors, explicit rounding contracts, and richer time-window comparability as separate future work.
+
 2026-10-06 - Add denominator and cohort contracts
 
 Environment:

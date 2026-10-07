@@ -33,6 +33,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - occurrence-level transform lineage receipts binding exact transform payloads plus bounded input/output field lineage
 - explicit rank/top-N contracts with unique categories, descending order, tie-safe cutoff expansion, and omitted-category receipts
 - explicit numerator/denominator/cohort contracts for ratio-like trend/rank/compare metrics, plus optional row-level denominator-basis consistency checks
+- explicit trend/compare baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with durable observed-value receipts
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -55,6 +56,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Generic rate units are not assumed to be percentages, and percent representation checks do not validate upstream numerator/denominator logic.
 - Ratio contracts make numerator/denominator/cohort identity inspectable but do not recompute rates, validate upstream arithmetic, or prove source-population completeness.
 - A denominator basis field validates supplied semantic labels only; it does not prove each row belongs to the declared cohort or denominator population.
+- Comparison contracts verify selector identity and arithmetic against supplied evidence; they do not prove the chosen baseline controls seasonality, cohort drift, confounding, or other comparability threats.
+- Claim comparison parsing is deliberately narrow to explicit numeric percent, percentage-point, and ratio phrases; general comparative prose is not machine-adjudicated.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -86,6 +89,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - execution tracing or attestation of upstream transformation systems
 - implicit aggregation of duplicate rank categories or hidden arbitrary tie-breaking at top-N cutoffs
 - automatic reconstruction or recomputation of ratio numerators, denominators, cohorts, or upstream rate arithmetic
+- automatic choice of analytical baselines, hidden row-order baselines, or open-ended natural-language interpretation of comparison claims
 
 ## Acceptance Criteria
 
@@ -115,6 +119,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Ratio-like trend/rank/compare metrics WARN when numerator/denominator identity is absent; malformed or partial declared ratio contracts block.
 - First-party specs preserve a closed version-1 ratio contract binding the shown metric to numerator, denominator, optional cohort, and optional denominator basis field.
 - When a denominator basis field is declared, missing/null/mixed identities or a basis identity that disagrees with the declared denominator block.
+- Trend/compare comparison contracts identify one visible baseline field plus distinct baseline/target selector values; each selector must resolve to exactly one finite numeric metric observation.
+- Declared absolute, percentage-point, percent-change, or ratio changes must match deterministic recomputation; first-party specs preserve baseline/target values and computed change as durable receipts.
+- Explicit numeric claim wording for percent, percentage points, or ratios must match the declared comparison type and value; missing baseline metadata for such wording produces review rather than inferred semantics.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -155,7 +162,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 65-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 69-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -168,6 +175,8 @@ For transform lineage, run `python -m pytest tests/test_transform_lineage.py tes
 For rank/top-N semantics, run `python -m pytest tests/test_rank_contract.py` and verify duplicate-category blocking, descending sort parity, full-source preservation, omitted-category reconciliation, bounded-filter parity, and cutoff-tie expansion.
 
 For denominator/cohort semantics, run `python -m pytest tests/test_ratio_contract.py` and verify missing-contract review, closed-schema validation, first-party metadata preservation, mixed-basis blocking, quantitative metric binding, and unreconstructable basis evidence blocking.
+
+For comparison-baseline semantics, run `python -m pytest tests/test_comparison_contract.py` and verify baseline uniqueness, percent-vs-percentage-point distinctions, percent-change/ratio zero-baseline blocking, stored receipt parity, and explicit claim-language mismatches.
 
 ## Open Questions
 
