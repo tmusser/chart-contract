@@ -30,6 +30,22 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `percent_vs_percentage_points`
+
+Demonstrates a fully declared comparison whose arithmetic is correct but whose claim uses the
+wrong change semantics: `40% -> 60%` is declared and recomputed as +20 percentage points,
+while the claim says “increased by 20%.”
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/percent_vs_percentage_points.vl.json \
+  --data examples/traps/percent_vs_percentage_points.csv \
+  --claim "$(cat examples/traps/percent_vs_percentage_points.claim.txt)"
+```
+
+Expected finding: `claim.comparison.change_semantics`.
+
 ### `mixed_denominator_basis`
 
 Demonstrates a chart whose displayed metric is consistently labeled `conversion rate` while
