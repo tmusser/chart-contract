@@ -47,6 +47,9 @@ Policy:
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.
+- If a claim states an explicit numeric percent, percentage-point, or ratio change, require a comparison baseline contract before sharing.
+- Stop on `contract.comparison.change` or `claim.comparison.change_semantics` failures; do not rewrite arithmetic labels merely to make the audit pass.
+- Treat a passing baseline contract as arithmetic reproducibility against supplied evidence, not proof the baseline controls seasonality, cohort drift, or causal comparability.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.
