@@ -31,6 +31,7 @@ The current unreleased line adds and hardens:
 - explicit rank/top-N contracts covering unique categories, descending sort, tie-safe cutoffs, full-source preservation, and omitted-category receipts
 - explicit numerator/denominator/cohort contracts for ratio-like metrics, with optional row-level denominator-basis consistency checks
 - explicit comparison-baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with claim-language parity
+- explicit calendar/rolling comparison-window contracts covering exact boundaries, completeness, duration parity, and partial-period risk without automatic normalization
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
