@@ -14,6 +14,7 @@ from ..rank import RankSelection, build_rank_selection, duplicate_rank_categorie
 from ..ratio import RATIO_INTENTS, chart_ratio_contract
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
+from ..time_window import build_time_window_summary, time_window_declaration
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
     ECDF_VALUE_FIELD,
@@ -83,6 +84,14 @@ def render_chart(chart: Any) -> alt.Chart:
                 "Declared comparison change does not match the selected baseline/target evidence."
             )
         usermeta["comparison_contract"] = comparison_summary.to_dict()
+
+    time_window_raw = time_window_declaration(chart)
+    if time_window_raw is not None:
+        if comparison_raw is None:
+            raise ValueError("Time-window metadata requires an explicit comparison baseline contract.")
+        usermeta["time_window_contract"] = build_time_window_summary(
+            **time_window_raw,
+        ).to_dict()
 
     declared_transforms = list(first_party_transform_declaration(chart.intent))
     if (
