@@ -272,6 +272,34 @@ The claim checker deliberately recognizes only narrow explicit numeric phrases. 
 to catch the classic `40% -> 60%` error: it is +20 percentage points or +50% relative
 change, not “up 20%.” See [Comparison baseline contract](docs/COMPARISON_CONTRACT.md).
 
+### Time comparisons: make the exposure window explicit
+
+A baseline comparison can have correct arithmetic and still compare unlike periods. Declare the
+actual calendar or rolling windows:
+
+```python
+chart = Chart.trend(
+    ...,
+    baseline_field="period",
+    baseline_value="2026-09-01",
+    target_value="2026-10-01",
+    change_type="absolute",
+    declared_change=20,
+    window_kind="calendar",
+    window_granularity="month",
+    baseline_start="2026-09-01",
+    baseline_end="2026-09-30",
+    target_start="2026-10-01",
+    target_end="2026-10-31",
+    baseline_complete=True,
+    target_complete=True,
+)
+```
+
+Complete-vs-partial comparisons `BLOCK`; unequal rolling windows `BLOCK`; unequal complete
+calendar durations such as February vs March produce `REVIEW`. No automatic prorating or
+normalization is performed. See [Time-window comparability contract](docs/TIME_WINDOW_CONTRACT.md).
+
 ### Vega-Lite transforms: make them visible
 
 External specs with explicit analytical transforms must declare the exact transform kinds they
