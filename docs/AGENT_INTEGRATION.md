@@ -50,6 +50,9 @@ Policy:
 - If a claim states an explicit numeric percent, percentage-point, or ratio change, require a comparison baseline contract before sharing.
 - Stop on `contract.comparison.change` or `claim.comparison.change_semantics` failures; do not rewrite arithmetic labels merely to make the audit pass.
 - Treat a passing baseline contract as arithmetic reproducibility against supplied evidence, not proof the baseline controls seasonality, cohort drift, or causal comparability.
+- For date-like baseline comparisons, require `contract.time_window.period` before sharing rather than guessing month/rolling/MTD semantics from labels.
+- Stop on complete-vs-incomplete or unequal rolling-window failures; do not silently prorate totals or rewrite the period definition.
+- Treat unequal complete calendar durations as REVIEW: February vs March may both be valid months even though exposure-sensitive totals need human judgment.
 - First-party rendered specs carry `usermeta.claim` automatically. That metadata preserves claim identity; it does not prove the claim is supported.
 - `REVIEW` means summarize the warnings and ask for human review before continuing.
 - A durable audit report is valid only for its recorded `input_binding`; if the spec, explicit data, or claim changes, rerun the audit before sharing.

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "mark": "line",
+  "title": "September vs October orders",
+  "encoding": {
+    "x": {"field": "period", "type": "ordinal"},
+    "y": {"field": "orders", "type": "quantitative"}
+  },
+  "usermeta": {
+    "source": "synthetic.orders",
+    "unit": "count",
+    "comparison_contract": {
+      "version": 1,
+      "metric_field": "orders",
+      "baseline_field": "period",
+      "baseline_value": "2026-09-01",
+      "target_value": "2026-10-01",
+      "change_type": "absolute",
+      "declared_change": 20.0,
+      "baseline_metric_value": 100.0,
+      "target_metric_value": 120.0,
+      "computed_change": 20.0
+    },
+    "time_window_contract": {
+      "version": 1,
+      "window_kind": "calendar",
+      "window_granularity": "month",
+      "baseline_start": "2026-09-01",
+      "baseline_end": "2026-09-30",
+      "target_start": "2026-10-01",
+      "target_end": "2026-10-06",
+      "baseline_complete": true,
+      "target_complete": false,
+      "baseline_days": 30,
+      "target_days": 6
+    }
+  }
+}

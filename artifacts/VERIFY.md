@@ -1,5 +1,54 @@
 # VERIFY
 
+2026-10-08 - Add time-window comparability contracts
+
+Environment:
+- Branch: `agent/time-window-comparability`
+- Base: `main` at `ca2c7fd7d56409753859035010d2b16795ab015c`
+- Pull request: #22 (`feat: audit time-window comparability`)
+- Initial GitHub Actions CI run #243 (`37796909018`) -> FAILED on three legacy comparison READY tests that used temporal `2025`/`2026` selectors without explicit period metadata
+- Corrected code-bearing GitHub Actions CI run #244 (`37797073709`) on head `ad2d51f209207efae40c501b5bcc06f8f56e5738` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, transform, coverage, stale-lineage, wrong-rank-top-N, mixed-denominator, percent-vs-percentage-points, and full-month-vs-MTD trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- trend/compare baseline comparisons can declare calendar or rolling window semantics with exact ISO start/end boundaries and completeness flags;
+- calendar windows require explicit day/week/month/quarter/year granularity; rolling windows require no calendar granularity;
+- complete calendar windows must span one full declared period;
+- temporal baseline comparisons without time-window metadata produce `contract.time_window.period=WARN` / REVIEW rather than inferred MTD/full-period semantics;
+- a time-window contract without an explicit comparison contract blocks;
+- complete-vs-incomplete periods fail `data.time_window.completeness`;
+- two incomplete periods warn for human review;
+- equal rolling durations pass and unequal rolling durations fail;
+- unequal calendar durations warn rather than fail because legitimate complete months/quarters can differ in day count;
+- no automatic prorating or normalization is performed;
+- first-party specs preserve closed v1 `time_window_contract` metadata with inclusive `baseline_days` / `target_days` receipts;
+- spec re-audits recompute day counts and block stale receipts;
+- legacy comparison fixtures using year selectors were upgraded to explicit complete 2025/2026 calendar-year windows rather than suppressing the new temporal warning;
+- machine-readable profile/documentation parity moves from 69 to 72 rules.
+
+CI correction note:
+- Run #243 exposed three #21 tests that still claimed READY while comparing date-like year selectors without period-window semantics.
+- The shared first-party comparison helper and external comparison fixture now declare complete 2025 and 2026 calendar years.
+- This preserves the new rule: a temporal baseline is incomplete as an analytical contract until the exposure periods are explicit.
+- Run #244 then passed the complete matrix.
+
+Remaining risks:
+- Completeness is declared metadata; chart-contract does not prove upstream ingestion actually finished.
+- Calendar-week validation checks a seven-day complete span but does not impose locale-specific Monday/Sunday week conventions.
+- Business-day counts, holidays, seasonality, and cohort composition are outside v1.
+- Unequal calendar durations warn regardless of whether the metric is a total, average, or rate; v1 does not infer exposure sensitivity from metric semantics.
+- Inclusive-day receipts are structural period evidence, not data freshness attestation.
+- Adding three rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #22 if the calendar-vs-rolling and completeness severity boundaries are desired.
+- Keep business-day calendars, seasonality checks, and metric-specific exposure normalization as separate future contracts.
+
 2026-10-07 - Add comparison baseline contracts
 
 Environment:

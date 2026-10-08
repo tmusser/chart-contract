@@ -34,6 +34,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit rank/top-N contracts with unique categories, descending order, tie-safe cutoff expansion, and omitted-category receipts
 - explicit numerator/denominator/cohort contracts for ratio-like trend/rank/compare metrics, plus optional row-level denominator-basis consistency checks
 - explicit trend/compare baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with durable observed-value receipts
+- explicit calendar/rolling comparison-window contracts with exact ISO boundaries, completeness declarations, and inclusive-day receipts
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -58,6 +59,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - A denominator basis field validates supplied semantic labels only; it does not prove each row belongs to the declared cohort or denominator population.
 - Comparison contracts verify selector identity and arithmetic against supplied evidence; they do not prove the chosen baseline controls seasonality, cohort drift, confounding, or other comparability threats.
 - Claim comparison parsing is deliberately narrow to explicit numeric percent, percentage-point, and ratio phrases; general comparative prose is not machine-adjudicated.
+- Time-window contracts verify declared boundaries, completeness state, and exposure duration only; they do not prove source ingestion completeness, seasonality control, business-day equivalence, or cohort comparability.
+- Unequal complete calendar periods are reviewable rather than automatically invalid because legitimate months/quarters can differ in day count; no automatic normalization is performed.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -90,6 +93,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - implicit aggregation of duplicate rank categories or hidden arbitrary tie-breaking at top-N cutoffs
 - automatic reconstruction or recomputation of ratio numerators, denominators, cohorts, or upstream rate arithmetic
 - automatic choice of analytical baselines, hidden row-order baselines, or open-ended natural-language interpretation of comparison claims
+- automatic prorating, exposure normalization, or inference of MTD/full-period/rolling semantics from labels alone
 
 ## Acceptance Criteria
 
@@ -122,6 +126,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Trend/compare comparison contracts identify one visible baseline field plus distinct baseline/target selector values; each selector must resolve to exactly one finite numeric metric observation.
 - Declared absolute, percentage-point, percent-change, or ratio changes must match deterministic recomputation; first-party specs preserve baseline/target values and computed change as durable receipts.
 - Explicit numeric claim wording for percent, percentage points, or ratios must match the declared comparison type and value; missing baseline metadata for such wording produces review rather than inferred semantics.
+- Date-like baseline comparisons without explicit time-window metadata WARN; declared windows use canonical ISO dates and closed version-1 calendar/rolling semantics.
+- Complete-vs-incomplete time comparisons block; two incomplete windows require review; unequal rolling durations block while unequal calendar durations warn.
+- Complete calendar windows must span one full declared day/week/month/quarter/year period; first-party specs preserve recomputable inclusive-day receipts.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -162,7 +169,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 69-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 72-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -177,6 +184,8 @@ For rank/top-N semantics, run `python -m pytest tests/test_rank_contract.py` and
 For denominator/cohort semantics, run `python -m pytest tests/test_ratio_contract.py` and verify missing-contract review, closed-schema validation, first-party metadata preservation, mixed-basis blocking, quantitative metric binding, and unreconstructable basis evidence blocking.
 
 For comparison-baseline semantics, run `python -m pytest tests/test_comparison_contract.py` and verify baseline uniqueness, percent-vs-percentage-point distinctions, percent-change/ratio zero-baseline blocking, stored receipt parity, and explicit claim-language mismatches.
+
+For time-window comparability, run `python -m pytest tests/test_time_window_contract.py` and verify missing-window review, calendar boundary validation, complete-vs-partial blocking, rolling-duration parity, unequal-calendar review, and stale day-count receipt blocking.
 
 ## Open Questions
 

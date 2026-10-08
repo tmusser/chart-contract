@@ -199,6 +199,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_comparison_chart(report, chart)
 
+    from .time_window_audit import audit_time_window_chart
+
+    audit_time_window_chart(report, chart)
+
     if claim:
         report.add("contract.claim.present", PASS, "Claim is declared.")
     else:
@@ -641,6 +645,9 @@ def audit_spec(
         unit,
         value_representation,
     )
+    from .time_window_audit import audit_time_window_spec
+
+    audit_time_window_spec(report, spec, resolved_frame)
     _audit_spec_encoding_fields(report, encoding, resolved_frame)
 
     if resolved_frame is not None:

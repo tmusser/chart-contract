@@ -50,6 +50,14 @@ class Chart:
     target_value: str | int | float | None = None
     change_type: str | None = None
     declared_change: float | int | None = None
+    window_kind: str | None = None
+    window_granularity: str | None = None
+    baseline_start: str | None = None
+    baseline_end: str | None = None
+    target_start: str | None = None
+    target_end: str | None = None
+    baseline_complete: bool | None = None
+    target_complete: bool | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -76,6 +84,14 @@ class Chart:
         target_value: str | int | float | None = None,
         change_type: str | None = None,
         declared_change: float | int | None = None,
+        window_kind: str | None = None,
+        window_granularity: str | None = None,
+        baseline_start: str | None = None,
+        baseline_end: str | None = None,
+        target_start: str | None = None,
+        target_end: str | None = None,
+        baseline_complete: bool | None = None,
+        target_complete: bool | None = None,
         event: Mapping[str, Any] | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
@@ -100,6 +116,14 @@ class Chart:
             target_value=target_value,
             change_type=change_type,
             declared_change=declared_change,
+            window_kind=window_kind,
+            window_granularity=window_granularity,
+            baseline_start=baseline_start,
+            baseline_end=baseline_end,
+            target_start=target_start,
+            target_end=target_end,
+            baseline_complete=baseline_complete,
+            target_complete=target_complete,
             event=event,
             caveat=caveat,
             filters=filters,
@@ -170,6 +194,14 @@ class Chart:
         target_value: str | int | float | None = None,
         change_type: str | None = None,
         declared_change: float | int | None = None,
+        window_kind: str | None = None,
+        window_granularity: str | None = None,
+        baseline_start: str | None = None,
+        baseline_end: str | None = None,
+        target_start: str | None = None,
+        target_end: str | None = None,
+        baseline_complete: bool | None = None,
+        target_complete: bool | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
         metadata: Mapping[str, Any] | None = None,
@@ -195,6 +227,14 @@ class Chart:
             target_value=target_value,
             change_type=change_type,
             declared_change=declared_change,
+            window_kind=window_kind,
+            window_granularity=window_granularity,
+            baseline_start=baseline_start,
+            baseline_end=baseline_end,
+            target_start=target_start,
+            target_end=target_end,
+            baseline_complete=baseline_complete,
+            target_complete=target_complete,
             caveat=caveat,
             filters=filters,
             metadata=metadata,

@@ -35,6 +35,14 @@ def _trend(
         target_value="2026",
         change_type=change_type,
         declared_change=declared_change,
+        window_kind="calendar",
+        window_granularity="year",
+        baseline_start="2025-01-01",
+        baseline_end="2025-12-31",
+        target_start="2026-01-01",
+        target_end="2026-12-31",
+        baseline_complete=True,
+        target_complete=True,
     )
 
 
@@ -266,6 +274,19 @@ def _spec() -> tuple[dict, pd.DataFrame]:
                 "baseline_metric_value": 100.0,
                 "target_metric_value": 120.0,
                 "computed_change": 20.0,
+            },
+            "time_window_contract": {
+                "version": 1,
+                "window_kind": "calendar",
+                "window_granularity": "year",
+                "baseline_start": "2025-01-01",
+                "baseline_end": "2025-12-31",
+                "target_start": "2026-01-01",
+                "target_end": "2026-12-31",
+                "baseline_complete": True,
+                "target_complete": True,
+                "baseline_days": 365,
+                "target_days": 365,
             },
         },
     }
