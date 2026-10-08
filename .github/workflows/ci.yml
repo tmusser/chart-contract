@@ -153,6 +153,19 @@ jobs:
           grep -q "percent_change" <<<"$comparison_output"
           grep -q "percentage_points" <<<"$comparison_output"
 
+          set +e
+          time_output=$(chart-contract audit spec examples/traps/full_month_vs_mtd.vl.json \
+            --data examples/traps/full_month_vs_mtd.csv \
+            --claim "$(cat examples/traps/full_month_vs_mtd.claim.txt)" 2>&1)
+          time_exit=$?
+          set -e
+          echo "$time_output"
+          test "$time_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$time_output"
+          grep -q "contract.time_window.period" <<<"$time_output"
+          grep -q "data.time_window.completeness" <<<"$time_output"
+          grep -q "complete period with one incomplete period" <<<"$time_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
