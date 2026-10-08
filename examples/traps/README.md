@@ -30,6 +30,22 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `full_month_vs_mtd`
+
+Demonstrates a comparison whose baseline arithmetic is internally correct but whose exposure
+windows are not comparable: September is a complete month while October covers only days 1-6.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/full_month_vs_mtd.vl.json \
+  --data examples/traps/full_month_vs_mtd.csv \
+  --claim "$(cat examples/traps/full_month_vs_mtd.claim.txt)"
+```
+
+Expected finding: `data.time_window.completeness` reporting one complete and one incomplete
+period. The audit does not prorate October.
+
 ### `percent_vs_percentage_points`
 
 Demonstrates a fully declared comparison whose arithmetic is correct but whose claim uses the
