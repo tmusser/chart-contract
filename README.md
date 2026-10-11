@@ -243,6 +243,26 @@ Missing numerator/denominator identity on a ratio-like metric produces `REVIEW`.
 This contract records semantic identity only. It does not recompute the rate or certify
 upstream SQL arithmetic. See [Ratio denominator and cohort contract](docs/RATIO_CONTRACT.md).
 
+### Grain: say what one row represents
+
+Repeated rows can be legitimate detail or accidental join fanout. Make the source-row identity explicit:
+
+```python
+chart = Chart.compare(
+    data=df,
+    x="month",
+    y="revenue",
+    claim="Monthly revenue is shown by month.",
+    source="warehouse.account_month",
+    unit="dollars",
+    grain_fields=["account_id", "month"],
+)
+```
+
+If `account_id + month` is duplicated, the chart `BLOCK`s. If that grain is finer than the displayed month, first-party rendering also refuses to collapse it because chart-contract will not guess `sum` versus `mean`.
+
+External Vega-Lite specs may declare one encoding-level aggregate together with source/output grain. The aggregate remains transform-inventoried and lineage-bound. See [Aggregation grain contract](docs/GRAIN_CONTRACT.md).
+
 ### Comparisons: bind the baseline and the arithmetic
 
 For explicit change claims, declare exactly which observations are being compared and what

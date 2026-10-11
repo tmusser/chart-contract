@@ -23,6 +23,9 @@
 - Do not collapse absolute delta, percentage-point change, percent change, and ratio into one generic “change” semantic; preserve the declared arithmetic mode.
 - A comparison baseline must resolve to explicit supplied observations; do not infer a hidden baseline from row order, chart position, or prose alone.
 - Treat stored comparison metric values and computed change as reproducible receipts, not proof that the chosen baseline is analytically appropriate.
+- Treat source grain as row identity: declared grain fields must be non-null and unique; do not silently deduplicate duplicate grain keys.
+- Do not collapse a finer source grain into a coarser displayed grain without an explicit aggregation operation; never guess sum versus mean versus another reducer.
+- Treat matching grain/aggregation receipts as structural consistency only, not proof that the declared business key or aggregation is substantively correct.
 - Do not infer full-period, month-to-date, or rolling-window semantics from labels alone; temporal baseline comparisons should declare exact window boundaries.
 - Never auto-prorate or normalize unequal comparison windows to make them pass. Unequal rolling durations block; complete calendar periods with different day counts require review.
 - Treat completeness flags as declared period state, not proof that upstream ingestion is actually complete.

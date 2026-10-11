@@ -166,6 +166,18 @@ jobs:
           grep -q "data.time_window.completeness" <<<"$time_output"
           grep -q "complete period with one incomplete period" <<<"$time_output"
 
+          set +e
+          grain_output=$(chart-contract audit spec examples/traps/join_fanout_grain.vl.json \
+            --data examples/traps/join_fanout_grain.csv \
+            --claim "$(cat examples/traps/join_fanout_grain.claim.txt)" 2>&1)
+          grain_exit=$?
+          set -e
+          echo "$grain_output"
+          test "$grain_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$grain_output"
+          grep -q "data.grain.unique" <<<"$grain_output"
+          grep -q "duplicate grain keys" <<<"$grain_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |

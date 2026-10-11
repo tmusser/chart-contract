@@ -30,6 +30,23 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `join_fanout_grain`
+
+Demonstrates a spec whose `sum(revenue)` aggregation is fully declared and transform-lineage
+bound, but the supplied source evidence violates its declared `account_id + month` grain:
+account A appears twice for September.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/join_fanout_grain.vl.json \
+  --data examples/traps/join_fanout_grain.csv \
+  --claim "$(cat examples/traps/join_fanout_grain.claim.txt)"
+```
+
+Expected finding: `data.grain.unique` reporting duplicate declared source-grain keys. The
+audit does not deduplicate the duplicate account-month row or let the aggregate hide it.
+
 ### `full_month_vs_mtd`
 
 Demonstrates a comparison whose baseline arithmetic is internally correct but whose exposure

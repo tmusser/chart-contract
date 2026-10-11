@@ -1,5 +1,48 @@
 # VERIFY
 
+2026-10-10 - Add aggregation grain contracts
+
+Environment:
+- Branch: `agent/aggregation-grain-contract`
+- Base: `main` at `e088486eb3414567a2892af35c2307bc814156db`
+- Pull request: #23 (`feat: add aggregation grain contracts`)
+- Code-bearing GitHub Actions CI run #247 (`38097803031`) on head `e1b8a8ce5d728ba0c2f3ded4871d21920c12d264` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- CLI verdict, statistical diagnostic, transform, evidence-coverage, stale-lineage, wrong-rank-top-N, mixed-denominator, percent-vs-percentage-points, full-month-vs-MTD, and join-fanout-grain trap checks -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend`, `rank`, and `compare` accept optional `grain_fields=[...]`;
+- declared source-grain fields must exist, be non-null, and uniquely identify every supplied row;
+- duplicate source-grain keys fail `data.grain.unique` rather than being silently deduplicated or aggregated;
+- repeated displayed-grain keys without source-grain metadata produce REVIEW;
+- first-party v1 performs no implicit aggregation: a finer source grain mapping many-to-one onto the displayed grain blocks and rendering refuses;
+- external specs may declare one supported encoding-level aggregate operation together with closed v1 source/output grain metadata;
+- supported v1 reducers are sum, mean, median, min, max, count, and distinct;
+- declared aggregation must exactly match the final encoding-level aggregate;
+- grain metadata records source row count, unique source-grain count, and output group count, all recomputed during spec audit;
+- stale count receipts, output-grain drift, aggregation-op drift, duplicate source grain, and missing evidence block;
+- aggregate transforms remain independently covered by transform inventory, declaration, and lineage receipts;
+- binned histogram count aggregation is excluded from this business-grain policy;
+- the `join_fanout_grain` trap proves a fully transform-declared and lineage-bound `sum(revenue)` still blocks when `account_id + month` source grain is duplicated;
+- machine-readable profile/documentation parity moves from 72 to 75 rules.
+
+Remaining risks:
+- Grain declarations are semantic row identity, not proof that the chosen business key is correct.
+- Duplicate-free declared grain does not prove upstream joins are complete or entity resolution is correct.
+- Version 1 supports only one encoding-level aggregate metric operation for external grain reconstruction; explicit transform-array aggregates and multiple aggregate measures remain out of scope.
+- A matching aggregate declaration does not prove sum/mean/etc. is analytically appropriate.
+- First-party charts intentionally require upstream aggregation rather than performing it.
+- The contract can verify supplied pre-aggregation evidence only; it cannot attest to aggregation that occurred before the supplied rows were produced.
+- Adding three new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #23 if the no-implicit-first-party-aggregation boundary and one-aggregate external v1 scope are desired.
+- Keep composite aggregation plans, multiple metric reducers, and upstream join provenance as separate future work.
+
 2026-10-08 - Add time-window comparability contracts
 
 Environment:

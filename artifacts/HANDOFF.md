@@ -2,59 +2,58 @@
 
 ## Resume Packet
 
-- Goal: make calendar/rolling exposure windows explicit and auditable for temporal baseline comparisons.
-- Branch: `agent/time-window-comparability`.
-- Base: `main` at `ca2c7fd7d56409753859035010d2b16795ab015c`.
-- Pull request: #22 (`feat: audit time-window comparability`).
-- Current slice: first-party window API fields, closed v1 period receipts, chart/spec audits, full-month-vs-MTD CLI trap, three new profile rules, tests, and docs.
-- Read first: `src/chart_contract/time_window.py`, `src/chart_contract/time_window_audit.py`, `tests/test_time_window_contract.py`, and `docs/TIME_WINDOW_CONTRACT.md`.
+- Goal: make source-row grain, duplicate/fanout keys, and source-to-display aggregation explicit and auditable.
+- Branch: `agent/aggregation-grain-contract`.
+- Base: `main` at `e088486eb3414567a2892af35c2307bc814156db`.
+- Pull request: #23 (`feat: add aggregation grain contracts`).
+- Current slice: first-party `grain_fields`, closed v1 grain receipts, chart/spec grain audits, encoding-level aggregate matching, join-fanout CLI trap, three new profile rules, tests, and docs.
+- Read first: `src/chart_contract/grain.py`, `src/chart_contract/grain_audit.py`, `tests/test_grain_contract.py`, and `docs/GRAIN_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.trend()` and `Chart.compare()` comparison contracts may additionally declare:
-  - `window_kind`
-  - `window_granularity`
-  - `baseline_start`
-  - `baseline_end`
-  - `target_start`
-  - `target_end`
-  - `baseline_complete`
-  - `target_complete`
-- `window_kind` supports `calendar` and `rolling`.
-- Calendar granularities are day/week/month/quarter/year.
-- Rolling windows require `window_granularity=None`.
-- Complete calendar periods are structurally validated against their declared granularity.
-- Date-like baseline comparisons with no time-window contract produce REVIEW.
-- Complete-vs-incomplete exposure blocks.
-- Two incomplete windows produce REVIEW.
-- Rolling windows must have equal inclusive-day duration.
-- Unequal complete calendar periods produce REVIEW rather than BLOCK.
-- No prorating or normalization is performed.
-- First-party specs stamp inclusive baseline/target day counts as durable receipts.
-- Spec audits recompute those day counts and block stale receipt metadata.
-- Time-window metadata requires an explicit comparison contract.
-- `examples/traps/full_month_vs_mtd.*` demonstrates valid comparison arithmetic that blocks because September is complete while October covers only days 1-6.
-- The `audit-v0.2` profile now contains 72 rules.
+- `Chart.trend()`, `Chart.rank()`, and `Chart.compare()` accept optional `grain_fields`.
+- Source-grain fields must exist, be non-null, and be unique across supplied rows.
+- Duplicate declared grain keys fail `data.grain.unique`.
+- If no grain is declared but repeated displayed-grain keys are supplied, `contract.grain.declared` warns.
+- First-party descriptive charts do not aggregate.
+- A finer unique source grain mapping many-to-one onto the displayed grain fails `contract.grain.aggregation` and first-party rendering refuses.
+- First-party grain metadata, when valid, records source/output grain plus row/group receipts with `aggregation=null`.
+- External specs can declare one encoding-level aggregate metric operation:
+  - sum
+  - mean
+  - median
+  - min
+  - max
+  - count
+  - distinct
+- External grain contracts record:
+  - source grain fields
+  - visible output grain fields
+  - exact aggregate op/field or null
+  - source row count
+  - unique source-grain count
+  - output group count
+- Spec audits require exact output-grain parity, source-grain uniqueness, aggregate parity, and fresh counts.
+- Encoding aggregates remain transform-inventoried, transform-declared, and lineage-bound independently of grain metadata.
+- Binned histogram aggregation is excluded from this business-grain rule.
+- `examples/traps/join_fanout_grain.*` demonstrates valid sum/transform metadata that still blocks because account-month source grain is duplicated.
+- The `audit-v0.2` profile now contains 75 rules.
 
 ## Important Decisions
 
-- Window semantics are never inferred from labels such as “September,” “MTD,” or “last 28 days.”
-- Complete calendar periods may legitimately differ in duration, so unequal calendar day counts warn.
-- Rolling windows are defined by exposure duration, so unequal durations block.
-- Completeness state is part of the explicit contract but is not upstream-ingestion attestation.
-- No automatic prorating or normalization.
-- Calendar week v1 means a complete seven-day span; locale-specific week anchors are deferred.
-- The contract does not determine whether totals, averages, or rates are exposure-sensitive enough to require normalization.
-- Existing comparison arithmetic remains separate: a numerically correct +20 can still block because its periods are structurally incomparable.
-- Older schema-0.4 reports become stale-policy artifacts because three new time-window rules change profile semantic identity.
+- Grain is row identity, not a deduplication hint.
+- Duplicate grain keys are not automatically collapsed.
+- First-party chart-contract does not become an aggregation engine; users aggregate upstream deliberately and then pass one row per displayed grain.
+- Repeated displayed keys without declared grain are REVIEW, not immediate BLOCK, because v1 cannot know whether repeated observations are legitimate finer-grain evidence.
+- Once grain is declared, hidden many-to-one collapse without aggregation is a deterministic failure.
+- External v1 aggregation support is deliberately bounded to one encoding-level metric aggregate.
+- Matching grain metadata is structural consistency only; it does not prove the business key, join logic, or reducer choice is analytically correct.
+- Histogram bin/count transforms are distribution mechanics, not business-grain collapse.
+- Older schema-0.4 reports become stale-policy artifacts because three new grain rules change profile semantic identity.
 
 ## Verification
 
-Initial CI run #243 failed because three existing comparison-contract tests used year-like selectors (`2025`, `2026`) and still expected READY with no explicit exposure windows.
-
-Those fixtures were upgraded to complete 2025/2026 calendar-year contracts rather than weakening temporal detection.
-
-GitHub Actions CI run #244 (`37797073709`) then passed on code-bearing head `ad2d51f209207efae40c501b5bcc06f8f56e5738`:
+GitHub Actions CI run #247 (`38097803031`) passed on code-bearing head `e1b8a8ce5d728ba0c2f3ded4871d21920c12d264`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -62,7 +61,7 @@ GitHub Actions CI run #244 (`37797073709`) then passed on code-bearing head `ad2
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
 - all prior CLI trap paths -> PASSED
-- `full_month_vs_mtd` installed-CLI trap -> PASSED
+- `join_fanout_grain` installed-CLI trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -70,14 +69,14 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- Completeness flags can be incorrect if upstream producers misdeclare ingestion state.
-- Business calendars and holiday exposure are not modeled.
-- Calendar duration warnings are intentionally metric-agnostic.
-- The v1 schema compares one baseline window to one target window; recurring/multi-period window families are not represented.
-- Time zones and sub-day windows are out of scope; dates are day-level ISO boundaries.
+- V1 does not support explicit transform-array aggregate reconstruction or more than one aggregate metric.
+- A user can declare the wrong but unique business key; uniqueness is not semantic truth.
+- The contract cannot detect fanout that happened upstream and was already collapsed before supplied evidence.
+- Aggregate suitability remains human judgment.
+- First-party callers who want aggregated charts must aggregate upstream and declare the resulting grain rather than asking chart-contract to do it.
 
 ## Next Recommended Task
 
-- Confirm final PR #22 CI remains green after VERIFY/HANDOFF.
-- Merge if the current REVIEW/BLOCK boundaries match the intended policy.
-- Keep business-day exposure, time-zone/sub-day windows, and automatic exposure adjustment out of this slice.
+- Confirm final PR #23 CI remains green after VERIFY/HANDOFF.
+- Merge if the first-party no-auto-aggregation boundary and external single-aggregate v1 are desired.
+- Keep multi-metric aggregation plans, composite reducer pipelines, and upstream join lineage as separate future work.

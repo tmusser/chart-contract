@@ -9,6 +9,7 @@ import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..comparison import COMPARISON_INTENTS, build_comparison_summary, changes_match, comparison_declaration
+from ..grain import GRAIN_INTENTS, build_grain_summary, visible_grain_fields_for_chart
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
 from ..ratio import RATIO_INTENTS, chart_ratio_contract
@@ -84,6 +85,14 @@ def render_chart(chart: Any) -> alt.Chart:
                 "Declared comparison change does not match the selected baseline/target evidence."
             )
         usermeta["comparison_contract"] = comparison_summary.to_dict()
+
+    if chart.intent in GRAIN_INTENTS and getattr(chart, "grain_fields", None) is not None:
+        usermeta["grain_contract"] = build_grain_summary(
+            chart.data,
+            source_grain_fields=chart.grain_fields,
+            output_grain_fields=visible_grain_fields_for_chart(chart),
+            aggregation=None,
+        ).to_dict()
 
     time_window_raw = time_window_declaration(chart)
     if time_window_raw is not None:

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "mark": "bar",
+  "title": "September revenue by month",
+  "encoding": {
+    "x": {"field": "month", "type": "ordinal"},
+    "y": {"field": "revenue", "type": "quantitative", "aggregate": "sum"}
+  },
+  "usermeta": {
+    "source": "synthetic.joined_accounts",
+    "unit": "dollars",
+    "grain_contract": {
+      "version": 1,
+      "source_grain_fields": ["account_id", "month"],
+      "output_grain_fields": ["month"],
+      "aggregation": {"op": "sum", "field": "revenue"},
+      "source_row_count": 3,
+      "source_unique_grain_count": 2,
+      "output_group_count": 1
+    },
+    "transform_contract": {"declared": ["aggregate"]},
+    "transform_lineage": {
+      "version": 1,
+      "receipts": [
+        {
+          "kind": "aggregate",
+          "location": "encoding.y.aggregate",
+          "operation_sha256": "c41daf74c01fa534556d28e0e86b3fc99b38099810f92bbd372f3174d54caa31",
+          "input_fields": ["revenue"],
+          "output_fields": []
+        }
+      ]
+    }
+  }
+}
