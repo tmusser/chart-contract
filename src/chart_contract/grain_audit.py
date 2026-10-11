@@ -132,6 +132,12 @@ def audit_grain_spec(
         )
         return
 
+    if _encoding_has_bin(encoding) and not (
+        isinstance(spec.get("usermeta"), Mapping)
+        and "grain_contract" in spec.get("usermeta", {})
+    ):
+        return
+
     try:
         contract = parse_grain_contract(spec)
     except ValueError as exc:
@@ -314,3 +320,14 @@ def _group_count(frame: pd.DataFrame, fields: tuple[str, ...]) -> int:
     if not len(frame):
         return 0
     return int(frame.groupby(list(fields), dropna=False).ngroups)
+
+
+def _encoding_has_bin(encoding: Any) -> bool:
+    if not isinstance(encoding, Mapping):
+        return False
+    for definition in encoding.values():
+        definitions = definition if isinstance(definition, list) else [definition]
+        for item in definitions:
+            if isinstance(item, Mapping) and item.get("bin") not in (None, False):
+                return True
+    return False
