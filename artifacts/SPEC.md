@@ -35,6 +35,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit numerator/denominator/cohort contracts for ratio-like trend/rank/compare metrics, plus optional row-level denominator-basis consistency checks
 - explicit trend/compare baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with durable observed-value receipts
 - explicit calendar/rolling comparison-window contracts with exact ISO boundaries, completeness declarations, and inclusive-day receipts
+- explicit source/output grain contracts for descriptive charts, including source-key uniqueness and bounded encoding-level aggregation semantics
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -61,6 +62,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Claim comparison parsing is deliberately narrow to explicit numeric percent, percentage-point, and ratio phrases; general comparative prose is not machine-adjudicated.
 - Time-window contracts verify declared boundaries, completeness state, and exposure duration only; they do not prove source ingestion completeness, seasonality control, business-day equivalence, or cohort comparability.
 - Unequal complete calendar periods are reviewable rather than automatically invalid because legitimate months/quarters can differ in day count; no automatic normalization is performed.
+- Grain contracts verify row-key uniqueness and declared source-to-output collapse only; they do not prove the business key, join logic, or chosen reducer is substantively correct.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -94,6 +96,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - automatic reconstruction or recomputation of ratio numerators, denominators, cohorts, or upstream rate arithmetic
 - automatic choice of analytical baselines, hidden row-order baselines, or open-ended natural-language interpretation of comparison claims
 - automatic prorating, exposure normalization, or inference of MTD/full-period/rolling semantics from labels alone
+- automatic deduplication, join-fanout repair, or guessing sum/mean/other aggregation when source grain is finer than displayed grain
 
 ## Acceptance Criteria
 
@@ -129,6 +132,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Date-like baseline comparisons without explicit time-window metadata WARN; declared windows use canonical ISO dates and closed version-1 calendar/rolling semantics.
 - Complete-vs-incomplete time comparisons block; two incomplete windows require review; unequal rolling durations block while unequal calendar durations warn.
 - Complete calendar windows must span one full declared day/week/month/quarter/year period; first-party specs preserve recomputable inclusive-day receipts.
+- Declared source-grain fields must exist, be non-null, and uniquely identify every supplied row; duplicate grain keys block rather than being silently deduplicated.
+- First-party descriptive charts refuse many-to-one source-to-display collapse; external specs may use one supported encoding-level aggregate only when grain metadata exactly matches the aggregate and recomputed row/group receipts.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -169,7 +174,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 72-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 75-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -186,6 +191,8 @@ For denominator/cohort semantics, run `python -m pytest tests/test_ratio_contrac
 For comparison-baseline semantics, run `python -m pytest tests/test_comparison_contract.py` and verify baseline uniqueness, percent-vs-percentage-point distinctions, percent-change/ratio zero-baseline blocking, stored receipt parity, and explicit claim-language mismatches.
 
 For time-window comparability, run `python -m pytest tests/test_time_window_contract.py` and verify missing-window review, calendar boundary validation, complete-vs-partial blocking, rolling-duration parity, unequal-calendar review, and stale day-count receipt blocking.
+
+For aggregation grain semantics, run `python -m pytest tests/test_grain_contract.py` and verify source-grain uniqueness, repeated-display-key review, first-party no-implicit-aggregation behavior, exact external encoding-aggregate matching, and stale receipt blocking.
 
 ## Open Questions
 
