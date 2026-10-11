@@ -253,6 +253,25 @@ def test_grain_contract_is_closed_schema() -> None:
     assert _severity(report, "contract.grain.declared") == "FAIL"
 
 
+def test_histogram_binned_count_does_not_require_business_grain_contract() -> None:
+    frame = pd.DataFrame({"amount": list(range(20))})
+    spec = Chart.histogram(
+        data=frame,
+        value="amount",
+        claim="Observed amount distribution.",
+        source="synthetic.amounts",
+        unit="dollars",
+        title="Observed amount distribution",
+    ).to_vega_lite()
+
+    report = audit_spec(spec, data=frame, claim="Observed amount distribution.")
+
+    assert all(
+        finding.rule_id not in {"contract.grain.declared", "data.grain.unique", "contract.grain.aggregation"}
+        for finding in report.findings
+    )
+
+
 def test_multiple_encoding_aggregates_are_out_of_scope_for_v1() -> None:
     spec, frame = _aggregate_spec()
     spec["encoding"]["tooltip"] = [
