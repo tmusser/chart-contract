@@ -58,6 +58,7 @@ class Chart:
     target_end: str | None = None
     baseline_complete: bool | None = None
     target_complete: bool | None = None
+    grain_fields: tuple[str, ...] | list[str] | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -75,6 +76,7 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        grain_fields: tuple[str, ...] | list[str] | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -107,6 +109,7 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            grain_fields=grain_fields,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -142,6 +145,7 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        grain_fields: tuple[str, ...] | list[str] | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -162,6 +166,7 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            grain_fields=grain_fields,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -185,6 +190,7 @@ class Chart:
         unit: str | None = None,
         value_representation: str | None = None,
         title: str | None = None,
+        grain_fields: tuple[str, ...] | list[str] | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -218,6 +224,7 @@ class Chart:
             unit=unit,
             value_representation=value_representation,
             title=title,
+            grain_fields=grain_fields,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
