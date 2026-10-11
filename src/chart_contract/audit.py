@@ -203,6 +203,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_time_window_chart(report, chart)
 
+    from .grain_audit import audit_grain_chart
+
+    audit_grain_chart(report, chart)
+
     if claim:
         report.add("contract.claim.present", PASS, "Claim is declared.")
     else:
@@ -646,8 +650,10 @@ def audit_spec(
         value_representation,
     )
     from .time_window_audit import audit_time_window_spec
+    from .grain_audit import audit_grain_spec
 
     audit_time_window_spec(report, spec, resolved_frame)
+    audit_grain_spec(report, spec, analytical_spec, encoding, resolved_frame)
     _audit_spec_encoding_fields(report, encoding, resolved_frame)
 
     if resolved_frame is not None:
