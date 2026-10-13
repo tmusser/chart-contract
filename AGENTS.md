@@ -17,6 +17,9 @@
 - Never infer percent representation from observed value ranges. When percent presentation is explicit, require `value_representation` to distinguish fractional values from percentage-point values.
 - Do not rescale percent data to obtain a passing audit. Preserve raw values and use display formatting that matches the declared representation.
 - Do not treat a generic `rate` unit as percent; rates may use unrelated denominators or scales.
+- Do not infer metric identity or definition stability from a column name, title, unit, claim, or source string; metric-definition metadata is explicit and opt-in.
+- When a metric basis field is declared, mixed or mismatched metric versions block rather than being treated as comparable observations.
+- Treat matching metric-definition metadata as identity consistency only, not proof that upstream computation implemented the declared business definition.
 - Do not infer numerator, denominator, or cohort identity for ratio-like metrics from field names, claim text, or observed values; missing semantics may require review, while contradictory declared semantics block.
 - Treat a declared denominator basis field as semantic identity, not denominator magnitude: different row counts are allowed, but mixed identities such as `visitors` and `signups` under one metric must not pass.
 - Do not describe a matching ratio contract as proof that numerator/denominator arithmetic or cohort membership is correct upstream.
