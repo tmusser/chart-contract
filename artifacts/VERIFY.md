@@ -1,5 +1,54 @@
 # VERIFY
 
+2026-10-12 - Add comparison-set completeness contracts
+
+Environment:
+- Branch: `agent/comparison-set-completeness`
+- Base: `main` at `0d18992587cdffc5f707e6aff6fe3e34c0007e78`
+- Pull request: #24 (`feat: audit comparison-set completeness`)
+- Code-bearing GitHub Actions CI run #250 (`38331339815`) on head `1631607c3227e205a4ee60e21f42ab125da821c2` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, and grain traps -> PASSED
+- new majority-omitted metric-mass REVIEW trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- truncated first-party ranks can declare `omitted_behavior="exclude"` or `"aggregate_other"`;
+- missing omitted behavior on a genuinely truncated rank produces `contract.rank.comparison_set=WARN`;
+- stale omitted behavior on an untruncated rank fails;
+- comparison-set receipts reconcile eligible/selected/omitted category counts and metric totals;
+- non-negative eligible metrics expose selected and omitted metric shares;
+- explicit exclusion WARNs when omitted categories contain at least 50% of eligible metric mass;
+- metrics with negative values or non-positive totals surface review because a normalized mass share is not meaningful;
+- aggregate-Other preserves full source rows, calculates selected-vs-Other membership, explicitly sums omitted metric values, and pins Other after ranked categories;
+- Other is treated as a completeness summary rather than another analytical rank;
+- first-party aggregate-Other transforms are independently transform-declared and lineage-bound;
+- `other_metric_value` must equal the recomputed omitted metric total;
+- Other labels cannot collide with an eligible source category;
+- aggregate-Other blocks percent/rate/ratio metrics rather than summing non-additive ratio-like values;
+- comparison-set receipt tampering and Other-transform tampering block even when generic transform lineage is refreshed;
+- existing rank top-N, tie, filter, full-source preservation, and sort semantics remain intact;
+- machine-readable profile/documentation parity moves from 75 to 78 rules.
+
+Important policy boundary:
+- The 50% omitted-mass threshold is a deterministic human-review heuristic, not a universal business-materiality threshold.
+- Explicit `aggregate_other` chooses sum semantics; matching arithmetic does not prove the metric is substantively additive.
+- A passing comparison-set contract proves completeness accounting against supplied evidence, not that top-N is the right visualization or that the external population is complete.
+
+Remaining risks:
+- Metric-mass shares use numeric sums and are not intended as exact decimal-accounting receipts for arbitrary high-precision financial values.
+- Negative-valued comparison sets cannot produce a normalized share and therefore require review rather than a misleading percentage.
+- Version 1 supports one fixed additive Other operation (`sum`) and one summary bucket.
+- The Other transform rewrites the category/metric fields inside Vega-Lite; current structural auditing covers the exact first-party transform shape but does not execute arbitrary external expressions.
+- Adding three new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #24 if explicit omit-vs-Other behavior and the 50% review threshold match the intended policy.
+- Keep weighted/non-additive long-tail summaries or configurable materiality thresholds as separate future contracts.
+
 2026-10-10 - Add aggregation grain contracts
 
 Environment:
