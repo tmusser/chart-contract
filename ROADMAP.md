@@ -33,6 +33,7 @@ The current unreleased line adds and hardens:
 - explicit comparison-baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with claim-language parity
 - explicit calendar/rolling comparison-window contracts covering exact boundaries, completeness, duration parity, and partial-period risk without automatic normalization
 - explicit source/output grain contracts that detect duplicate business keys, hidden many-to-one display collapse, and undeclared encoding-level aggregation
+- explicit top-N comparison-set completeness contracts covering exclusion, omitted metric mass, and reproducible aggregate-Other summaries
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
