@@ -97,6 +97,49 @@ Counts use **eligible categories**: rows with both non-null category and metric 
 Missing analytical rows remain visible to the separate evidence-coverage rules rather than
 being mislabeled as top-N omissions.
 
+## Comparison-set completeness
+
+A truncated rank must also say what happens to the omitted comparison set.
+
+First-party API:
+
+```python
+Chart.rank(
+    ...,
+    top_n=5,
+    omitted_behavior="exclude",          # keep only ranked categories visible
+)
+
+Chart.rank(
+    ...,
+    top_n=5,
+    omitted_behavior="aggregate_other",  # summarize omitted categories as Other
+    other_label="Other",
+)
+```
+
+If `top_n` actually omits eligible categories and `omitted_behavior` is missing,
+`contract.rank.comparison_set` produces `WARN / REVIEW`.
+
+The closed `usermeta.comparison_set_contract` records:
+
+- selected/omitted/eligible category counts;
+- eligible, selected, and omitted metric totals;
+- selected and omitted metric shares when all eligible values are non-negative and total > 0;
+- Other label / aggregation / metric receipt when applicable.
+
+For explicit exclusion, `data.rank.omitted_metric_mass` warns when omitted categories contain
+at least half of eligible metric mass. This is a deterministic completeness heuristic, not a
+universal business-materiality threshold.
+
+For `aggregate_other`, version 1 uses explicit `sum` semantics. The original rows remain
+embedded; Vega-Lite first calculates selected-vs-Other membership and then sums the omitted
+metric. The Other bucket is pinned last and is **not** treated as another analytical rank.
+
+Percent, rate, and ratio metrics cannot use `aggregate_other` because summing those values is
+not a valid generic aggregation. Use explicit exclusion or aggregate a valid additive
+numerator upstream instead.
+
 ## Preserve the full source rows
 
 First-party top-N rendering does not pre-slice the embedded dataset.
