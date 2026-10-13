@@ -178,6 +178,19 @@ jobs:
           grep -q "data.grain.unique" <<<"$grain_output"
           grep -q "duplicate grain keys" <<<"$grain_output"
 
+          set +e
+          omitted_output=$(chart-contract audit spec examples/traps/majority_metric_mass_omitted.vl.json \
+            --data examples/traps/majority_metric_mass_omitted.csv \
+            --claim "$(cat examples/traps/majority_metric_mass_omitted.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          omitted_exit=$?
+          set -e
+          echo "$omitted_output"
+          test "$omitted_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$omitted_output"
+          grep -q "data.rank.omitted_metric_mass" <<<"$omitted_output"
+          grep -q "58.0%" <<<"$omitted_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
