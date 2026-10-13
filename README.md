@@ -376,6 +376,14 @@ than a display convenience.
 - the selected top-N category filter is itself transform-declared and lineage-bound.
 
 That means a later audit can catch a stale count, reordered rank, or tampered selected set.
+
+Top-N charts can also declare `omitted_behavior="exclude"` or
+`omitted_behavior="aggregate_other"`. The resulting comparison-set contract records omitted
+metric mass; explicit exclusion requires review when the omitted categories contain at least
+half of eligible non-negative metric mass. `aggregate_other` preserves full source rows and
+sums the long tail into a last-position Other summary bucket; ratio-like metrics are never
+summed this way.
+
 See [Rank and top-N contract](docs/RANK_CONTRACT.md).
 
 ### Evidence coverage: show how much data survives
