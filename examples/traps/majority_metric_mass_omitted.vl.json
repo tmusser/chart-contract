@@ -1,0 +1,59 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "Top observed segments",
+  "transform": [
+    {"filter": {"field": "segment", "oneOf": ["S1", "S2"]}}
+  ],
+  "encoding": {
+    "x": {"field": "score", "type": "quantitative", "scale": {"zero": true}},
+    "y": {"field": "segment", "type": "nominal", "sort": ["S1", "S2"]}
+  },
+  "usermeta": {
+    "chart_contract_intent": "rank",
+    "source": "synthetic.comparison_set",
+    "unit": "accounts",
+    "rank_contract": {
+      "version": 1,
+      "category_field": "segment",
+      "metric_field": "score",
+      "order": "descending",
+      "top_n": 2,
+      "tie_policy": "include_cutoff_ties",
+      "eligible_category_count": 5,
+      "displayed_category_count": 2,
+      "omitted_category_count": 3,
+      "cutoff_tie_expanded": false
+    },
+    "comparison_set_contract": {
+      "version": 1,
+      "category_field": "segment",
+      "metric_field": "score",
+      "omitted_behavior": "exclude",
+      "other_label": null,
+      "other_aggregation": null,
+      "eligible_category_count": 5,
+      "selected_category_count": 2,
+      "omitted_category_count": 3,
+      "eligible_metric_total": 100.0,
+      "selected_metric_total": 42.0,
+      "omitted_metric_total": 58.0,
+      "selected_metric_share": 0.42,
+      "omitted_metric_share": 0.58,
+      "other_metric_value": null
+    },
+    "transform_contract": {"declared": ["filter"]},
+    "transform_lineage": {
+      "version": 1,
+      "receipts": [
+        {
+          "kind": "filter",
+          "location": "transform[0].filter",
+          "operation_sha256": "35a163cf77b1057fa4fb7545c8dd043ac90cd99dc5781d3f86380f194a8579ec",
+          "input_fields": ["segment"],
+          "output_fields": []
+        }
+      ]
+    }
+  }
+}
