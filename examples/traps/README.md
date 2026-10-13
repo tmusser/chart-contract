@@ -30,6 +30,22 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `majority_metric_mass_omitted`
+
+Demonstrates a structurally valid top-2 rank whose excluded categories contain 58% of the
+eligible metric mass. Ranking, filter, transform declaration, lineage, and comparison-set
+receipts all agree; the issue is completeness, not tampering.
+
+Expected verdict: `REVIEW`
+
+```bash
+chart-contract audit spec examples/traps/majority_metric_mass_omitted.vl.json \
+  --data examples/traps/majority_metric_mass_omitted.csv \
+  --claim "$(cat examples/traps/majority_metric_mass_omitted.claim.txt)"
+```
+
+Expected finding: `data.rank.omitted_metric_mass` reporting 58.0% omitted mass.
+
 ### `join_fanout_grain`
 
 Demonstrates a spec whose `sum(revenue)` aggregation is fully declared and transform-lineage
