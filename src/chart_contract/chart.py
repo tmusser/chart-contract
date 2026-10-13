@@ -41,6 +41,8 @@ class Chart:
     label: str | None = None
     branch: str | None = None
     top_n: int | None = None
+    omitted_behavior: str | None = None
+    other_label: str = "Other"
     numerator: str | None = None
     denominator: str | None = None
     cohort: str | None = None
@@ -151,6 +153,8 @@ class Chart:
         cohort: str | None = None,
         denominator_basis_field: str | None = None,
         top_n: int | None = None,
+        omitted_behavior: str | None = None,
+        other_label: str = "Other",
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
         metadata: Mapping[str, Any] | None = None,
@@ -172,6 +176,8 @@ class Chart:
             cohort=cohort,
             denominator_basis_field=denominator_basis_field,
             top_n=top_n,
+            omitted_behavior=omitted_behavior,
+            other_label=other_label,
             caveat=caveat,
             filters=filters,
             metadata=metadata,
