@@ -1,0 +1,21 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Observed active users",
+  "encoding": {
+    "x": {"field": "period", "type": "ordinal"},
+    "y": {"field": "active_users", "type": "quantitative"}
+  },
+  "usermeta": {
+    "source": "synthetic.metric_definition",
+    "unit": "users",
+    "metric_definition_contract": {
+      "version": 1,
+      "metric_field": "active_users",
+      "metric_id": "monthly_active_users",
+      "metric_definition": "Unique users with at least one qualifying session in the measurement window.",
+      "metric_version": "v1",
+      "metric_basis_field": "metric_version"
+    }
+  }
+}

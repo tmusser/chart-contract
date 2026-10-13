@@ -1,5 +1,53 @@
 # VERIFY
 
+2026-10-13 - Add metric-definition identity contracts
+
+Environment:
+- Branch: `agent/metric-definition-identity`
+- Base: `main` at `43f2a814dfdab06837a75e02631b8c2dc1981f46`
+- Pull request: #25 (`feat: audit metric definition identity`)
+- Code-bearing GitHub Actions CI run #253 (`38471520287`) on head `913b3c72432203342e6874817ff7749e13dad53a` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, and comparison-set traps -> PASSED
+- new metric-definition-drift CLI trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend`, `rank`, and `compare` accept optional `metric_id`, `metric_definition`, `metric_version`, and `metric_basis_field`;
+- metric-definition identity is opt-in and is never inferred from field names, titles, claims, units, sources, or observed values;
+- once any metric-definition identity is declared, metric ID/definition/version are required together and must be non-empty strings;
+- the closed version-1 contract binds identity to the shown quantitative metric field;
+- first-party specs preserve `usermeta.metric_definition_contract`;
+- external specs must bind the declared metric field to an encoded quantitative field;
+- an optional `metric_basis_field` requires reconstructable evidence;
+- row-level basis values must be non-null, non-empty strings, use one common version, and exactly match the declared metric version;
+- mixed `v1` / `v2` evidence fails `data.metric.definition_basis`;
+- uniform row versions that disagree with the declared contract also block;
+- missing/null basis fields block when row-level version evidence is declared;
+- contracts without a basis field remain metadata identity only and do not fabricate row-level proof;
+- closed-schema extra fields and partial declarations block;
+- machine-readable profile/documentation parity moves from 78 to 80 rules.
+
+Important policy boundary:
+- A passing metric-definition contract establishes declared identity consistency only.
+- It does not prove the business definition is analytically correct or that upstream SQL/Python implemented it.
+- Version labels are treated as exact semantic identities; chart-contract does not decide whether a version change is materially important.
+- Absence of metric-definition metadata does not downgrade an artifact because v1 refuses to invent catalog semantics.
+
+Remaining risks:
+- Version strings are user-supplied identity labels; a dishonest or stale label can still be consistently wrong.
+- V1 checks one row-level version field rather than independently hashing executable metric logic or SQL.
+- Definition text is preserved exactly but not parsed for semantic equivalence.
+- Upstream implementation drift within the same version label remains outside this contract.
+- Adding two new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #25 if the opt-in metric-catalog boundary and exact row-version identity semantics are desired.
+- Keep executable metric lineage, definition hashing, and cross-version compatibility judgments as separate future work.
+
 2026-10-12 - Add comparison-set completeness contracts
 
 Environment:

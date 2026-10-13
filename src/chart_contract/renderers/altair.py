@@ -16,6 +16,7 @@ from ..comparison_set import (
     comparison_set_sort,
 )
 from ..grain import GRAIN_INTENTS, build_grain_summary, visible_grain_fields_for_chart
+from ..metric_definition import METRIC_DEFINITION_INTENTS, chart_metric_definition_contract
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
 from ..ratio import RATIO_INTENTS, chart_ratio_contract
@@ -90,6 +91,14 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if ratio_contract is not None:
         usermeta["ratio_contract"] = ratio_contract
+
+    metric_definition_contract = (
+        chart_metric_definition_contract(chart)
+        if chart.intent in METRIC_DEFINITION_INTENTS
+        else None
+    )
+    if metric_definition_contract is not None:
+        usermeta["metric_definition_contract"] = metric_definition_contract
 
     comparison_raw = (
         comparison_declaration(chart)

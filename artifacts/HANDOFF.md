@@ -2,61 +2,54 @@
 
 ## Resume Packet
 
-- Goal: make top-N omitted-category treatment and omitted metric mass explicit and auditable.
-- Branch: `agent/comparison-set-completeness`.
-- Base: `main` at `0d18992587cdffc5f707e6aff6fe3e34c0007e78`.
-- Pull request: #24 (`feat: audit comparison-set completeness`).
-- Current slice: rank API omission behavior, closed v1 comparison-set receipts, chart/spec audits, aggregate-Other renderer path, majority-omitted CLI trap, three new profile rules, tests, and docs.
-- Read first: `src/chart_contract/comparison_set.py`, `src/chart_contract/comparison_set_audit.py`, `src/chart_contract/rank_audit.py`, `tests/test_rank_contract.py`, and `docs/RANK_CONTRACT.md`.
+- Goal: make business metric identity/version explicit so a stable quantitative field name cannot hide definition drift.
+- Branch: `agent/metric-definition-identity`.
+- Base: `main` at `43f2a814dfdab06837a75e02631b8c2dc1981f46`.
+- Pull request: #25 (`feat: audit metric definition identity`).
+- Current slice: first-party metric identity API, closed v1 spec metadata, chart/spec audits, row-level version checks, metric-definition-drift CLI trap, two new profile rules, tests, and docs.
+- Read first: `src/chart_contract/metric_definition.py`, `src/chart_contract/metric_definition_audit.py`, `tests/test_metric_definition_contract.py`, and `docs/METRIC_DEFINITION_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.rank()` accepts:
-  - `omitted_behavior=None | "exclude" | "aggregate_other"`
-  - `other_label="Other"`
-- Omission behavior is relevant only when `top_n` actually omits eligible categories.
-- Missing behavior on a truncated rank is REVIEW.
-- Explicit exclusion preserves the existing bounded top-N filter and now stamps `comparison_set_contract`.
-- Comparison-set metadata records:
-  - eligible / selected / omitted category counts
-  - eligible / selected / omitted metric totals
-  - selected / omitted shares when the metric values are non-negative and total > 0
-  - Other label / sum operation / value when applicable
-- Excluding at least 50% of eligible metric mass produces `data.rank.omitted_metric_mass=WARN`.
-- `aggregate_other` keeps the full source evidence and uses explicit Vega-Lite calculate + aggregate transforms.
-- Selected top-N categories retain deterministic rank order; Other is pinned last and is not treated as a ranked peer.
-- Generic transform declaration and lineage cover calculate + aggregate independently of the comparison-set contract.
-- Aggregate-Other is rejected for percent/rate/ratio metrics.
-- Other label collision with an existing eligible category blocks.
-- Spec audits recompute the entire comparison-set receipt from supplied full evidence.
-- Tampering with the Other value or transform shape blocks.
-- `examples/traps/majority_metric_mass_omitted.*` demonstrates a mechanically correct top-2 showing only 42% of metric mass; verdict is REVIEW.
-- The `audit-v0.2` profile now contains 78 rules.
+- `Chart.trend()`, `Chart.rank()`, and `Chart.compare()` accept:
+  - `metric_id`
+  - `metric_definition`
+  - `metric_version`
+  - optional `metric_basis_field`
+- Metric-definition identity is opt-in.
+- If any identity metadata is supplied, ID/definition/version must all be present and non-empty.
+- First-party specs preserve a closed `usermeta.metric_definition_contract`.
+- The contract binds to the chart/spec quantitative metric field.
+- External specs must bind the same metric field to a visible quantitative encoding.
+- `metric_basis_field` provides row-level evidence that every supplied observation uses the same declared metric version.
+- Missing, null, blank, mixed, or contract-mismatched basis values block.
+- Without a basis field, the contract records catalog identity only and emits no row-level version finding.
+- No metric identity is inferred from field names, units, titles, claims, sources, or values.
+- `examples/traps/metric_definition_drift.*` demonstrates `active_users` retaining the same field name while row versions change from v1 to v2.
+- The `audit-v0.2` profile now contains 80 rules.
 
 ## Important Decisions
 
-- Omission count and omission mass are separate receipts.
-- Explicit exclusion is valid, but excluding most metric mass should not remain silently READY.
-- The 50% threshold is a deterministic review threshold only; it is not an analytical materiality standard.
-- Other is a completeness summary bucket, not another rank.
-- Version-1 Other semantics are fixed to sum.
-- Sum is never applied to ratio-like metrics.
-- A user choosing aggregate-Other explicitly chooses sum semantics; chart-contract verifies the arithmetic but not substantive additivity.
-- Full pre-truncation source rows remain available in first-party specs.
-- Existing rank_contract v1 remains unchanged; comparison-set completeness is a separate metadata contract rather than a breaking rank-contract schema change.
-- Older schema-0.4 reports become stale-policy artifacts because three new rules change profile semantic identity.
+- Opt-in semantics avoid forcing callers to invent fake metric-catalog identity merely to reach READY.
+- Once declared, metric identity is strict and closed-schema.
+- Metric version is an exact semantic identity string; no normalization or compatibility inference is performed.
+- The optional basis field checks version identity only; it does not replay or validate upstream metric computation.
+- Definition text is descriptive metadata and is not interpreted for semantic equivalence.
+- A passing contract does not certify that the business definition is sensible or correctly implemented upstream.
+- Existing ratio, comparison, time-window, grain, and comparison-set contracts remain independent and composable.
+- Older schema-0.4 reports become stale-policy artifacts because two new metric-definition rules change profile semantic identity.
 
 ## Verification
 
-GitHub Actions CI run #250 (`38331339815`) passed on code-bearing head `1631607c3227e205a4ee60e21f42ab125da821c2`:
+GitHub Actions CI run #253 (`38471520287`) passed on code-bearing head `913b3c72432203342e6874817ff7749e13dad53a`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
 - Python 3.12 -> PASSED
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
-- all prior CLI trap paths -> PASSED
-- `majority_metric_mass_omitted` REVIEW trap -> PASSED with warnings-as-errors
+- all existing CLI trap paths -> PASSED
+- `metric_definition_drift` installed-CLI trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -64,14 +57,14 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- Weighted or domain-specific “Other” aggregation is not represented in v1.
-- Negative-valued metrics cannot produce a meaningful normalized mass share.
-- The contract cannot decide whether 50% is the right materiality threshold for a given business context.
-- A metric may be numerically summable but substantively non-additive; explicit sum semantics do not certify appropriateness.
-- External specs using semantically equivalent but structurally different Other transforms are outside the exact first-party reconstruction path.
+- A stable but incorrect version label remains undetectable.
+- V1 does not bind metric identity to executable SQL/dbt/Python definitions.
+- V1 does not compare semantic equivalence of free-text definitions.
+- Cross-version compatibility remains a human/domain decision rather than an automated judgment.
+- A metric may change implementation without changing its declared version upstream.
 
 ## Next Recommended Task
 
-- Confirm final PR #24 CI remains green after VERIFY/HANDOFF.
-- Merge if explicit omission behavior, majority-omitted REVIEW, and fixed-sum Other semantics match the intended v1.
-- Keep configurable materiality thresholds, weighted Other summaries, and multiple summary buckets separate future work.
+- Confirm final PR #25 CI remains green after VERIFY/HANDOFF.
+- Merge if strict opt-in metric identity and row-version consistency match the desired v1.
+- Keep executable metric provenance, definition digests, and cross-version migration semantics separate future work.

@@ -61,6 +61,10 @@ class Chart:
     baseline_complete: bool | None = None
     target_complete: bool | None = None
     grain_fields: tuple[str, ...] | list[str] | None = None
+    metric_id: str | None = None
+    metric_definition: str | None = None
+    metric_version: str | None = None
+    metric_basis_field: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -79,6 +83,10 @@ class Chart:
         value_representation: str | None = None,
         title: str | None = None,
         grain_fields: tuple[str, ...] | list[str] | None = None,
+        metric_id: str | None = None,
+        metric_definition: str | None = None,
+        metric_version: str | None = None,
+        metric_basis_field: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -112,6 +120,10 @@ class Chart:
             value_representation=value_representation,
             title=title,
             grain_fields=grain_fields,
+            metric_id=metric_id,
+            metric_definition=metric_definition,
+            metric_version=metric_version,
+            metric_basis_field=metric_basis_field,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -148,6 +160,10 @@ class Chart:
         value_representation: str | None = None,
         title: str | None = None,
         grain_fields: tuple[str, ...] | list[str] | None = None,
+        metric_id: str | None = None,
+        metric_definition: str | None = None,
+        metric_version: str | None = None,
+        metric_basis_field: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -171,6 +187,10 @@ class Chart:
             value_representation=value_representation,
             title=title,
             grain_fields=grain_fields,
+            metric_id=metric_id,
+            metric_definition=metric_definition,
+            metric_version=metric_version,
+            metric_basis_field=metric_basis_field,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -197,6 +217,10 @@ class Chart:
         value_representation: str | None = None,
         title: str | None = None,
         grain_fields: tuple[str, ...] | list[str] | None = None,
+        metric_id: str | None = None,
+        metric_definition: str | None = None,
+        metric_version: str | None = None,
+        metric_basis_field: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -231,6 +255,10 @@ class Chart:
             value_representation=value_representation,
             title=title,
             grain_fields=grain_fields,
+            metric_id=metric_id,
+            metric_definition=metric_definition,
+            metric_version=metric_version,
+            metric_basis_field=metric_basis_field,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,

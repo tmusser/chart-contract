@@ -195,6 +195,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_ratio_chart(report, chart)
 
+    from .metric_definition_audit import audit_metric_definition_chart
+
+    audit_metric_definition_chart(report, chart)
+
     from .comparison_audit import audit_comparison_chart
 
     audit_comparison_chart(report, chart)
@@ -641,9 +645,11 @@ def audit_spec(
         )
 
     from .comparison_audit import audit_comparison_spec
+    from .metric_definition_audit import audit_metric_definition_spec
     from .ratio_audit import audit_ratio_spec
 
     audit_ratio_spec(report, spec, encoding, resolved_frame, unit)
+    audit_metric_definition_spec(report, spec, encoding, resolved_frame)
     audit_comparison_spec(
         report,
         spec,

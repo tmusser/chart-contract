@@ -191,6 +191,18 @@ jobs:
           grep -q "data.rank.omitted_metric_mass" <<<"$omitted_output"
           grep -q "58.0%" <<<"$omitted_output"
 
+          set +e
+          metric_definition_output=$(chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
+            --data examples/traps/metric_definition_drift.csv \
+            --claim "$(cat examples/traps/metric_definition_drift.claim.txt)" 2>&1)
+          metric_definition_exit=$?
+          set -e
+          echo "$metric_definition_output"
+          test "$metric_definition_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$metric_definition_output"
+          grep -q "data.metric.definition_basis" <<<"$metric_definition_output"
+          grep -q "mixed metric versions" <<<"$metric_definition_output"
+
       - name: Run statistical diagnostic trap checks
         shell: bash
         run: |
