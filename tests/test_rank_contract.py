@@ -17,15 +17,30 @@ def _frame(values: list[float]) -> pd.DataFrame:
     )
 
 
-def _chart(frame: pd.DataFrame, *, top_n: int | None = None) -> Chart:
+_UNSET = object()
+
+
+def _chart(
+    frame: pd.DataFrame,
+    *,
+    top_n: int | None = None,
+    omitted_behavior: object = _UNSET,
+    unit: str = "points",
+) -> Chart:
+    behavior = (
+        ("exclude" if top_n is not None else None)
+        if omitted_behavior is _UNSET
+        else omitted_behavior
+    )
     return Chart.rank(
         data=frame,
         x="segment",
         y="score",
         top_n=top_n,
+        omitted_behavior=behavior,
         claim="Segments are ranked by observed score.",
         source="synthetic.rank",
-        unit="points",
+        unit=unit,
         title="Observed segment ranking",
     )
 
@@ -99,6 +114,165 @@ def test_top_n_keeps_full_source_rows_and_declares_omitted_categories() -> None:
     assert _finding(spec_report, "contract.rank.truncation").severity == "PASS"
     assert _finding(spec_report, "visual.rank.sort_order").severity == "PASS"
     assert spec_report.verdict == "READY"
+
+
+def test_explicit_exclusion_declares_metric_mass_receipts() -> None:
+    frame = _frame([10, 8, 6, 4, 2])
+    chart = _chart(frame, top_n=3, omitted_behavior="exclude")
+
+    report = chart.audit()
+    spec = chart.to_vega_lite()
+    contract = spec["usermeta"]["comparison_set_contract"]
+
+    assert _finding(report, "contract.rank.comparison_set").severity == "PASS"
+    assert _finding(report, "data.rank.omitted_metric_mass").severity == "PASS"
+    assert contract["omitted_behavior"] == "exclude"
+    assert contract["eligible_metric_total"] == 30.0
+    assert contract["selected_metric_total"] == 24.0
+    assert contract["omitted_metric_total"] == 6.0
+    assert contract["selected_metric_share"] == 0.8
+    assert contract["omitted_metric_share"] == 0.2
+    assert contract["other_metric_value"] is None
+
+
+def test_missing_omitted_behavior_requires_review() -> None:
+    frame = _frame([10, 8, 6, 4])
+    chart = _chart(frame, top_n=2, omitted_behavior=None)
+
+    report = chart.audit()
+    spec = chart.to_vega_lite()
+    spec_report = audit_spec(
+        spec=spec,
+        data=frame,
+        claim="Segments are ranked by observed score.",
+    )
+
+    assert _finding(report, "contract.rank.comparison_set").severity == "WARN"
+    assert report.verdict == "REVIEW"
+    assert "comparison_set_contract" not in spec["usermeta"]
+    assert _finding(spec_report, "contract.rank.comparison_set").severity == "WARN"
+    assert spec_report.verdict == "REVIEW"
+
+
+def test_excluding_most_metric_mass_requires_review() -> None:
+    frame = _frame([21, 21, 20, 19, 19])
+    report = _chart(frame, top_n=2, omitted_behavior="exclude").audit()
+
+    finding = _finding(report, "data.rank.omitted_metric_mass")
+    assert finding.severity == "WARN"
+    assert "58.0%" in finding.message
+    assert report.verdict == "REVIEW"
+
+
+def test_aggregate_other_preserves_full_source_and_sums_omitted_mass() -> None:
+    frame = _frame([40, 30, 20, 10])
+    chart = _chart(frame, top_n=2, omitted_behavior="aggregate_other")
+
+    report = chart.audit()
+    spec = chart.to_vega_lite()
+    contract = spec["usermeta"]["comparison_set_contract"]
+
+    assert report.verdict == "READY"
+    assert _finding(report, "visual.rank.other_bucket").severity == "PASS"
+    assert contract["omitted_behavior"] == "aggregate_other"
+    assert contract["other_label"] == "Other"
+    assert contract["other_aggregation"] == "sum"
+    assert contract["other_metric_value"] == 30.0
+    assert contract["omitted_metric_share"] == 0.3
+    assert len(_dataset_rows(spec)) == 4
+    assert spec["encoding"]["y"]["sort"] == ["S1", "S2", "Other"]
+    assert spec["transform"][0]["as"] == "segment"
+    assert spec["transform"][1] == {
+        "aggregate": [{"op": "sum", "field": "score", "as": "score"}],
+        "groupby": ["segment"],
+    }
+    assert spec["usermeta"]["transform_contract"] == {
+        "declared": ["aggregate", "calculate"]
+    }
+    assert spec["usermeta"]["transform_lineage"] == build_transform_lineage(spec)
+
+    spec_report = audit_spec(
+        spec=spec,
+        data=frame,
+        claim="Segments are ranked by observed score.",
+    )
+    assert _finding(spec_report, "contract.rank.comparison_set").severity == "PASS"
+    assert _finding(spec_report, "visual.rank.other_bucket").severity == "PASS"
+    assert spec_report.verdict == "READY"
+
+
+def test_aggregate_other_blocks_ratio_like_metrics() -> None:
+    frame = _frame([0.40, 0.30, 0.20, 0.10])
+    chart = _chart(
+        frame,
+        top_n=2,
+        omitted_behavior="aggregate_other",
+        unit="conversion rate",
+    )
+    chart.numerator = "converted_sessions"
+    chart.denominator = "eligible_sessions"
+
+    report = chart.audit()
+
+    assert _finding(report, "contract.rank.comparison_set").severity == "FAIL"
+    assert report.verdict == "BLOCK"
+    with pytest.raises(ValueError, match="not supported for percent/rate/ratio"):
+        chart.to_vega_lite()
+
+
+def test_other_label_cannot_collide_with_source_category() -> None:
+    frame = pd.DataFrame(
+        {"segment": ["A", "B", "Other"], "score": [10, 8, 1]}
+    )
+    chart = Chart.rank(
+        data=frame,
+        x="segment",
+        y="score",
+        top_n=2,
+        omitted_behavior="aggregate_other",
+        other_label="Other",
+        claim="Segments are ranked by observed score.",
+        source="synthetic.rank",
+        unit="points",
+        title="Observed segment ranking",
+    )
+
+    report = chart.audit()
+
+    assert _finding(report, "contract.rank.comparison_set").severity == "FAIL"
+    with pytest.raises(ValueError, match="collides"):
+        chart.to_vega_lite()
+
+
+def test_aggregate_other_receipt_tampering_blocks_spec_audit() -> None:
+    frame = _frame([40, 30, 20, 10])
+    spec = _chart(frame, top_n=2, omitted_behavior="aggregate_other").to_vega_lite()
+    spec["usermeta"]["comparison_set_contract"]["other_metric_value"] = 29.0
+
+    report = audit_spec(
+        spec=spec,
+        data=frame,
+        claim="Segments are ranked by observed score.",
+    )
+
+    assert report.verdict == "BLOCK"
+    assert _finding(report, "contract.rank.comparison_set").severity == "FAIL"
+
+
+def test_aggregate_other_transform_tampering_blocks_even_with_fresh_lineage() -> None:
+    frame = _frame([40, 30, 20, 10])
+    spec = _chart(frame, top_n=2, omitted_behavior="aggregate_other").to_vega_lite()
+    spec["transform"][1]["aggregate"][0]["op"] = "mean"
+    spec["usermeta"]["transform_lineage"] = build_transform_lineage(spec)
+
+    report = audit_spec(
+        spec=spec,
+        data=frame,
+        claim="Segments are ranked by observed score.",
+    )
+
+    assert report.verdict == "BLOCK"
+    assert _finding(report, "visual.rank.other_bucket").severity == "FAIL"
 
 
 def test_cutoff_ties_expand_display_instead_of_breaking_equal_values() -> None:

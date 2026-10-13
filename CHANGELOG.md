@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit truncated-rank comparison-set behavior via `omitted_behavior="exclude" | "aggregate_other"`, with durable omitted metric-mass receipts.
+- Reproducible additive Other buckets that preserve full source evidence, pin the summary last, and block ratio-like metrics from being summed.
 - Explicit source-grain declarations for descriptive charts, with duplicate/null grain-key blocking and first-party refusal to collapse finer source grain implicitly.
 - Closed version-1 external grain contracts binding source grain, displayed output grain, one supported encoding-level aggregate, and recomputable row/group receipts.
 - Explicit calendar/rolling time-window contracts for baseline comparisons, including ISO period boundaries, completeness declarations, and durable inclusive-day receipts.

@@ -41,6 +41,9 @@
 - Rank charts require one explicit row per category; do not silently aggregate duplicate categories to make a ranking pass.
 - Top-N rank truncation must be explicit, preserve full source evidence in first-party specs, declare omitted-category counts, and include all exact metric ties at the cutoff rather than applying an arbitrary hidden tie-break.
 - Deterministic category ordering inside equal metric values is display stabilization only; do not describe it as distinct analytical rank.
+- Truncated rank charts must make omitted-category treatment explicit: exclusion and aggregation into Other are different analytical contracts.
+- Treat omitted metric mass as a completeness receipt, not proof of category importance; excluding at least half of non-negative metric mass requires human review.
+- An aggregate Other bucket is a summary bucket, not another analytical rank. Pin it after ranked categories and never sum percent/rate/ratio metrics into Other.
 - Treat the machine-readable audit profile as descriptive ruleset metadata, not another audit or scientific approval artifact.
 - Do not recompute a report binding to legitimize post-audit edits to findings or verdict fields; rerun the audit and emit a new report.
 - Treat a saved-report audit-profile mismatch as stale policy identity that requires re-audit for current verification, not as proof that either policy is better or scientifically valid.

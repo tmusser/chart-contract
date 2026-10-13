@@ -24,6 +24,7 @@ from .rank import (
     parse_rank_contract,
     rank_filter_categories,
 )
+from .comparison_set import parse_comparison_set_contract
 
 
 def audit_rank_spec(
@@ -166,7 +167,17 @@ def audit_rank_spec(
             ),
         )
 
+    try:
+        comparison_set = parse_comparison_set_contract(spec)
+    except ValueError:
+        comparison_set = None
+    aggregate_other = bool(
+        comparison_set and comparison_set["omitted_behavior"] == "aggregate_other"
+    )
+
     expected_categories = list(selection.displayed_categories)
+    if aggregate_other:
+        expected_categories.append(comparison_set["other_label"])
     sort_value = y_encoding.get("sort") if isinstance(y_encoding, Mapping) else None
     if sort_value == expected_categories:
         report.add(
@@ -186,7 +197,9 @@ def audit_rank_spec(
 
     filtered_categories = rank_filter_categories(analytical_spec, category_field)
     should_filter = selection.summary.omitted_category_count > 0
-    if should_filter:
+    if should_filter and aggregate_other:
+        pass
+    elif should_filter:
         if filtered_categories is None:
             report.add(
                 "contract.rank.truncation",
@@ -245,7 +258,7 @@ def audit_rank_spec(
             "Rank cutoff does not split equal metric values.",
         )
 
-    displayed_count = selection.summary.displayed_category_count
+    displayed_count = selection.summary.displayed_category_count + (1 if aggregate_other else 0)
     if displayed_count > 12:
         report.add(
             "readability.rank.category_count",

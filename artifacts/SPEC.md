@@ -32,6 +32,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - deterministic evidence-coverage checks over visible analytical fields, including usable-row retention and grouped missingness imbalance
 - occurrence-level transform lineage receipts binding exact transform payloads plus bounded input/output field lineage
 - explicit rank/top-N contracts with unique categories, descending order, tie-safe cutoff expansion, and omitted-category receipts
+- explicit comparison-set completeness for truncated ranks, including exclusion/aggregate-Other behavior and omitted metric-mass receipts
 - explicit numerator/denominator/cohort contracts for ratio-like trend/rank/compare metrics, plus optional row-level denominator-basis consistency checks
 - explicit trend/compare baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with durable observed-value receipts
 - explicit calendar/rolling comparison-window contracts with exact ISO boundaries, completeness declarations, and inclusive-day receipts
@@ -69,6 +70,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Group coverage imbalance is a review signal only and does not establish that missingness caused an observed group difference.
 - Transform lineage receipts are structural identity metadata only; they do not prove expression execution, analytical correctness, or upstream SQL/Python/dbt provenance.
 - Rank truncation metadata is reproducible against supplied evidence but does not prove the externally supplied category population is complete or that top-N is the best presentation.
+- Omitted metric-mass shares are completeness receipts only; the 50% review threshold does not define universal business materiality.
+- Aggregate-Other uses explicit sum semantics only and does not prove the ranked metric is substantively additive; ratio-like metrics are rejected from this path.
 - Input fingerprints prove content identity, not analytical truth, scientific validity, or human approval.
 - Report-result fingerprints detect saved finding/verdict drift but are not signatures; someone with write access can deliberately recompute them.
 - Audit-profile digests identify declared ruleset semantics; they do not authenticate execution, prove the implementation correct, or establish that any chart is safe or scientifically sound.
@@ -123,6 +126,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Every auditable transform occurrence in a passing transformed spec has an exact version-1 lineage receipt; same-kind payload edits, missing receipts, malformed receipts, and stale receipts block.
 - Rank charts require one row per non-null category, deterministic descending metric order, and explicit top-N intent; cutoff ties are included rather than silently split.
 - First-party top-N rank specs preserve the full supplied rows, declare eligible/displayed/omitted category counts, and use one bounded category filter whose selected set is reproducible from the supplied evidence.
+- Truncated ranks declare exclude vs aggregate-Other behavior; comparison-set receipts reconcile eligible/selected/omitted metric totals and shares where meaningful.
+- Explicit exclusion WARNs when omitted non-negative metric mass is at least 50%; aggregate-Other sums exactly the omitted categories, remains source-reconstructable, and is pinned after ranked categories.
 - Ratio-like trend/rank/compare metrics WARN when numerator/denominator identity is absent; malformed or partial declared ratio contracts block.
 - First-party specs preserve a closed version-1 ratio contract binding the shown metric to numerator, denominator, optional cohort, and optional denominator basis field.
 - When a denominator basis field is declared, missing/null/mixed identities or a basis identity that disagrees with the declared denominator block.
@@ -174,7 +179,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 75-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 78-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -193,6 +198,8 @@ For comparison-baseline semantics, run `python -m pytest tests/test_comparison_c
 For time-window comparability, run `python -m pytest tests/test_time_window_contract.py` and verify missing-window review, calendar boundary validation, complete-vs-partial blocking, rolling-duration parity, unequal-calendar review, and stale day-count receipt blocking.
 
 For aggregation grain semantics, run `python -m pytest tests/test_grain_contract.py` and verify source-grain uniqueness, repeated-display-key review, first-party no-implicit-aggregation behavior, exact external encoding-aggregate matching, and stale receipt blocking.
+
+For comparison-set completeness, run `python -m pytest tests/test_rank_contract.py` and verify explicit exclusion receipts, majority-omitted review, aggregate-Other source preservation, ratio-like blocking, Other-label collision, receipt tampering, and transform tampering.
 
 ## Open Questions
 
