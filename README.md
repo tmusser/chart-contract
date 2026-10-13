@@ -218,6 +218,35 @@ Generic `rate` units are deliberately **not** assumed to be percentages. See
 [Percent value semantics](docs/PERCENT_SEMANTICS.md) for the deterministic contract and
 external Vega-Lite behavior.
 
+### Metric definitions: bind the business meaning
+
+A stable field name does not guarantee a stable metric definition. When a metric catalog or
+version is available, preserve that identity explicitly:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="period",
+    y="active_users",
+    claim="Observed active users changed.",
+    source="warehouse.product_metrics",
+    unit="users",
+    metric_id="monthly_active_users",
+    metric_definition="Unique users with at least one qualifying session in the measurement window.",
+    metric_version="v3",
+    metric_basis_field="metric_version",
+)
+```
+
+The optional `metric_basis_field` checks every supplied row against the declared version.
+Mixed `v1` / `v2` evidence then `BLOCK`s even when the quantitative field is still named
+`active_users`.
+
+The contract is opt-in and does not infer metric semantics from field names, titles, claims,
+units, or sources. A match proves identity consistency only, not that upstream computation
+implemented the definition correctly. See
+[Metric definition identity contract](docs/METRIC_DEFINITION_CONTRACT.md).
+
 ### Rates and ratios: declare what they are "of"
 
 A percentage, rate, or ratio is not semantically complete without numerator/denominator identity:
