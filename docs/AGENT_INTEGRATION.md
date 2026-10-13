@@ -47,6 +47,9 @@ Policy:
 - For truncated ranks, require `contract.rank.comparison_set`; distinguish explicit exclusion from an explicit aggregate-Other summary.
 - Treat `data.rank.omitted_metric_mass` warnings as a completeness review signal: the visible top-N may contain a minority of the total metric mass even when ranking/filter mechanics are correct.
 - Treat an Other bucket as an omitted-set summary, never as a ranked category, and stop if `visual.rank.other_bucket` fails.
+- When a metric catalog/version is available, preserve it in `metric_definition_contract` rather than assuming a stable field name implies stable semantics.
+- Stop on `data.metric.definition_basis`: supplied rows declare incompatible metric versions and should not be compared as one metric artifact.
+- A passing metric-definition contract is identity metadata, not validation that upstream SQL or Python actually implemented the declared definition.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.
