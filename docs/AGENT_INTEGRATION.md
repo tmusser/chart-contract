@@ -44,6 +44,9 @@ Policy:
 - For rank charts, require `data.rank.category_unique`, `contract.rank.truncation`, and `visual.rank.sort_order` to pass before sharing.
 - Treat `data.rank.cutoff_tie` as a review signal: top-N may display more than N categories because exact cutoff ties are intentionally preserved.
 - Do not summarize omitted categories as absent from the source; first-party top-N specs retain full source rows and declare how many eligible categories are omitted from display.
+- For truncated ranks, require `contract.rank.comparison_set`; distinguish explicit exclusion from an explicit aggregate-Other summary.
+- Treat `data.rank.omitted_metric_mass` warnings as a completeness review signal: the visible top-N may contain a minority of the total metric mass even when ranking/filter mechanics are correct.
+- Treat an Other bucket as an omitted-set summary, never as a ranked category, and stop if `visual.rank.other_bucket` fails.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.
