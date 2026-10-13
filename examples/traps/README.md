@@ -30,6 +30,22 @@ chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
   --claim "$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
 ```
 
+### `metric_definition_drift`
+
+Demonstrates a clean-looking `active_users` trend whose field name, unit, source, and visual
+shape stay stable while the supplied row-level metric version changes from `v1` to `v2`.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
+  --data examples/traps/metric_definition_drift.csv \
+  --claim "$(cat examples/traps/metric_definition_drift.claim.txt)"
+```
+
+Expected finding: `data.metric.definition_basis` reporting mixed metric versions. The audit
+does not infer that a stable column name means a stable business definition.
+
 ### `majority_metric_mass_omitted`
 
 Demonstrates a structurally valid top-2 rank whose excluded categories contain 58% of the
