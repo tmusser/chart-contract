@@ -9,6 +9,12 @@ import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
 from ..comparison import COMPARISON_INTENTS, build_comparison_summary, changes_match, comparison_declaration
+from ..comparison_set import (
+    ComparisonSetSummary,
+    aggregate_other_transforms,
+    build_comparison_set_summary,
+    comparison_set_sort,
+)
 from ..grain import GRAIN_INTENTS, build_grain_summary, visible_grain_fields_for_chart
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
@@ -39,6 +45,7 @@ def render_chart(chart: Any) -> alt.Chart:
 
     usermeta = dict(chart.metadata or {})
     rank_selection: RankSelection | None = None
+    comparison_set_summary: ComparisonSetSummary | None = None
     if chart.intent == "rank":
         usermeta.setdefault("chart_contract_intent", "rank")
         top_n = validate_top_n(getattr(chart, "top_n", None))
@@ -56,6 +63,25 @@ def render_chart(chart: Any) -> alt.Chart:
                 top_n=top_n,
             )
             usermeta["rank_contract"] = rank_selection.summary.to_dict()
+            if (
+                rank_selection.summary.omitted_category_count > 0
+                and getattr(chart, "omitted_behavior", None) is not None
+            ):
+                comparison_set_summary = build_comparison_set_summary(
+                    chart.data,
+                    selection=rank_selection,
+                    omitted_behavior=chart.omitted_behavior,
+                    other_label=getattr(chart, "other_label", "Other"),
+                    unit=chart.unit,
+                )
+                usermeta["comparison_set_contract"] = comparison_set_summary.to_dict()
+            elif (
+                rank_selection.summary.omitted_category_count == 0
+                and getattr(chart, "omitted_behavior", None) is not None
+            ):
+                raise ValueError(
+                    "omitted_behavior is only valid when top_n omits eligible categories."
+                )
 
     ratio_contract = (
         chart_ratio_contract(chart)
@@ -103,12 +129,16 @@ def render_chart(chart: Any) -> alt.Chart:
         ).to_dict()
 
     declared_transforms = list(first_party_transform_declaration(chart.intent))
-    if (
-        rank_selection is not None
-        and rank_selection.summary.omitted_category_count > 0
-        and "filter" not in declared_transforms
-    ):
-        declared_transforms.append("filter")
+    if rank_selection is not None and rank_selection.summary.omitted_category_count > 0:
+        if (
+            comparison_set_summary is not None
+            and comparison_set_summary.omitted_behavior == "aggregate_other"
+        ):
+            for kind in ("aggregate", "calculate"):
+                if kind not in declared_transforms:
+                    declared_transforms.append(kind)
+        elif "filter" not in declared_transforms:
+            declared_transforms.append("filter")
     if declared_transforms:
         usermeta["transform_contract"] = {"declared": sorted(declared_transforms)}
     if chart.intent in {"qq", "ecdf", "residual", "set_membership", "process_tree"}:
@@ -172,7 +202,7 @@ def render_chart(chart: Any) -> alt.Chart:
     if chart.intent == "trend":
         rendered = _render_trend(chart, records)
     elif chart.intent == "rank":
-        rendered = _render_rank(chart, records, rank_selection)
+        rendered = _render_rank(chart, records, rank_selection, comparison_set_summary)
     elif chart.intent == "compare":
         rendered = _render_compare(chart, records)
     elif chart.intent == "histogram":
@@ -250,18 +280,33 @@ def _render_rank(
     chart: Any,
     records: list[dict[str, Any]],
     selection: RankSelection | None,
+    comparison_set: ComparisonSetSummary | None,
 ) -> alt.Chart:
     base = alt.Chart(alt.InlineData(values=records))
     sort: Any = "-x"
     if selection is not None:
-        sort = list(selection.displayed_categories)
+        sort = comparison_set_sort(selection, comparison_set)
         if selection.summary.omitted_category_count > 0:
-            base = base.transform_filter(
-                alt.FieldOneOfPredicate(
-                    field=chart.x,
-                    oneOf=list(selection.displayed_categories),
+            if comparison_set is not None and comparison_set.omitted_behavior == "aggregate_other":
+                transforms = aggregate_other_transforms(
+                    category_field=chart.x,
+                    metric_field=chart.y,
+                    selected_categories=selection.displayed_categories,
+                    other_label=comparison_set.other_label or "Other",
                 )
-            )
+                base = base.transform_calculate(
+                    **{chart.x: transforms[0]["calculate"]}
+                ).transform_aggregate(
+                    **{chart.y: f"sum({chart.y})"},
+                    groupby=[chart.x],
+                )
+            else:
+                base = base.transform_filter(
+                    alt.FieldOneOfPredicate(
+                        field=chart.x,
+                        oneOf=list(selection.displayed_categories),
+                    )
+                )
 
     return base.mark_bar().encode(
         x=alt.X(
