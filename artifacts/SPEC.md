@@ -37,6 +37,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit trend/compare baseline contracts distinguishing absolute delta, percentage points, percent change, and ratio arithmetic with durable observed-value receipts
 - explicit calendar/rolling comparison-window contracts with exact ISO boundaries, completeness declarations, and inclusive-day receipts
 - explicit source/output grain contracts for descriptive charts, including source-key uniqueness and bounded encoding-level aggregation semantics
+- explicit metric-definition identity for trend/rank/compare metrics, including stable ID/definition/version metadata and optional row-level version checks
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -64,6 +65,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Time-window contracts verify declared boundaries, completeness state, and exposure duration only; they do not prove source ingestion completeness, seasonality control, business-day equivalence, or cohort comparability.
 - Unequal complete calendar periods are reviewable rather than automatically invalid because legitimate months/quarters can differ in day count; no automatic normalization is performed.
 - Grain contracts verify row-key uniqueness and declared source-to-output collapse only; they do not prove the business key, join logic, or chosen reducer is substantively correct.
+- Metric-definition contracts verify declared identity/version consistency only; they do not prove the business definition is substantively correct or that upstream computation implemented it.
+- Metric identity is never inferred from field names, titles, claims, units, or source strings; the contract is opt-in.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -100,6 +103,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - automatic choice of analytical baselines, hidden row-order baselines, or open-ended natural-language interpretation of comparison claims
 - automatic prorating, exposure normalization, or inference of MTD/full-period/rolling semantics from labels alone
 - automatic deduplication, join-fanout repair, or guessing sum/mean/other aggregation when source grain is finer than displayed grain
+- inference of business metric definitions or automatic reconciliation of rows produced under different metric versions
 
 ## Acceptance Criteria
 
@@ -139,6 +143,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Complete calendar windows must span one full declared day/week/month/quarter/year period; first-party specs preserve recomputable inclusive-day receipts.
 - Declared source-grain fields must exist, be non-null, and uniquely identify every supplied row; duplicate grain keys block rather than being silently deduplicated.
 - First-party descriptive charts refuse many-to-one source-to-display collapse; external specs may use one supported encoding-level aggregate only when grain metadata exactly matches the aggregate and recomputed row/group receipts.
+- Declared metric-definition contracts bind the shown quantitative field to one metric ID, definition, and version; partial/malformed/field-mismatched contracts block.
+- When a metric basis field is declared, missing/null/mixed row versions or versions that disagree with the contract block.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -179,7 +185,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 78-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 80-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -200,6 +206,8 @@ For time-window comparability, run `python -m pytest tests/test_time_window_cont
 For aggregation grain semantics, run `python -m pytest tests/test_grain_contract.py` and verify source-grain uniqueness, repeated-display-key review, first-party no-implicit-aggregation behavior, exact external encoding-aggregate matching, and stale receipt blocking.
 
 For comparison-set completeness, run `python -m pytest tests/test_rank_contract.py` and verify explicit exclusion receipts, majority-omitted review, aggregate-Other source preservation, ratio-like blocking, Other-label collision, receipt tampering, and transform tampering.
+
+For metric-definition identity, run `python -m pytest tests/test_metric_definition_contract.py` and verify closed-schema validation, quantitative-field binding, stable row-level version identity, mixed-version blocking, missing-evidence blocking, and opt-in no-inference behavior.
 
 ## Open Questions
 
