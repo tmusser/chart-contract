@@ -1,5 +1,55 @@
 # VERIFY
 
+2026-10-15 - Add measurement-unit conversion contracts
+
+Environment:
+- Branch: `agent/unit-conversion-contract`
+- Base: `main` at `7be4fea88dec1c55d1693e2d61cc00ecf154b558`
+- Pull request: #26 (`feat: audit measurement unit conversions`)
+- Code-bearing GitHub Actions CI run #256 (`38755883263`) on head `bc434f7cd7b08f4cd5e98bc53970b0ae4c2b8215` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, and metric-definition traps -> PASSED
+- new mixed-measurement-units CLI trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend`, `rank`, and `compare` accept optional source/display unit-conversion metadata;
+- unit-conversion semantics are opt-in and are never inferred from geography, field names, labels, or observed ranges;
+- closed v1 metadata binds the shown quantitative metric to source unit, display unit, conversion kind, factor, and optional row-level source-unit identity;
+- `identity` requires source unit == display unit, factor == 1.0, no conversion basis, and no separate source-value field;
+- `scale` requires different source/display units, one finite positive factor, explicit conversion basis, and a preserved source-value field distinct from the displayed metric;
+- fixed-scale audits recompute `display = source * factor` for every complete observation;
+- source/display values must be jointly present or jointly null, numeric, and finite;
+- first-party rendering refuses stale fixed-conversion arithmetic;
+- optional `source_unit_basis_field` values must be complete, non-empty strings, use one common source-unit identity, and exactly match the contract;
+- mixed USD/EUR row-level evidence fails `data.unit.source_basis`;
+- external specs must bind `metric_field` to an encoded quantitative field and `display_unit` exactly to `usermeta.unit`;
+- scale contracts without reconstructable evidence block;
+- malformed/partial/extra-field contracts block;
+- absence of unit-conversion metadata does not invent conversion semantics or downgrade an artifact;
+- machine-readable profile/documentation parity moves from 80 to 83 rules.
+
+Important policy boundary:
+- chart-contract never fetches FX rates or chooses conversion factors.
+- V1 supports identity and one fixed multiplicative factor only.
+- No silent data mutation, time-varying factors, inflation adjustment, or affine/offset conversions are performed.
+- Matching arithmetic proves the declared factor reproduces supplied values, not that the factor or external conversion basis is economically/scientifically appropriate.
+
+Remaining risks:
+- A consistently mislabeled source-unit field can still be wrong.
+- Fixed-factor arithmetic uses floating-point tolerance rather than exact decimal accounting.
+- V1 cannot represent row-varying FX or historically varying conversion rates.
+- V1 cannot represent affine conversions such as Celsius/Fahrenheit.
+- Conversion-basis text is descriptive metadata and is not externally authenticated.
+- Adding three new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #26 if fixed multiplicative conversion scope and exact unit-identity semantics are desired.
+- Keep time-varying FX, inflation adjustment, affine conversions, and unit alias normalization as separate future contracts.
+
 2026-10-13 - Add metric-definition identity contracts
 
 Environment:
