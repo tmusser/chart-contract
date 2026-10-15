@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity and fixed multiplicative conversion modes.
+- Row-level source-unit consistency and fixed-factor arithmetic checks that block mixed units or stale converted values without fetching rates or mutating data.
 - Explicit metric-definition identity metadata for trend/rank/compare charts, binding the shown metric to a stable ID, definition, and version.
 - Optional row-level metric-version basis checks that block definition drift such as the same `active_users` field switching from v1 to v2 across compared rows.
 - Explicit truncated-rank comparison-set behavior via `omitted_behavior="exclude" | "aggregate_other"`, with durable omitted metric-mass receipts.
