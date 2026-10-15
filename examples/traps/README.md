@@ -6,6 +6,22 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `mixed_measurement_units`
+
+Demonstrates a visually ordinary regional revenue chart labeled USD while the supplied
+row-level source-unit evidence contains both USD and EUR.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/mixed_measurement_units.vl.json \
+  --data examples/traps/mixed_measurement_units.csv \
+  --claim "$(cat examples/traps/mixed_measurement_units.claim.txt)"
+```
+
+Expected finding: `data.unit.source_basis` reporting mixed source units. The audit does not
+guess an FX rate or convert the EUR row.
+
 ### `too_many_pie_categories`
 
 Demonstrates an arc chart with too many categories.
