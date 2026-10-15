@@ -192,6 +192,19 @@ jobs:
           grep -q "58.0%" <<<"$omitted_output"
 
           set +e
+          unit_output=$(chart-contract audit spec examples/traps/mixed_measurement_units.vl.json \
+            --data examples/traps/mixed_measurement_units.csv \
+            --claim "$(cat examples/traps/mixed_measurement_units.claim.txt)" 2>&1)
+          unit_exit=$?
+          set -e
+          echo "$unit_output"
+          test "$unit_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$unit_output"
+          grep -q "contract.unit.conversion" <<<"$unit_output"
+          grep -q "data.unit.source_basis" <<<"$unit_output"
+          grep -q "mixed source units" <<<"$unit_output"
+
+          set +e
           metric_definition_output=$(chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
             --data examples/traps/metric_definition_drift.csv \
             --claim "$(cat examples/traps/metric_definition_drift.claim.txt)" 2>&1)
