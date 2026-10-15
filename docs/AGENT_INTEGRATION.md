@@ -50,6 +50,9 @@ Policy:
 - When a metric catalog/version is available, preserve it in `metric_definition_contract` rather than assuming a stable field name implies stable semantics.
 - Stop on `data.metric.definition_basis`: supplied rows declare incompatible metric versions and should not be compared as one metric artifact.
 - A passing metric-definition contract is identity metadata, not validation that upstream SQL or Python actually implemented the declared definition.
+- When measurement units can differ across source rows, preserve `unit_conversion_contract` instead of assuming the displayed `unit` describes raw evidence.
+- Stop on `data.unit.source_basis` for mixed source units and on `data.unit.conversion_evidence` when a fixed factor does not reproduce supplied source/display values.
+- Do not fetch FX, normalize units, or rewrite values to satisfy the audit; v1 supports identity and one explicit fixed multiplicative factor only.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.

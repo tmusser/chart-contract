@@ -35,6 +35,7 @@ The current unreleased line adds and hardens:
 - explicit source/output grain contracts that detect duplicate business keys, hidden many-to-one display collapse, and undeclared encoding-level aggregation
 - explicit top-N comparison-set completeness contracts covering exclusion, omitted metric mass, and reproducible aggregate-Other summaries
 - explicit metric-definition identity contracts binding metric ID/version/definition plus optional row-level version consistency checks
+- explicit measurement-unit identity and fixed-scale conversion contracts with row-level source-unit consistency and recomputable arithmetic
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 

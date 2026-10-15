@@ -38,6 +38,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit calendar/rolling comparison-window contracts with exact ISO boundaries, completeness declarations, and inclusive-day receipts
 - explicit source/output grain contracts for descriptive charts, including source-key uniqueness and bounded encoding-level aggregation semantics
 - explicit metric-definition identity for trend/rank/compare metrics, including stable ID/definition/version metadata and optional row-level version checks
+- explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity/fixed-scale semantics, row-level source-unit checks, and recomputable fixed conversion arithmetic
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -67,6 +68,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Grain contracts verify row-key uniqueness and declared source-to-output collapse only; they do not prove the business key, join logic, or chosen reducer is substantively correct.
 - Metric-definition contracts verify declared identity/version consistency only; they do not prove the business definition is substantively correct or that upstream computation implemented it.
 - Metric identity is never inferred from field names, titles, claims, units, or source strings; the contract is opt-in.
+- Unit conversion contracts verify declared source/display identity and fixed multiplicative arithmetic only; they do not validate external FX provenance, inflation methodology, time-varying rates, or offset conversions.
+- Unit identity is never inferred from value ranges, geography, field names, or displayed labels, and chart-contract does not silently mutate source values to satisfy a conversion contract.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -104,6 +107,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - automatic prorating, exposure normalization, or inference of MTD/full-period/rolling semantics from labels alone
 - automatic deduplication, join-fanout repair, or guessing sum/mean/other aggregation when source grain is finer than displayed grain
 - inference of business metric definitions or automatic reconciliation of rows produced under different metric versions
+- automatic unit conversion, FX lookup, inflation adjustment, time-varying conversion factors, or affine/offset conversion such as Celsius/Fahrenheit
 
 ## Acceptance Criteria
 
@@ -145,6 +149,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - First-party descriptive charts refuse many-to-one source-to-display collapse; external specs may use one supported encoding-level aggregate only when grain metadata exactly matches the aggregate and recomputed row/group receipts.
 - Declared metric-definition contracts bind the shown quantitative field to one metric ID, definition, and version; partial/malformed/field-mismatched contracts block.
 - When a metric basis field is declared, missing/null/mixed row versions or versions that disagree with the contract block.
+- Declared unit-conversion contracts bind the shown quantitative field to source/display units and either identity or fixed-scale semantics; malformed, partial, field-mismatched, or display-unit-mismatched contracts block.
+- When a source-unit basis field is declared, missing/null/mixed/mismatched source-unit identities block; fixed-scale conversions must reproduce displayed values from preserved source values and the declared factor.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -185,7 +191,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 80-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 83-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -208,6 +214,8 @@ For aggregation grain semantics, run `python -m pytest tests/test_grain_contract
 For comparison-set completeness, run `python -m pytest tests/test_rank_contract.py` and verify explicit exclusion receipts, majority-omitted review, aggregate-Other source preservation, ratio-like blocking, Other-label collision, receipt tampering, and transform tampering.
 
 For metric-definition identity, run `python -m pytest tests/test_metric_definition_contract.py` and verify closed-schema validation, quantitative-field binding, stable row-level version identity, mixed-version blocking, missing-evidence blocking, and opt-in no-inference behavior.
+
+For unit-conversion semantics, run `python -m pytest tests/test_unit_conversion_contract.py` and verify source-unit identity, fixed-scale recomputation, malformed-contract blocking, external binding, and stale arithmetic refusal.
 
 ## Open Questions
 
