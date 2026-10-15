@@ -23,6 +23,13 @@ from ..ratio import RATIO_INTENTS, chart_ratio_contract
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..time_window import build_time_window_summary, time_window_declaration
+from ..unit_conversion import (
+    UNIT_CONVERSION_INTENTS,
+    chart_unit_conversion_contract,
+    conversion_arithmetic_status,
+    parse_unit_conversion_contract,
+    source_unit_basis_status,
+)
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
     ECDF_VALUE_FIELD,
@@ -99,6 +106,34 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if metric_definition_contract is not None:
         usermeta["metric_definition_contract"] = metric_definition_contract
+
+    unit_conversion_raw = (
+        chart_unit_conversion_contract(chart)
+        if chart.intent in UNIT_CONVERSION_INTENTS
+        else None
+    )
+    if unit_conversion_raw is not None:
+        unit_contract = parse_unit_conversion_contract(
+            {"usermeta": {"unit_conversion_contract": unit_conversion_raw}}
+        )
+        if unit_contract["source_unit_basis_field"] is not None:
+            ok, message = source_unit_basis_status(
+                chart.data,
+                basis_field=unit_contract["source_unit_basis_field"],
+                source_unit=unit_contract["source_unit"],
+            )
+            if not ok:
+                raise ValueError(message)
+        if unit_contract["conversion_kind"] == "scale":
+            ok, message = conversion_arithmetic_status(
+                chart.data,
+                metric_field=unit_contract["metric_field"],
+                source_value_field=unit_contract["source_value_field"],
+                conversion_factor=unit_contract["conversion_factor"],
+            )
+            if not ok:
+                raise ValueError(message)
+        usermeta["unit_conversion_contract"] = unit_contract
 
     comparison_raw = (
         comparison_declaration(chart)
