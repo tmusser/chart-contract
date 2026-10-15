@@ -247,6 +247,37 @@ units, or sources. A match proves identity consistency only, not that upstream c
 implemented the definition correctly. See
 [Metric definition identity contract](docs/METRIC_DEFINITION_CONTRACT.md).
 
+### Measurement units: bind source and display semantics
+
+A displayed unit does not prove every source row was measured in that unit. When unit identity
+or conversion matters, preserve it explicitly:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="period",
+    y="revenue_kusd",
+    claim="Observed revenue changed.",
+    source="warehouse.revenue",
+    unit="thousand USD",
+    source_unit="USD",
+    conversion_kind="scale",
+    conversion_factor=0.001,
+    conversion_basis="1 thousand USD = 1000 USD",
+    source_value_field="revenue_usd",
+    source_unit_basis_field="source_unit",
+)
+```
+
+For fixed-scale conversions, the audit recomputes
+`displayed_value = source_value * conversion_factor` from supplied evidence. A row-level
+source-unit field can also catch mixed identities such as USD and EUR under one displayed unit.
+
+Version 1 deliberately does not fetch FX rates, perform silent conversions, support time-varying
+factors, or model offset conversions such as Celsius/Fahrenheit. The contract verifies declared
+identity/fixed-factor arithmetic; it does not certify the external conversion basis. See
+[Unit conversion contract](docs/UNIT_CONVERSION_CONTRACT.md).
+
 ### Rates and ratios: declare what they are "of"
 
 A percentage, rate, or ratio is not semantically complete without numerator/denominator identity:
