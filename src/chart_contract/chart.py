@@ -65,6 +65,12 @@ class Chart:
     metric_definition: str | None = None
     metric_version: str | None = None
     metric_basis_field: str | None = None
+    source_unit: str | None = None
+    conversion_kind: str | None = None
+    conversion_factor: float | int | None = None
+    conversion_basis: str | None = None
+    source_value_field: str | None = None
+    source_unit_basis_field: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -87,6 +93,12 @@ class Chart:
         metric_definition: str | None = None,
         metric_version: str | None = None,
         metric_basis_field: str | None = None,
+        source_unit: str | None = None,
+        conversion_kind: str | None = None,
+        conversion_factor: float | int | None = None,
+        conversion_basis: str | None = None,
+        source_value_field: str | None = None,
+        source_unit_basis_field: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -124,6 +136,12 @@ class Chart:
             metric_definition=metric_definition,
             metric_version=metric_version,
             metric_basis_field=metric_basis_field,
+            source_unit=source_unit,
+            conversion_kind=conversion_kind,
+            conversion_factor=conversion_factor,
+            conversion_basis=conversion_basis,
+            source_value_field=source_value_field,
+            source_unit_basis_field=source_unit_basis_field,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -164,6 +182,12 @@ class Chart:
         metric_definition: str | None = None,
         metric_version: str | None = None,
         metric_basis_field: str | None = None,
+        source_unit: str | None = None,
+        conversion_kind: str | None = None,
+        conversion_factor: float | int | None = None,
+        conversion_basis: str | None = None,
+        source_value_field: str | None = None,
+        source_unit_basis_field: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -191,6 +215,12 @@ class Chart:
             metric_definition=metric_definition,
             metric_version=metric_version,
             metric_basis_field=metric_basis_field,
+            source_unit=source_unit,
+            conversion_kind=conversion_kind,
+            conversion_factor=conversion_factor,
+            conversion_basis=conversion_basis,
+            source_value_field=source_value_field,
+            source_unit_basis_field=source_unit_basis_field,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -221,6 +251,12 @@ class Chart:
         metric_definition: str | None = None,
         metric_version: str | None = None,
         metric_basis_field: str | None = None,
+        source_unit: str | None = None,
+        conversion_kind: str | None = None,
+        conversion_factor: float | int | None = None,
+        conversion_basis: str | None = None,
+        source_value_field: str | None = None,
+        source_unit_basis_field: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -259,6 +295,12 @@ class Chart:
             metric_definition=metric_definition,
             metric_version=metric_version,
             metric_basis_field=metric_basis_field,
+            source_unit=source_unit,
+            conversion_kind=conversion_kind,
+            conversion_factor=conversion_factor,
+            conversion_basis=conversion_basis,
+            source_value_field=source_value_field,
+            source_unit_basis_field=source_unit_basis_field,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
