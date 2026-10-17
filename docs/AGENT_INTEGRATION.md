@@ -55,6 +55,7 @@ Policy:
 - Do not fetch FX, normalize units, or rewrite values to satisfy the audit; v1 supports identity and one explicit fixed multiplicative factor only.
 - When an artifact represents a sample or census, preserve `population_contract`; do not assume supplied rows define the population by themselves.
 - Do not use DataFrame row count as `sample_size` unless `sample_member_field` proves one row per sampled unit.
+- Surface `contract.population.scope` REVIEW when a claim explicitly says `sample of`, `sampled from`, `survey respondent(s)`, or `census of` without population metadata; do not generalize this into broad claim NLP.
 - Surface `claim.population.generalization` REVIEW for explicit population generalization from convenience/quota/unknown/other sampling rather than silently endorsing the inference.
 - A passing `data.population.weights` finding validates weight values only, not the weighting methodology or representativeness.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
