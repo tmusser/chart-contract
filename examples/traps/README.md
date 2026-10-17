@@ -6,6 +6,23 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `convenience_sample_generalized`
+
+Demonstrates a structurally coherent convenience sample that explicitly generalizes its
+observed result to the full target population.
+
+Expected verdict: `REVIEW`
+
+```bash
+chart-contract audit spec examples/traps/convenience_sample_generalized.vl.json \
+  --data examples/traps/convenience_sample_generalized.csv \
+  --claim "$(cat examples/traps/convenience_sample_generalized.claim.txt)"
+```
+
+Expected finding: `claim.population.generalization` warning on `convenience` sampling.
+The audit does not claim the sample is invalid; it requires human review before population
+generalization.
+
 ### `mixed_measurement_units`
 
 Demonstrates a visually ordinary regional revenue chart labeled USD while the supplied
