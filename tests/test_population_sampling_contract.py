@@ -299,6 +299,39 @@ def test_closed_population_schema_blocks_extra_fields() -> None:
     assert _finding(report, "contract.population.scope").severity == "FAIL"
 
 
+def test_explicit_sample_claim_without_contract_requires_review() -> None:
+    chart = Chart.trend(
+        data=_frame(),
+        x="period",
+        y="active_users",
+        claim="A sample of eligible users shows higher observed activity after launch.",
+        source="synthetic.population_sampling",
+        unit="users",
+        title="Observed active users",
+    )
+
+    report = chart.audit()
+
+    finding = _finding(report, "contract.population.scope")
+    assert finding.severity == "WARN"
+    assert report.verdict == "REVIEW"
+
+
+def test_external_explicit_sample_claim_without_contract_requires_review() -> None:
+    spec, frame = _external_spec()
+    del spec["usermeta"]["population_contract"]
+
+    report = audit_spec(
+        spec,
+        data=frame,
+        claim="Survey respondents show higher observed activity after launch.",
+    )
+
+    finding = _finding(report, "contract.population.scope")
+    assert finding.severity == "WARN"
+    assert report.verdict == "REVIEW"
+
+
 def test_absent_population_contract_does_not_invent_sampling_semantics() -> None:
     spec, frame = _external_spec()
     del spec["usermeta"]["population_contract"]
