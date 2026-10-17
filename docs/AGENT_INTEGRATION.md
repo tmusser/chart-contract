@@ -53,6 +53,10 @@ Policy:
 - When measurement units can differ across source rows, preserve `unit_conversion_contract` instead of assuming the displayed `unit` describes raw evidence.
 - Stop on `data.unit.source_basis` for mixed source units and on `data.unit.conversion_evidence` when a fixed factor does not reproduce supplied source/display values.
 - Do not fetch FX, normalize units, or rewrite values to satisfy the audit; v1 supports identity and one explicit fixed multiplicative factor only.
+- When an artifact represents a sample or census, preserve `population_contract`; do not assume supplied rows define the population by themselves.
+- Do not use DataFrame row count as `sample_size` unless `sample_member_field` proves one row per sampled unit.
+- Surface `claim.population.generalization` REVIEW for explicit population generalization from convenience/quota/unknown/other sampling rather than silently endorsing the inference.
+- A passing `data.population.weights` finding validates weight values only, not the weighting methodology or representativeness.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.
