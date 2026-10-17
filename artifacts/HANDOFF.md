@@ -28,6 +28,7 @@
 - Optional sample-member evidence is reconstructable only when supplied rows are one sampled unit each; IDs must be complete, unique, and exactly match declared sample size.
 - Optional sampling weights must be complete, numeric, finite, and strictly positive.
 - Population generalization is an explicit boolean rather than broad claim-text inference.
+- Missing population metadata emits REVIEW only for bounded explicit claim phrases: `sample of`, `sampled from`, `survey respondent(s)`, and `census of`.
 - Generalization from convenience/quota/unknown/other sampling emits REVIEW.
 - Descriptive nonprobability samples can remain READY.
 - Probability-method/census generalization structurally passes but is not described as representativeness proof.
@@ -49,7 +50,7 @@
 
 ## Verification
 
-GitHub Actions CI run #259 (`38989510237`) passed on code-bearing head `71b2ddd74a414c82eace924ddbc6cd16b1f0d278`:
+GitHub Actions CI run #269 (`38989751879`) passed on code-bearing head `226f55a1a671dbddc196d0381d3103f52dcaf993`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -70,7 +71,7 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 - V1 does not model cluster/strata structure beyond the method label.
 - V1 does not validate weighting methodology or use weights to recompute metrics.
 - V1 does not estimate uncertainty, design effects, or effective sample size.
-- Broad claim-language inference remains intentionally out of scope.
+- Broad claim-language inference remains intentionally out of scope beyond the four bounded explicit sampling phrases.
 
 ## Next Recommended Task
 
