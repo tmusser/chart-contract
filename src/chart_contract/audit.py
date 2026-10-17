@@ -661,7 +661,7 @@ def audit_spec(
     audit_ratio_spec(report, spec, encoding, resolved_frame, unit)
     audit_metric_definition_spec(report, spec, encoding, resolved_frame)
     audit_unit_conversion_spec(report, spec, encoding, resolved_frame, unit)
-    audit_population_spec(report, spec, resolved_frame)
+    audit_population_spec(report, spec, resolved_frame, resolved_claim)
     audit_comparison_spec(
         report,
         spec,
