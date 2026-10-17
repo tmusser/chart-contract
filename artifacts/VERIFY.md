@@ -6,7 +6,7 @@ Environment:
 - Branch: `agent/population-sampling-contract`
 - Base: `main` at `8709096777f7d4ebceeea69290dd3e52034b0cf4`
 - Pull request: #27 (`feat: audit population sampling scope`)
-- Code-bearing GitHub Actions CI run #259 (`38989510237`) on head `71b2ddd74a414c82eace924ddbc6cd16b1f0d278` -> PASSED
+- Code-bearing GitHub Actions CI run #269 (`38989751879`) on head `226f55a1a671dbddc196d0381d3103f52dcaf993` -> PASSED
 - Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
 - source compilation / environment checks -> PASSED on every Python lane
 - all existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, metric-definition, and unit-conversion traps -> PASSED
@@ -25,6 +25,7 @@ Verified behavior:
 - first-party rendering refuses invalid reconstructable member evidence;
 - optional `weight_field` values must be complete, numeric, finite, and strictly positive;
 - population generalization is explicit metadata rather than open-ended claim-text inference;
+- explicit `sample of`, `sampled from`, `survey respondent(s)`, or `census of` claim wording without a population contract emits `contract.population.scope=WARN` / REVIEW;
 - convenience/quota/unknown/other sampling plus `generalizes_to_population=true` emits `claim.population.generalization=WARN` / REVIEW;
 - descriptive nonprobability samples can remain READY when population generalization is false;
 - census and probability-method declarations structurally pass the generalization rule without being described as representative proof;
@@ -38,7 +39,7 @@ Important policy boundary:
 - Sampling-method labels are declarations; chart-contract does not prove the method was executed correctly.
 - Positive finite weights do not prove calibration, inverse-probability correctness, design effects, or variance estimation.
 - V1 does not infer sample size from aggregate chart rows.
-- V1 does not infer population-generalizing intent from arbitrary prose.
+- V1 does not infer population-generalizing intent from arbitrary prose; only the bounded explicit sampling phrases above trigger missing-contract review.
 
 Remaining risks:
 - Declared population and sampling-method strings can be consistently wrong.
