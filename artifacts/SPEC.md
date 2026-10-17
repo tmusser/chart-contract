@@ -75,6 +75,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Declared sample size is not inferred from DataFrame row count; only an explicit sample-member field can make row-level sample-count evidence reconstructable.
 - Sampling weights are checked only for complete positive finite values; chart-contract does not certify calibration, design effects, or variance estimation.
 - Population generalization is explicit metadata in v1 rather than open-ended claim-text inference; nonprobability generalization produces a review signal rather than automatic statistical rejection.
+- Missing population metadata produces REVIEW only for bounded explicit sampling phrases (`sample of`, `sampled from`, `survey respondent(s)`, `census of`); broad population-language NLP remains out of scope.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -157,6 +158,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - When a metric basis field is declared, missing/null/mixed row versions or versions that disagree with the contract block.
 - Declared unit-conversion contracts bind the shown quantitative field to source/display units and either identity or fixed-scale semantics; malformed, partial, field-mismatched, or display-unit-mismatched contracts block.
 - When a source-unit basis field is declared, missing/null/mixed/mismatched source-unit identities block; fixed-scale conversions must reproduce displayed values from preserved source values and the declared factor.
+- Explicit `sample of` / `sampled from` / `survey respondent(s)` / `census of` claim wording without population metadata produces REVIEW; ordinary claims do not invent sampling semantics.
 - Declared population contracts distinguish sample versus census scope, require coherent population/sample counts and sampling methods, and preserve explicit population-generalization intent.
 - Optional sample-member evidence must be complete, unique, and exactly reproduce declared sample size; optional weight evidence must be complete, numeric, finite, and strictly positive.
 - Explicit population generalization from convenience, quota, unknown, or other nonprobability sampling methods produces REVIEW without claiming statistical invalidity.
@@ -226,7 +228,7 @@ For metric-definition identity, run `python -m pytest tests/test_metric_definiti
 
 For unit-conversion semantics, run `python -m pytest tests/test_unit_conversion_contract.py` and verify source-unit identity, fixed-scale recomputation, malformed-contract blocking, external binding, and stale arithmetic refusal.
 
-For population/sampling semantics, run `python -m pytest tests/test_population_sampling_contract.py` and verify sample/census coherence, aggregated-row/sample-size separation, optional member-count reconstruction, positive-weight checks, nonprobability generalization review, external evidence requirements, and closed-schema enforcement.
+For population/sampling semantics, run `python -m pytest tests/test_population_sampling_contract.py` and verify explicit-sample-claim missing-contract review, sample/census coherence, aggregated-row/sample-size separation, optional member-count reconstruction, positive-weight checks, nonprobability generalization review, external evidence requirements, and closed-schema enforcement.
 
 ## Open Questions
 
