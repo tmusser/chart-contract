@@ -79,6 +79,11 @@ class Chart:
     sample_member_field: str | None = None
     weight_field: str | None = None
     generalizes_to_population: bool | None = None
+    interval_lower_field: str | None = None
+    interval_upper_field: str | None = None
+    interval_kind: str | None = None
+    interval_level: float | int | None = None
+    interval_method: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -115,6 +120,11 @@ class Chart:
         sample_member_field: str | None = None,
         weight_field: str | None = None,
         generalizes_to_population: bool | None = None,
+        interval_lower_field: str | None = None,
+        interval_upper_field: str | None = None,
+        interval_kind: str | None = None,
+        interval_level: float | int | None = None,
+        interval_method: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -166,6 +176,11 @@ class Chart:
             sample_member_field=sample_member_field,
             weight_field=weight_field,
             generalizes_to_population=generalizes_to_population,
+            interval_lower_field=interval_lower_field,
+            interval_upper_field=interval_upper_field,
+            interval_kind=interval_kind,
+            interval_level=interval_level,
+            interval_method=interval_method,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -305,6 +320,11 @@ class Chart:
         sample_member_field: str | None = None,
         weight_field: str | None = None,
         generalizes_to_population: bool | None = None,
+        interval_lower_field: str | None = None,
+        interval_upper_field: str | None = None,
+        interval_kind: str | None = None,
+        interval_level: float | int | None = None,
+        interval_method: str | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -357,6 +377,11 @@ class Chart:
             sample_member_field=sample_member_field,
             weight_field=weight_field,
             generalizes_to_population=generalizes_to_population,
+            interval_lower_field=interval_lower_field,
+            interval_upper_field=interval_upper_field,
+            interval_kind=interval_kind,
+            interval_level=interval_level,
+            interval_method=interval_method,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
