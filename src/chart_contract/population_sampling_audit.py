@@ -11,6 +11,7 @@ from .audit import FAIL, PASS, WARN, AuditReport
 from .population_sampling import (
     POPULATION_INTENTS,
     chart_population_contract,
+    claim_implies_sampling_scope,
     generalization_status,
     parse_population_contract,
     sample_member_status,
@@ -24,6 +25,17 @@ def audit_population_chart(report: AuditReport, chart: Any) -> None:
 
     raw = chart_population_contract(chart)
     if raw is None:
+        if claim_implies_sampling_scope(getattr(chart, "claim", None)):
+            report.add(
+                "contract.population.scope",
+                WARN,
+                "Claim explicitly names sample/census scope but no population contract is declared.",
+                suggestion=(
+                    "Declare sample/census scope, target population, sample size, "
+                    "sampling method, and generalization intent."
+                ),
+                field="evidence_scope",
+            )
         return
 
     try:
@@ -65,9 +77,21 @@ def audit_population_spec(
     report: AuditReport,
     spec: Mapping[str, Any],
     frame: pd.DataFrame | None,
+    claim: str | None,
 ) -> None:
     usermeta = spec.get("usermeta")
     if not isinstance(usermeta, Mapping) or "population_contract" not in usermeta:
+        if claim_implies_sampling_scope(claim):
+            report.add(
+                "contract.population.scope",
+                WARN,
+                "Claim explicitly names sample/census scope but no population contract is declared.",
+                suggestion=(
+                    "Add usermeta.population_contract with sample/census scope, target "
+                    "population, sample size, sampling method, and generalization intent."
+                ),
+                field="usermeta.population_contract",
+            )
         return
 
     try:
