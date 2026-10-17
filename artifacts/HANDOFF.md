@@ -2,52 +2,54 @@
 
 ## Resume Packet
 
-- Goal: make source/display measurement units and fixed multiplicative conversions explicit and auditable.
-- Branch: `agent/unit-conversion-contract`.
-- Base: `main` at `7be4fea88dec1c55d1693e2d61cc00ecf154b558`.
-- Pull request: #26 (`feat: audit measurement unit conversions`).
-- Current slice: first-party unit-conversion API, closed v1 metadata, chart/spec audits, row-level source-unit checks, fixed-scale recomputation, mixed-unit CLI trap, three new profile rules, tests, and docs.
-- Read first: `src/chart_contract/unit_conversion.py`, `src/chart_contract/unit_conversion_audit.py`, `tests/test_unit_conversion_contract.py`, and `docs/UNIT_CONVERSION_CONTRACT.md`.
+- Goal: make sample/census scope, target population, optional member/weight evidence, and population-generalization intent explicit.
+- Branch: `agent/population-sampling-contract`.
+- Base: `main` at `8709096777f7d4ebceeea69290dd3e52034b0cf4`.
+- Pull request: #27 (`feat: audit population sampling scope`).
+- Current slice: first-party sampling API, closed v1 metadata, chart/spec audits, sample-member reconstruction, positive-weight checks, bounded generalization review, convenience-sample CLI trap, four new profile rules, tests, and docs.
+- Read first: `src/chart_contract/population_sampling.py`, `src/chart_contract/population_sampling_audit.py`, `tests/test_population_sampling_contract.py`, and `docs/POPULATION_SAMPLING_CONTRACT.md`.
 
 ## Current Repo State
 
 - `Chart.trend()`, `Chart.rank()`, and `Chart.compare()` accept:
-  - `source_unit`
-  - `conversion_kind`
-  - `conversion_factor`
-  - `conversion_basis`
-  - `source_value_field`
-  - optional `source_unit_basis_field`
-- Existing `unit` remains the displayed unit and is preserved separately as `usermeta.unit`.
-- Unit-conversion semantics are opt-in.
-- First-party specs preserve a closed `usermeta.unit_conversion_contract`.
-- `identity` means source/display units are exactly identical with factor 1.0 and no separate conversion evidence.
-- `scale` means one fixed multiplicative conversion with preserved original source values and explicit basis text.
-- Fixed scale uses `displayed = source * factor`.
-- Scale evidence requires jointly present/null source and display values, finite numerics, and at least one complete pair.
-- The first-party renderer refuses to stamp a scale contract if arithmetic does not reproduce.
-- Optional row-level source-unit evidence must be non-null/non-empty, invariant, and exactly match `source_unit`.
-- External contracts must bind to an encoded quantitative metric and exact declared display unit.
-- No unit aliases are normalized.
-- `examples/traps/mixed_measurement_units.*` demonstrates a USD-labeled chart whose rows actually contain USD and EUR.
-- The `audit-v0.2` profile now contains 83 rules.
+  - `evidence_scope`
+  - `population`
+  - `population_size`
+  - `sample_size`
+  - `sampling_method`
+  - optional `sample_member_field`
+  - optional `weight_field`
+  - `generalizes_to_population`
+- Population semantics are opt-in.
+- First-party specs preserve a closed `usermeta.population_contract`.
+- Sample evidence cannot declare `census` sampling and must be smaller than a declared population.
+- Census evidence requires `sampling_method="census"`, population size, and exact sample/population equality.
+- DataFrame row count is deliberately not used as sample size.
+- Optional sample-member evidence is reconstructable only when supplied rows are one sampled unit each; IDs must be complete, unique, and exactly match declared sample size.
+- Optional sampling weights must be complete, numeric, finite, and strictly positive.
+- Population generalization is an explicit boolean rather than broad claim-text inference.
+- Generalization from convenience/quota/unknown/other sampling emits REVIEW.
+- Descriptive nonprobability samples can remain READY.
+- Probability-method/census generalization structurally passes but is not described as representativeness proof.
+- `examples/traps/convenience_sample_generalized.*` demonstrates a coherent convenience sample that explicitly overreaches to the full population.
+- The `audit-v0.2` profile now contains 87 rules.
 
 ## Important Decisions
 
-- Unit identity is explicit; it is not inferred from labels, geography, field names, or numeric magnitude.
-- Version 1 does not become a conversion engine.
-- Callers preserve already-converted displayed values plus the original source-value field when using fixed-scale mode.
-- The contract recomputes the fixed factor but never mutates the supplied evidence.
-- `identity` and `scale` are the only v1 conversion kinds.
-- Scale factors must be finite and positive.
-- Time-varying FX, inflation/constant-dollar adjustments, and affine/offset conversions remain out of scope.
-- Conversion-basis text is provenance metadata, not proof that the external rate/source is authoritative.
-- Existing metric-definition, ratio, comparison, time-window, grain, and comparison-set contracts remain independent and composable.
-- Older schema-0.4 reports become stale-policy artifacts because three new unit rules change profile semantic identity.
+- Sampling scope is provenance, not statistical certification.
+- Aggregated analytical rows are not assumed to be sampled units.
+- `sample_member_field` is optional so aggregated charts can declare sample size without fabricating row-level proof.
+- When member evidence is declared, exact count reconstruction is strict.
+- Weight validation is structural only; no calibration or estimator logic is inferred.
+- Generalization intent is explicit metadata to avoid open-ended NLP adjudication.
+- Nonprobability generalization is REVIEW, not BLOCK: it may be defensible with domain context, but should not silently remain READY.
+- Probability-method declarations are not automatic approval of population inference.
+- Existing coverage, metric-definition, unit, ratio, comparison, time-window, grain, and comparison-set contracts remain independent and composable.
+- Older schema-0.4 reports become stale-policy artifacts because four new population rules change profile semantic identity.
 
 ## Verification
 
-GitHub Actions CI run #256 (`38755883263`) passed on code-bearing head `bc434f7cd7b08f4cd5e98bc53970b0ae4c2b8215`:
+GitHub Actions CI run #259 (`38989510237`) passed on code-bearing head `71b2ddd74a414c82eace924ddbc6cd16b1f0d278`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -55,7 +57,7 @@ GitHub Actions CI run #256 (`38755883263`) passed on code-bearing head `bc434f7c
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
 - all existing CLI trap paths -> PASSED
-- `mixed_measurement_units` installed-CLI trap -> PASSED
+- `convenience_sample_generalized` REVIEW trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -63,14 +65,15 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- A uniformly wrong source-unit identity cannot be detected from metadata alone.
-- Floating-point tolerance is appropriate for v1 but not exact financial-decimal accounting.
-- V1 cannot represent per-row or time-varying conversion factors.
-- V1 cannot model affine transformations such as Fahrenheit/Celsius.
-- V1 does not authenticate the stated conversion basis or fetch independent rate evidence.
+- Population/sampling metadata can be truthfully formatted but factually wrong.
+- V1 does not validate the sampling frame, inclusion probabilities, nonresponse, or actual execution of the declared method.
+- V1 does not model cluster/strata structure beyond the method label.
+- V1 does not validate weighting methodology or use weights to recompute metrics.
+- V1 does not estimate uncertainty, design effects, or effective sample size.
+- Broad claim-language inference remains intentionally out of scope.
 
 ## Next Recommended Task
 
-- Confirm final PR #26 CI remains green after VERIFY/HANDOFF.
-- Merge if exact source-unit identity and fixed multiplicative conversion semantics match the intended v1.
-- Keep time-varying FX, inflation normalization, affine conversions, and canonical unit aliases separate future work.
+- Confirm final PR #27 CI remains green after VERIFY/HANDOFF.
+- Merge if the explicit sample/census scope and nonprobability-generalization REVIEW boundary match the desired v1.
+- Keep uncertainty/interval semantics, design effects, and formal sample inference separate future work.
