@@ -188,19 +188,20 @@ def audit_uncertainty_spec(
 
     if spec_has_interval_binding(
         spec,
+        estimate_field=contract["estimate_field"],
         lower_field=contract["lower_field"],
         upper_field=contract["upper_field"],
     ):
         report.add(
             "visual.uncertainty.interval",
             PASS,
-            "Spec visibly binds the declared lower/upper fields as an interval rule.",
+            "Spec visibly binds the declared estimate plus lower/upper interval fields.",
         )
     else:
         report.add(
             "visual.uncertainty.interval",
             FAIL,
-            "Spec declares uncertainty metadata but does not visibly encode the declared interval bounds.",
+            "Spec declares uncertainty metadata but does not visibly encode the declared estimate and interval bounds.",
             suggestion=(
                 "Encode the declared lower/upper fields as y/y2 or x/x2 on a rule layer."
             ),
