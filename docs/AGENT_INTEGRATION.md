@@ -58,6 +58,10 @@ Policy:
 - Surface `contract.population.scope` REVIEW when a claim explicitly says `sample of`, `sampled from`, `survey respondent(s)`, or `census of` without population metadata; do not generalize this into broad claim NLP.
 - Surface `claim.population.generalization` REVIEW for explicit population generalization from convenience/quota/unknown/other sampling rather than silently endorsing the inference.
 - A passing `data.population.weights` finding validates weight values only, not the weighting methodology or representativeness.
+- Preserve `uncertainty_contract` when trend/compare charts show error bars; do not describe generic visible intervals as confidence/credible/prediction intervals without explicit metadata.
+- Stop on `data.uncertainty.bounds` or `visual.uncertainty.interval`: malformed bounds or metadata detached from the visible error-bar fields invalidate the artifact.
+- Narrow explicit wording such as `95% CI` must match interval kind/level; do not generalize this parser into open-ended significance or uncertainty NLP.
+- Never translate interval overlap/non-overlap into a significance claim unless a separate supported inferential contract exists.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.

@@ -40,6 +40,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit metric-definition identity for trend/rank/compare metrics, including stable ID/definition/version metadata and optional row-level version checks
 - explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity/fixed-scale semantics, row-level source-unit checks, and recomputable fixed conversion arithmetic
 - explicit population/sample scope contracts for trend/rank/compare metrics, including declared population/sample counts, bounded sampling methods, optional row-level member/weight evidence, and explicit population-generalization intent
+- explicit uncertainty interval contracts for trend/compare metrics, binding the shown estimate to lower/upper fields, interval kind, level, method, and visible interval marks
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -76,6 +77,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Sampling weights are checked only for complete positive finite values; chart-contract does not certify calibration, design effects, or variance estimation.
 - Population generalization is explicit metadata in v1 rather than open-ended claim-text inference; nonprobability generalization produces a review signal rather than automatic statistical rejection.
 - Missing population metadata produces REVIEW only for bounded explicit sampling phrases (`sample of`, `sampled from`, `survey respondent(s)`, `census of`); broad population-language NLP remains out of scope.
+- Uncertainty contracts verify interval field identity, complete finite bound ordering, visible lower/upper field binding, and narrow explicit claim parity only; they do not validate estimator assumptions, nominal coverage, calibration, or statistical significance.
+- Interval claim parsing is deliberately narrow to explicit forms such as `95% CI`, `95% confidence interval`, `90% credible interval`, `80% prediction interval`, and `95% bootstrap interval`.
+- Interval overlap/non-overlap is never converted into a hypothesis-test or significance conclusion.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -115,6 +119,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - inference of business metric definitions or automatic reconciliation of rows produced under different metric versions
 - automatic unit conversion, FX lookup, inflation adjustment, time-varying conversion factors, or affine/offset conversion such as Celsius/Fahrenheit
 - automatic representativeness certification, survey-design validation, sample-frame completeness proof, response-bias correction, weight calibration, or statistical population-generalization approval
+- automatic confidence/credible/prediction/bootstrap interval computation, coverage certification, significance testing, p-value inference, or overlap-based hypothesis conclusions
 
 ## Acceptance Criteria
 
@@ -162,6 +167,10 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Declared population contracts distinguish sample versus census scope, require coherent population/sample counts and sampling methods, and preserve explicit population-generalization intent.
 - Optional sample-member evidence must be complete, unique, and exactly reproduce declared sample size; optional weight evidence must be complete, numeric, finite, and strictly positive.
 - Explicit population generalization from convenience, quota, unknown, or other nonprobability sampling methods produces REVIEW without claiming statistical invalidity.
+- Declared uncertainty contracts on trend/compare charts bind the shown estimate to distinct lower/upper fields, one supported interval kind, finite level in (0,1), and explicit method; malformed or partial contracts block.
+- Interval evidence must be complete, numeric, finite, and satisfy `lower <= estimate <= upper` for every supplied observation.
+- First-party interval specs visibly bind the declared lower/upper fields; external specs with detached or missing interval marks block.
+- Narrow explicit interval wording without metadata produces REVIEW, while declared kind/level mismatches block; passing interval metadata never implies significance or calibrated coverage.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -202,7 +211,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 87-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 91-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -229,6 +238,8 @@ For metric-definition identity, run `python -m pytest tests/test_metric_definiti
 For unit-conversion semantics, run `python -m pytest tests/test_unit_conversion_contract.py` and verify source-unit identity, fixed-scale recomputation, malformed-contract blocking, external binding, and stale arithmetic refusal.
 
 For population/sampling semantics, run `python -m pytest tests/test_population_sampling_contract.py` and verify explicit-sample-claim missing-contract review, sample/census coherence, aggregated-row/sample-size separation, optional member-count reconstruction, positive-weight checks, nonprobability generalization review, external evidence requirements, and closed-schema enforcement.
+
+For uncertainty intervals, run `python -m pytest tests/test_uncertainty_contract.py` and verify bound containment, malformed-contract blocking, first-party visible interval rendering, external visual-binding tamper detection, explicit claim kind/level parity, grouped compare intervals, and no missing-metadata inference beyond narrow interval wording.
 
 ## Open Questions
 

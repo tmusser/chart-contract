@@ -313,6 +313,35 @@ produces `REVIEW`; a passing probability-method declaration still does not prove
 representativeness or unbiased inference. See
 [Population and sampling contract](docs/POPULATION_SAMPLING_CONTRACT.md).
 
+### Uncertainty intervals: say what the error bars mean
+
+Error bars are not self-describing. For trend/compare charts, bind the estimate to explicit
+lower/upper fields plus interval kind, level, and method:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="period",
+    y="estimate",
+    claim="Observed estimates are shown with a 95% confidence interval.",
+    source="warehouse.model_output",
+    unit="users",
+    interval_lower_field="lower",
+    interval_upper_field="upper",
+    interval_kind="confidence",
+    interval_level=0.95,
+    interval_method="wald",
+)
+```
+
+The audit requires complete finite bounds satisfying `lower <= estimate <= upper`, and
+first-party specs visibly bind those fields as an interval rule. Narrow claim wording such as
+`95% CI` or `90% credible interval` must match the declared kind and level.
+
+Version 1 does **not** infer significance from interval overlap or certify statistical coverage,
+model assumptions, or calibration. See
+[Uncertainty interval contract](docs/UNCERTAINTY_CONTRACT.md).
+
 ### Rates and ratios: declare what they are "of"
 
 A percentage, rate, or ratio is not semantically complete without numerator/denominator identity:

@@ -30,6 +30,12 @@ from ..ratio import RATIO_INTENTS, chart_ratio_contract
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..time_window import build_time_window_summary, time_window_declaration
+from ..uncertainty import (
+    UNCERTAINTY_INTENTS,
+    chart_uncertainty_contract,
+    interval_bounds_status,
+    parse_uncertainty_contract,
+)
 from ..unit_conversion import (
     UNIT_CONVERSION_INTENTS,
     chart_unit_conversion_contract,
@@ -167,6 +173,25 @@ def render_chart(chart: Any) -> alt.Chart:
             if not ok:
                 raise ValueError(message)
         usermeta["unit_conversion_contract"] = unit_contract
+
+    uncertainty_raw = (
+        chart_uncertainty_contract(chart)
+        if chart.intent in UNCERTAINTY_INTENTS
+        else None
+    )
+    if uncertainty_raw is not None:
+        uncertainty_contract = parse_uncertainty_contract(
+            {"usermeta": {"uncertainty_contract": uncertainty_raw}}
+        )
+        ok, message = interval_bounds_status(
+            chart.data,
+            estimate_field=uncertainty_contract["estimate_field"],
+            lower_field=uncertainty_contract["lower_field"],
+            upper_field=uncertainty_contract["upper_field"],
+        )
+        if not ok:
+            raise ValueError(message)
+        usermeta["uncertainty_contract"] = uncertainty_contract
 
     comparison_raw = (
         comparison_declaration(chart)
@@ -330,8 +355,16 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         ],
     )
 
+    interval = _render_interval_rule(
+        chart,
+        records,
+        x_type=x_type,
+        x_tooltip_type=tooltip_type,
+    )
+    rendered = line if interval is None else line + interval
+
     if not chart.event:
-        return line
+        return rendered
 
     event_data = pd.DataFrame(
         [
@@ -350,7 +383,7 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         .mark_text(color="#b03a2e", align="left", dx=6, dy=-6)
         .encode(x=alt.X(f"{chart.x}:{x_type}"), y=alt.value(12), text="label:N")
     )
-    return line + rule + text
+    return rendered + rule + text
 
 
 def _render_rank(
@@ -426,7 +459,48 @@ def _render_compare(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
             alt.Tooltip(field=chart.group, type="nominal"),
             alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
         ]
-    return alt.Chart(alt.InlineData(values=records)).mark_bar().encode(**encoding)
+    bars = alt.Chart(alt.InlineData(values=records)).mark_bar().encode(**encoding)
+    interval = _render_interval_rule(
+        chart,
+        records,
+        x_type="N",
+        x_tooltip_type="nominal",
+    )
+    return bars if interval is None else bars + interval
+
+
+def _render_interval_rule(
+    chart: Any,
+    records: list[dict[str, Any]],
+    *,
+    x_type: str,
+    x_tooltip_type: str,
+) -> alt.Chart | None:
+    raw = chart_uncertainty_contract(chart)
+    if raw is None:
+        return None
+    contract = parse_uncertainty_contract(
+        {"usermeta": {"uncertainty_contract": raw}}
+    )
+    lower = contract["lower_field"]
+    upper = contract["upper_field"]
+    tooltip: list[Any] = [
+        alt.Tooltip(field=chart.x, type=x_tooltip_type),
+        alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
+        alt.Tooltip(field=lower, type="quantitative"),
+        alt.Tooltip(field=upper, type="quantitative"),
+    ]
+    encoding: dict[str, Any] = {
+        "x": alt.X(f"{chart.x}:{x_type}"),
+        "y": alt.Y(f"{lower}:Q"),
+        "y2": alt.Y2(f"{upper}:Q"),
+        "tooltip": tooltip,
+    }
+    if chart.group:
+        encoding["xOffset"] = alt.XOffset(f"{chart.group}:N")
+        encoding["color"] = alt.Color(f"{chart.group}:N")
+        tooltip.insert(1, alt.Tooltip(field=chart.group, type="nominal"))
+    return alt.Chart(alt.InlineData(values=records)).mark_rule().encode(**encoding)
 
 
 def _render_histogram(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:

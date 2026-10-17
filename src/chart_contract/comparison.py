@@ -270,7 +270,11 @@ def explicit_claim_change(
             return "percentage_points", float(match.group("value"))
 
     match = re.search(
-        r"(?P<value>[+-]?\d+(?:\.\d+)?)\s*(?:%|percent\b)",
+        (
+            r"(?P<value>[+-]?\d+(?:\.\d+)?)\s*(?:%|percent\b)"
+            r"(?!\s*(?:confidence\s+interval|credible\s+interval|"
+            r"prediction\s+interval|bootstrap\s+interval|ci\b))"
+        ),
         text,
         flags=re.IGNORECASE,
     )

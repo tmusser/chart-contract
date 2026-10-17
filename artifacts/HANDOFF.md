@@ -2,55 +2,52 @@
 
 ## Resume Packet
 
-- Goal: make sample/census scope, target population, optional member/weight evidence, and population-generalization intent explicit.
-- Branch: `agent/population-sampling-contract`.
-- Base: `main` at `8709096777f7d4ebceeea69290dd3e52034b0cf4`.
-- Pull request: #27 (`feat: audit population sampling scope`).
-- Current slice: first-party sampling API, closed v1 metadata, chart/spec audits, sample-member reconstruction, positive-weight checks, bounded generalization review, convenience-sample CLI trap, four new profile rules, tests, and docs.
-- Read first: `src/chart_contract/population_sampling.py`, `src/chart_contract/population_sampling_audit.py`, `tests/test_population_sampling_contract.py`, and `docs/POPULATION_SAMPLING_CONTRACT.md`.
+- Goal: make uncertainty/error-bar semantics explicit and auditable rather than treating visible intervals as self-describing.
+- Branch: `agent/uncertainty-interval-contract`.
+- Base: `main` at `9ad28b1ef6d9237a8378903204f38de7355feebb`.
+- Pull request: #28 (`feat: audit uncertainty interval semantics`).
+- Current slice: first-party interval API/rendering, closed v1 metadata, chart/spec audits, bound containment, visible interval binding, narrow claim parity, comparison-parser collision fix, CLI trap, four new profile rules, tests, and docs.
+- Read first: `src/chart_contract/uncertainty.py`, `src/chart_contract/uncertainty_audit.py`, `tests/test_uncertainty_contract.py`, and `docs/UNCERTAINTY_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.trend()`, `Chart.rank()`, and `Chart.compare()` accept:
-  - `evidence_scope`
-  - `population`
-  - `population_size`
-  - `sample_size`
-  - `sampling_method`
-  - optional `sample_member_field`
-  - optional `weight_field`
-  - `generalizes_to_population`
-- Population semantics are opt-in.
-- First-party specs preserve a closed `usermeta.population_contract`.
-- Sample evidence cannot declare `census` sampling and must be smaller than a declared population.
-- Census evidence requires `sampling_method="census"`, population size, and exact sample/population equality.
-- DataFrame row count is deliberately not used as sample size.
-- Optional sample-member evidence is reconstructable only when supplied rows are one sampled unit each; IDs must be complete, unique, and exactly match declared sample size.
-- Optional sampling weights must be complete, numeric, finite, and strictly positive.
-- Population generalization is an explicit boolean rather than broad claim-text inference.
-- Missing population metadata emits REVIEW only for bounded explicit claim phrases: `sample of`, `sampled from`, `survey respondent(s)`, and `census of`.
-- Generalization from convenience/quota/unknown/other sampling emits REVIEW.
-- Descriptive nonprobability samples can remain READY.
-- Probability-method/census generalization structurally passes but is not described as representativeness proof.
-- `examples/traps/convenience_sample_generalized.*` demonstrates a coherent convenience sample that explicitly overreaches to the full population.
-- The `audit-v0.2` profile now contains 87 rules.
+- `Chart.trend()` and `Chart.compare()` accept:
+  - `interval_lower_field`
+  - `interval_upper_field`
+  - `interval_kind`
+  - `interval_level`
+  - `interval_method`
+- Rank is intentionally excluded from uncertainty v1 because top-N/aggregate-Other interval composition needs a separate design.
+- Supported interval kinds: confidence, credible, prediction, bootstrap.
+- First-party specs preserve a closed `usermeta.uncertainty_contract`.
+- The contract binds one visible estimate field to distinct lower/upper fields.
+- `interval_level` must be finite and in `(0,1)`.
+- Every estimate/lower/upper triplet must be complete, numeric, finite, and satisfy `lower <= estimate <= upper`.
+- First-party rendering refuses malformed bounds and visibly draws intervals as rule layers.
+- External specs must keep the declared estimate visible and bind lower/upper fields through `y/y2` or `x/x2`.
+- Deleting or rewiring the interval layer blocks even when metadata remains unchanged.
+- Narrow explicit claim forms include `95% CI`, confidence, credible, prediction, and bootstrap interval wording.
+- Missing uncertainty metadata with such wording produces REVIEW.
+- Explicit claim kind/level mismatch produces BLOCK.
+- Comparison parsing now excludes recognized interval-level percentages, so `95% CI` no longer triggers a fake percent-change baseline warning.
+- `examples/traps/interval_claim_mismatch.*` declares a valid 90% credible interval while the claim says 95% confidence interval.
+- The `audit-v0.2` profile now contains 91 rules.
 
 ## Important Decisions
 
-- Sampling scope is provenance, not statistical certification.
-- Aggregated analytical rows are not assumed to be sampled units.
-- `sample_member_field` is optional so aggregated charts can declare sample size without fabricating row-level proof.
-- When member evidence is declared, exact count reconstruction is strict.
-- Weight validation is structural only; no calibration or estimator logic is inferred.
-- Generalization intent is explicit metadata to avoid open-ended NLP adjudication.
-- Nonprobability generalization is REVIEW, not BLOCK: it may be defensible with domain context, but should not silently remain READY.
-- Probability-method declarations are not automatic approval of population inference.
-- Existing coverage, metric-definition, unit, ratio, comparison, time-window, grain, and comparison-set contracts remain independent and composable.
-- Older schema-0.4 reports become stale-policy artifacts because four new population rules change profile semantic identity.
+- Error bars are semantic contracts, not decoration.
+- V1 validates supplied intervals rather than computing them.
+- Visible interval binding is required so metadata cannot outlive the actual visual uncertainty encoding.
+- Claim parsing stays narrow and deterministic; general words such as uncertain/likely/error bars are not interpreted.
+- A passing contract does not certify coverage, calibration, estimator correctness, significance, or hypothesis-test validity.
+- Interval overlap/non-overlap is never interpreted as significance.
+- Interval method remains explicit descriptive identity rather than executable statistical provenance.
+- Existing population, unit, metric-definition, ratio, comparison, time-window, grain, and comparison-set contracts remain independent and composable.
+- Older schema-0.4 reports become stale-policy artifacts because four new uncertainty rules change profile semantic identity.
 
 ## Verification
 
-GitHub Actions CI run #269 (`38989751879`) passed on code-bearing head `226f55a1a671dbddc196d0381d3103f52dcaf993`:
+GitHub Actions CI run #273 (`39072662559`) passed on code-bearing head `1fadcb22201c396c5f4bdbc68bcf22b8fd051791`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -58,7 +55,7 @@ GitHub Actions CI run #269 (`38989751879`) passed on code-bearing head `226f55a1
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
 - all existing CLI trap paths -> PASSED
-- `convenience_sample_generalized` REVIEW trap -> PASSED
+- `interval_claim_mismatch` installed-CLI trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -66,15 +63,15 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- Population/sampling metadata can be truthfully formatted but factually wrong.
-- V1 does not validate the sampling frame, inclusion probabilities, nonresponse, or actual execution of the declared method.
-- V1 does not model cluster/strata structure beyond the method label.
-- V1 does not validate weighting methodology or use weights to recompute metrics.
-- V1 does not estimate uncertainty, design effects, or effective sample size.
-- Broad claim-language inference remains intentionally out of scope beyond the four bounded explicit sampling phrases.
+- A method label can be internally consistent but statistically wrong.
+- V1 does not recompute intervals from standard errors, posterior samples, bootstrap replicates, or model outputs.
+- V1 does not validate nominal coverage or calibration.
+- V1 does not support simultaneous/multiple-comparison interval semantics.
+- Rank/top-N interval composition remains deferred.
+- The external visual-binding check intentionally verifies direct rule-field binding, not every semantically equivalent Vega-Lite construction.
 
 ## Next Recommended Task
 
-- Confirm final PR #27 CI remains green after VERIFY/HANDOFF.
-- Merge if the explicit sample/census scope and nonprobability-generalization REVIEW boundary match the desired v1.
-- Keep uncertainty/interval semantics, design effects, and formal sample inference separate future work.
+- Confirm final PR #28 CI remains green after VERIFY/HANDOFF.
+- Merge if explicit interval semantics, direct visible binding, and narrow claim parity match the desired v1.
+- Keep significance/hypothesis testing, simultaneous intervals, calibration, and estimator provenance separate future work.

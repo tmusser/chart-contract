@@ -1,5 +1,57 @@
 # VERIFY
 
+2026-10-17 - Add uncertainty interval contracts
+
+Environment:
+- Branch: `agent/uncertainty-interval-contract`
+- Base: `main` at `9ad28b1ef6d9237a8378903204f38de7355feebb`
+- Pull request: #28 (`feat: audit uncertainty interval semantics`)
+- Code-bearing GitHub Actions CI run #273 (`39072662559`) on head `1fadcb22201c396c5f4bdbc68bcf22b8fd051791` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- all existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, metric-definition, unit-conversion, and population traps -> PASSED
+- new interval-claim-mismatch CLI trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend` and `compare` accept optional interval lower/upper fields, kind, level, and method;
+- supported interval kinds are `confidence`, `credible`, `prediction`, and `bootstrap`;
+- the closed v1 contract binds the chart's shown estimate field to distinct lower/upper fields;
+- interval level must be finite and strictly between 0 and 1;
+- interval method must be a non-empty explicit identity;
+- every supplied estimate/lower/upper triplet must be complete, numeric, finite, and satisfy `lower <= estimate <= upper`;
+- malformed or stale bounds fail `data.uncertainty.bounds` and first-party rendering refuses them;
+- first-party trend/compare output visibly renders the interval using a Vega-Lite rule layer;
+- external specs must visibly bind the declared estimate plus lower/upper interval fields; deleted/rewired interval layers or stale estimate bindings fail `visual.uncertainty.interval`;
+- narrow explicit wording such as `95% CI`, `95% confidence interval`, `90% credible interval`, `80% prediction interval`, and `95% bootstrap interval` is recognized;
+- explicit interval wording without uncertainty metadata emits REVIEW;
+- explicit claim kind/level mismatches fail `claim.uncertainty.semantics`;
+- the comparison-change parser no longer misreads interval levels such as `95% CI` as percent-change claims;
+- grouped compare interval rendering remains auditable;
+- closed-schema extra fields and partial interval declarations block;
+- uncertainty semantics are not added to rank v1 because top-N/aggregate-Other interval composition is intentionally deferred;
+- machine-readable profile/documentation parity moves from 87 to 91 rules.
+
+Important policy boundary:
+- A passing uncertainty contract establishes field identity, bound integrity, visible binding, and narrow explicit claim parity only.
+- It does not prove nominal interval coverage, calibration, statistical significance, model adequacy, bootstrap validity, or Bayesian/frequentist interpretive equivalence.
+- Interval overlap/non-overlap is never converted into a significance or hypothesis-test conclusion.
+- General uncertainty prose is not machine-interpreted into formal interval semantics.
+
+Remaining risks:
+- Interval method labels are descriptive strings and can be consistently wrong.
+- V1 does not recompute confidence/credible/prediction/bootstrap intervals from upstream estimator inputs.
+- V1 does not represent asymmetric methods beyond supplied lower/upper bounds or validate their construction.
+- V1 does not model simultaneous/multiple-comparison intervals or covariance across estimates.
+- Rank/top-N interval semantics remain outside v1.
+- Adding four new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #28 if explicit interval identity/visible-binding semantics match the desired v1.
+- Keep statistical significance, hypothesis tests, simultaneous intervals, and formal calibration/coverage diagnostics as separate future contracts.
+
 2026-10-16 - Add population sampling scope contracts
 
 Environment:

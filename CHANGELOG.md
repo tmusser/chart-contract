@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit uncertainty interval contracts for trend/compare charts, binding estimate/lower/upper fields to interval kind, level, and method.
+- Visible interval-rule binding, deterministic bound validation, and narrow claim parity for phrases such as 95% CI versus credible/prediction/bootstrap intervals.
 - Explicit sample-versus-census population contracts for trend/rank/compare artifacts, including population identity, declared sample/population counts, sampling method, and population-generalization intent.
 - Optional row-level sample-member and sampling-weight checks plus deterministic REVIEW for population generalization from convenience/quota/unknown/other sampling methods.
 - Explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity and fixed multiplicative conversion modes.

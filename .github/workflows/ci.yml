@@ -219,6 +219,22 @@ jobs:
           grep -q "convenience" <<<"$population_output"
 
           set +e
+          uncertainty_output=$(chart-contract audit spec examples/traps/interval_claim_mismatch.vl.json \
+            --data examples/traps/interval_claim_mismatch.csv \
+            --claim "$(cat examples/traps/interval_claim_mismatch.claim.txt)" 2>&1)
+          uncertainty_exit=$?
+          set -e
+          echo "$uncertainty_output"
+          test "$uncertainty_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$uncertainty_output"
+          grep -q "contract.uncertainty.interval" <<<"$uncertainty_output"
+          grep -q "data.uncertainty.bounds" <<<"$uncertainty_output"
+          grep -q "visual.uncertainty.interval" <<<"$uncertainty_output"
+          grep -q "claim.uncertainty.semantics" <<<"$uncertainty_output"
+          grep -q "credible" <<<"$uncertainty_output"
+          grep -q "confidence" <<<"$uncertainty_output"
+
+          set +e
           metric_definition_output=$(chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
             --data examples/traps/metric_definition_drift.csv \
             --claim "$(cat examples/traps/metric_definition_drift.claim.txt)" 2>&1)
