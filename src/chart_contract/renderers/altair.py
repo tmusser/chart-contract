@@ -17,6 +17,13 @@ from ..comparison_set import (
 )
 from ..grain import GRAIN_INTENTS, build_grain_summary, visible_grain_fields_for_chart
 from ..metric_definition import METRIC_DEFINITION_INTENTS, chart_metric_definition_contract
+from ..population_sampling import (
+    POPULATION_INTENTS,
+    chart_population_contract,
+    parse_population_contract,
+    sample_member_status,
+    weight_status,
+)
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
 from ..ratio import RATIO_INTENTS, chart_ratio_contract
@@ -106,6 +113,32 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if metric_definition_contract is not None:
         usermeta["metric_definition_contract"] = metric_definition_contract
+
+    population_raw = (
+        chart_population_contract(chart)
+        if chart.intent in POPULATION_INTENTS
+        else None
+    )
+    if population_raw is not None:
+        population_contract = parse_population_contract(
+            {"usermeta": {"population_contract": population_raw}}
+        )
+        if population_contract["sample_member_field"] is not None:
+            ok, message = sample_member_status(
+                chart.data,
+                member_field=population_contract["sample_member_field"],
+                sample_size=population_contract["sample_size"],
+            )
+            if not ok:
+                raise ValueError(message)
+        if population_contract["weight_field"] is not None:
+            ok, message = weight_status(
+                chart.data,
+                weight_field=population_contract["weight_field"],
+            )
+            if not ok:
+                raise ValueError(message)
+        usermeta["population_contract"] = population_contract
 
     unit_conversion_raw = (
         chart_unit_conversion_contract(chart)
