@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -25,6 +26,22 @@ SAMPLING_METHODS = {
     "other",
 }
 NONPROBABILITY_METHODS = {"convenience", "quota", "unknown", "other"}
+
+
+_EXPLICIT_SAMPLING_PATTERNS = (
+    re.compile(r"\bsample\s+of\b", re.IGNORECASE),
+    re.compile(r"\bsampled\s+from\b", re.IGNORECASE),
+    re.compile(r"\bsurvey\s+respondents?\b", re.IGNORECASE),
+    re.compile(r"\bcensus\s+of\b", re.IGNORECASE),
+)
+
+
+def claim_implies_sampling_scope(claim: str | None) -> bool:
+    """Detect only narrow, explicit claim wording that names sampling scope."""
+
+    if not isinstance(claim, str) or not claim.strip():
+        return False
+    return any(pattern.search(claim) for pattern in _EXPLICIT_SAMPLING_PATTERNS)
 
 
 def chart_population_contract(chart: Any) -> dict[str, Any] | None:
