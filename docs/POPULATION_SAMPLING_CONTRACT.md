@@ -96,6 +96,22 @@ A passing weight check does not prove:
 - uncertainty estimates account for the design;
 - weighted estimates are unbiased.
 
+## Explicit sampling claims without metadata
+
+Population semantics remain opt-in for ordinary chart claims. Version 1 does not try to infer
+sampling design from phrases such as "all users" or "customers."
+
+A deliberately narrow claim-text trigger emits `contract.population.scope=WARN` when there
+is no population contract and the claim explicitly contains one of these forms:
+
+- `sample of`
+- `sampled from`
+- `survey respondent` / `survey respondents`
+- `census of`
+
+This catches an artifact that openly says it is based on a sample or census while omitting the
+sampling contract, without expanding into open-ended population-language adjudication.
+
 ## Population generalization
 
 `generalizes_to_population` is explicit metadata. The audit does not attempt broad natural-language inference from arbitrary claim text.
