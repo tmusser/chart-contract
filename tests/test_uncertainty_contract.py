@@ -139,6 +139,9 @@ def test_explicit_interval_claim_without_contract_requires_review() -> None:
 
     finding = _finding(report, "claim.uncertainty.semantics")
     assert finding.severity == "WARN"
+    assert not any(
+        f.rule_id == "contract.comparison.baseline" for f in report.findings
+    )
     assert report.verdict == "REVIEW"
 
 
