@@ -27,6 +27,10 @@
 - Treat population and sampling metadata as scope/provenance, not proof of representativeness, random selection, nonresponse validity, or unbiased population inference.
 - Population generalization is explicit metadata in v1. Convenience/quota/unknown/other sampling plus declared generalization requires review. Missing population metadata may also REVIEW only for the bounded explicit phrases `sample of`, `sampled from`, `survey respondent(s)`, or `census of`; do not broaden this into arbitrary population-language NLP.
 - Sampling weights must be inspectable positive finite values when declared, but passing weight checks do not certify calibration, design effects, or variance estimation.
+- Treat error bars as explicit semantic contracts, not generic uncertainty decoration: preserve estimate/lower/upper fields, interval kind, level, and method together.
+- Require uncertainty bounds to be complete, finite, numeric, and contain the estimate; do not repair or reorder malformed intervals automatically.
+- When interval metadata is declared, the visible spec must actually bind the declared lower/upper fields; metadata-only uncertainty is not enough.
+- Do not infer statistical significance, hypothesis-test conclusions, calibration, or coverage from interval overlap/non-overlap or a passing interval contract.
 - Do not infer numerator, denominator, or cohort identity for ratio-like metrics from field names, claim text, or observed values; missing semantics may require review, while contradictory declared semantics block.
 - Treat a declared denominator basis field as semantic identity, not denominator magnitude: different row counts are allowed, but mixed identities such as `visitors` and `signups` under one metric must not pass.
 - Do not describe a matching ratio contract as proof that numerator/denominator arithmetic or cohort membership is correct upstream.
