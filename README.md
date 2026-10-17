@@ -305,10 +305,13 @@ weights auditable when the supplied evidence is actually at that grain. The audi
 does **not** equate plotted row count with sample size, because aggregated charts may summarize
 many sampled units.
 
-Population generalization is explicit metadata rather than broad claim-text NLP. Declaring
-generalization from convenience/quota/unknown sampling produces `REVIEW`; a passing
-probability-method declaration still does not prove representativeness or unbiased inference.
-See [Population and sampling contract](docs/POPULATION_SAMPLING_CONTRACT.md).
+Population generalization is explicit metadata rather than broad claim-text NLP. A narrow
+claim trigger also requires `REVIEW` when wording explicitly says `sample of`,
+`sampled from`, `survey respondent(s)`, or `census of` but no population contract
+is declared. Declaring generalization from convenience/quota/unknown/other sampling also
+produces `REVIEW`; a passing probability-method declaration still does not prove
+representativeness or unbiased inference. See
+[Population and sampling contract](docs/POPULATION_SAMPLING_CONTRACT.md).
 
 ### Rates and ratios: declare what they are "of"
 
