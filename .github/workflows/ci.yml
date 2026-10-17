@@ -205,6 +205,20 @@ jobs:
           grep -q "mixed source units" <<<"$unit_output"
 
           set +e
+          population_output=$(chart-contract audit spec examples/traps/convenience_sample_generalized.vl.json \
+            --data examples/traps/convenience_sample_generalized.csv \
+            --claim "$(cat examples/traps/convenience_sample_generalized.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          population_exit=$?
+          set -e
+          echo "$population_output"
+          test "$population_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$population_output"
+          grep -q "contract.population.scope" <<<"$population_output"
+          grep -q "claim.population.generalization" <<<"$population_output"
+          grep -q "convenience" <<<"$population_output"
+
+          set +e
           metric_definition_output=$(chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
             --data examples/traps/metric_definition_drift.csv \
             --claim "$(cat examples/traps/metric_definition_drift.claim.txt)" 2>&1)

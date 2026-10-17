@@ -278,6 +278,41 @@ factors, or model offset conversions such as Celsius/Fahrenheit. The contract ve
 identity/fixed-factor arithmetic; it does not certify the external conversion basis. See
 [Unit conversion contract](docs/UNIT_CONVERSION_CONTRACT.md).
 
+### Population scope: say what the evidence represents
+
+A clean dataset does not establish whether the evidence is the whole population or a sample.
+When population semantics matter, declare them explicitly:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="period",
+    y="active_users",
+    claim="Observed active users changed.",
+    source="warehouse.sampled_users",
+    unit="users",
+    evidence_scope="sample",
+    population="All eligible product users",
+    population_size=100_000,
+    sample_size=2_500,
+    sampling_method="stratified",
+    generalizes_to_population=True,
+)
+```
+
+Optional `sample_member_field` and `weight_field` make row-level member counts and sampling
+weights auditable when the supplied evidence is actually at that grain. The audit deliberately
+does **not** equate plotted row count with sample size, because aggregated charts may summarize
+many sampled units.
+
+Population generalization is explicit metadata rather than broad claim-text NLP. A narrow
+claim trigger also requires `REVIEW` when wording explicitly says `sample of`,
+`sampled from`, `survey respondent(s)`, or `census of` but no population contract
+is declared. Declaring generalization from convenience/quota/unknown/other sampling also
+produces `REVIEW`; a passing probability-method declaration still does not prove
+representativeness or unbiased inference. See
+[Population and sampling contract](docs/POPULATION_SAMPLING_CONTRACT.md).
+
 ### Rates and ratios: declare what they are "of"
 
 A percentage, rate, or ratio is not semantically complete without numerator/denominator identity:

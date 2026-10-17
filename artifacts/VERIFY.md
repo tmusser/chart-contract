@@ -1,5 +1,59 @@
 # VERIFY
 
+2026-10-16 - Add population sampling scope contracts
+
+Environment:
+- Branch: `agent/population-sampling-contract`
+- Base: `main` at `8709096777f7d4ebceeea69290dd3e52034b0cf4`
+- Pull request: #27 (`feat: audit population sampling scope`)
+- Code-bearing GitHub Actions CI run #269 (`38989751879`) on head `226f55a1a671dbddc196d0381d3103f52dcaf993` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- all existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, metric-definition, and unit-conversion traps -> PASSED
+- new convenience-sample population-generalization REVIEW trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend`, `rank`, and `compare` accept optional population/sampling metadata;
+- closed v1 contracts distinguish `sample` from `census` evidence and preserve target-population identity;
+- sample contracts require positive sample size, non-census method, and `sample_size < population_size` when population size is declared;
+- census contracts require `sampling_method="census"`, declared population size, and exact sample/population size equality;
+- DataFrame row count is never silently treated as sample size;
+- optional `sample_member_field` reconstructs sample count only when supplied row-level evidence is one member per row;
+- member evidence must be non-null/non-blank, unique, and exactly reproduce declared sample size;
+- first-party rendering refuses invalid reconstructable member evidence;
+- optional `weight_field` values must be complete, numeric, finite, and strictly positive;
+- population generalization is explicit metadata rather than open-ended claim-text inference;
+- explicit `sample of`, `sampled from`, `survey respondent(s)`, or `census of` claim wording without a population contract emits `contract.population.scope=WARN` / REVIEW;
+- convenience/quota/unknown/other sampling plus `generalizes_to_population=true` emits `claim.population.generalization=WARN` / REVIEW;
+- descriptive nonprobability samples can remain READY when population generalization is false;
+- census and probability-method declarations structurally pass the generalization rule without being described as representative proof;
+- external specs with declared member/weight evidence require reconstructable supplied data;
+- partial, contradictory, unsupported-method, and closed-schema-extra-field contracts block;
+- absence of population metadata remains opt-in/no invented sampling semantics;
+- machine-readable profile/documentation parity moves from 83 to 87 rules.
+
+Important policy boundary:
+- A passing population contract is scope/provenance, not representativeness certification.
+- Sampling-method labels are declarations; chart-contract does not prove the method was executed correctly.
+- Positive finite weights do not prove calibration, inverse-probability correctness, design effects, or variance estimation.
+- V1 does not infer sample size from aggregate chart rows.
+- V1 does not infer population-generalizing intent from arbitrary prose; only the bounded explicit sampling phrases above trigger missing-contract review.
+
+Remaining risks:
+- Declared population and sampling-method strings can be consistently wrong.
+- Member-count reconstruction is available only when evidence is truly one sampled unit per row.
+- V1 does not validate sampling frames, inclusion probabilities, response mechanisms, or survey design.
+- V1 does not certify probability samples as unbiased or representative.
+- Weight-field checks are structural only and do not validate statistical use of weights.
+- Adding four new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #27 if explicit sample/census scope and bounded generalization review semantics are desired.
+- Keep confidence intervals, design effects, nonresponse adjustment, and formal sampling inference as separate future work.
+
 2026-10-15 - Add measurement-unit conversion contracts
 
 Environment:

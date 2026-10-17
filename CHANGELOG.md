@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit sample-versus-census population contracts for trend/rank/compare artifacts, including population identity, declared sample/population counts, sampling method, and population-generalization intent.
+- Optional row-level sample-member and sampling-weight checks plus deterministic REVIEW for population generalization from convenience/quota/unknown/other sampling methods.
 - Explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity and fixed multiplicative conversion modes.
 - Row-level source-unit consistency and fixed-factor arithmetic checks that block mixed units or stale converted values without fetching rates or mutating data.
 - Explicit metric-definition identity metadata for trend/rank/compare charts, binding the shown metric to a stable ID, definition, and version.

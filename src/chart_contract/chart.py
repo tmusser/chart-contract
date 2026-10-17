@@ -71,6 +71,14 @@ class Chart:
     conversion_basis: str | None = None
     source_value_field: str | None = None
     source_unit_basis_field: str | None = None
+    evidence_scope: str | None = None
+    population: str | None = None
+    population_size: int | None = None
+    sample_size: int | None = None
+    sampling_method: str | None = None
+    sample_member_field: str | None = None
+    weight_field: str | None = None
+    generalizes_to_population: bool | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -99,6 +107,14 @@ class Chart:
         conversion_basis: str | None = None,
         source_value_field: str | None = None,
         source_unit_basis_field: str | None = None,
+        evidence_scope: str | None = None,
+        population: str | None = None,
+        population_size: int | None = None,
+        sample_size: int | None = None,
+        sampling_method: str | None = None,
+        sample_member_field: str | None = None,
+        weight_field: str | None = None,
+        generalizes_to_population: bool | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -142,6 +158,14 @@ class Chart:
             conversion_basis=conversion_basis,
             source_value_field=source_value_field,
             source_unit_basis_field=source_unit_basis_field,
+            evidence_scope=evidence_scope,
+            population=population,
+            population_size=population_size,
+            sample_size=sample_size,
+            sampling_method=sampling_method,
+            sample_member_field=sample_member_field,
+            weight_field=weight_field,
+            generalizes_to_population=generalizes_to_population,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -188,6 +212,14 @@ class Chart:
         conversion_basis: str | None = None,
         source_value_field: str | None = None,
         source_unit_basis_field: str | None = None,
+        evidence_scope: str | None = None,
+        population: str | None = None,
+        population_size: int | None = None,
+        sample_size: int | None = None,
+        sampling_method: str | None = None,
+        sample_member_field: str | None = None,
+        weight_field: str | None = None,
+        generalizes_to_population: bool | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -221,6 +253,14 @@ class Chart:
             conversion_basis=conversion_basis,
             source_value_field=source_value_field,
             source_unit_basis_field=source_unit_basis_field,
+            evidence_scope=evidence_scope,
+            population=population,
+            population_size=population_size,
+            sample_size=sample_size,
+            sampling_method=sampling_method,
+            sample_member_field=sample_member_field,
+            weight_field=weight_field,
+            generalizes_to_population=generalizes_to_population,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -257,6 +297,14 @@ class Chart:
         conversion_basis: str | None = None,
         source_value_field: str | None = None,
         source_unit_basis_field: str | None = None,
+        evidence_scope: str | None = None,
+        population: str | None = None,
+        population_size: int | None = None,
+        sample_size: int | None = None,
+        sampling_method: str | None = None,
+        sample_member_field: str | None = None,
+        weight_field: str | None = None,
+        generalizes_to_population: bool | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -301,6 +349,14 @@ class Chart:
             conversion_basis=conversion_basis,
             source_value_field=source_value_field,
             source_unit_basis_field=source_unit_basis_field,
+            evidence_scope=evidence_scope,
+            population=population,
+            population_size=population_size,
+            sample_size=sample_size,
+            sampling_method=sampling_method,
+            sample_member_field=sample_member_field,
+            weight_field=weight_field,
+            generalizes_to_population=generalizes_to_population,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,

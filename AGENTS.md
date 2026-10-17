@@ -23,6 +23,10 @@
 - Do not infer source measurement units from displayed labels, field names, geography, or value ranges; source/display unit identity is explicit metadata.
 - Never silently convert values to make a unit contract pass. Fixed-scale conversions must preserve original source values and reproduce the declared factor against supplied evidence.
 - Treat matching fixed conversion arithmetic as a reproducible receipt only, not validation of FX provenance, inflation methodology, time-varying rates, or offset conversions.
+- Do not equate chart row count with sample size; aggregated evidence can summarize many sampled units. Only reconstruct sample size when an explicit sample-member field is supplied.
+- Treat population and sampling metadata as scope/provenance, not proof of representativeness, random selection, nonresponse validity, or unbiased population inference.
+- Population generalization is explicit metadata in v1. Convenience/quota/unknown/other sampling plus declared generalization requires review. Missing population metadata may also REVIEW only for the bounded explicit phrases `sample of`, `sampled from`, `survey respondent(s)`, or `census of`; do not broaden this into arbitrary population-language NLP.
+- Sampling weights must be inspectable positive finite values when declared, but passing weight checks do not certify calibration, design effects, or variance estimation.
 - Do not infer numerator, denominator, or cohort identity for ratio-like metrics from field names, claim text, or observed values; missing semantics may require review, while contradictory declared semantics block.
 - Treat a declared denominator basis field as semantic identity, not denominator magnitude: different row counts are allowed, but mixed identities such as `visitors` and `signups` under one metric must not pass.
 - Do not describe a matching ratio contract as proof that numerator/denominator arithmetic or cohort membership is correct upstream.
