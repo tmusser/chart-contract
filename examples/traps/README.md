@@ -6,6 +6,23 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `interval_claim_mismatch`
+
+Demonstrates a visually valid interval whose metadata declares a 90% credible interval while
+the claim calls it a 95% confidence interval.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/interval_claim_mismatch.vl.json \
+  --data examples/traps/interval_claim_mismatch.csv \
+  --claim "$(cat examples/traps/interval_claim_mismatch.claim.txt)"
+```
+
+Expected finding: `claim.uncertainty.semantics` reporting that the explicit claim kind/level
+does not match the declared interval contract. The audit does not infer statistical
+significance from the interval.
+
 ### `convenience_sample_generalized`
 
 Demonstrates a structurally coherent convenience sample that explicitly generalizes its
