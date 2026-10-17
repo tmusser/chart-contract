@@ -1,0 +1,24 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Observed active users",
+  "encoding": {
+    "x": {"field": "period", "type": "ordinal"},
+    "y": {"field": "active_users", "type": "quantitative"}
+  },
+  "usermeta": {
+    "source": "synthetic.convenience_sample",
+    "unit": "users",
+    "population_contract": {
+      "version": 1,
+      "evidence_scope": "sample",
+      "population": "All eligible product users",
+      "population_size": 10000,
+      "sample_size": 500,
+      "sampling_method": "convenience",
+      "sample_member_field": null,
+      "weight_field": null,
+      "generalizes_to_population": true
+    }
+  }
+}
