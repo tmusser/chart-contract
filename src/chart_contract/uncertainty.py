@@ -251,10 +251,11 @@ def interval_claim_status(
 def spec_has_interval_binding(
     spec: Mapping[str, Any],
     *,
+    estimate_field: str,
     lower_field: str,
     upper_field: str,
 ) -> bool:
-    """Return whether a Vega-Lite rule layer visibly binds lower/upper interval fields."""
+    """Return whether the estimate and declared interval bounds are visibly bound."""
 
     def field(definition: Any) -> str | None:
         if isinstance(definition, Mapping):
@@ -295,7 +296,22 @@ def spec_has_interval_binding(
         spec_child = node.get("spec")
         return visit(spec_child) if isinstance(spec_child, Mapping) else False
 
-    return visit(spec)
+    def estimate_visible(node: Any) -> bool:
+        if not isinstance(node, Mapping):
+            return False
+        encoding = node.get("encoding")
+        if isinstance(encoding, Mapping):
+            for channel in ("x", "y"):
+                if field(encoding.get(channel)) == estimate_field:
+                    return True
+        for key in ("layer", "hconcat", "vconcat", "concat"):
+            nested = node.get(key)
+            if isinstance(nested, list) and any(estimate_visible(child) for child in nested):
+                return True
+        spec_child = node.get("spec")
+        return estimate_visible(spec_child) if isinstance(spec_child, Mapping) else False
+
+    return estimate_visible(spec) and visit(spec)
 
 
 def _required_string(value: Any, field: str) -> str:
