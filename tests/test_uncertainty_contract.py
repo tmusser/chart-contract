@@ -248,6 +248,21 @@ def test_external_interval_metadata_without_visible_bounds_blocks() -> None:
     assert report.verdict == "BLOCK"
 
 
+def test_external_tampered_estimate_binding_blocks() -> None:
+    spec, frame = _external_spec()
+    spec["usermeta"]["uncertainty_contract"]["estimate_field"] = "estimate_old"
+    frame["estimate_old"] = frame["estimate"]
+
+    report = audit_spec(
+        spec,
+        data=frame,
+        claim="Observed estimates are shown with uncertainty intervals.",
+    )
+
+    assert _finding(report, "visual.uncertainty.interval").severity == "FAIL"
+    assert report.verdict == "BLOCK"
+
+
 def test_external_tampered_interval_binding_blocks() -> None:
     spec, frame = _external_spec()
     spec["layer"][1]["encoding"]["y"]["field"] = "estimate"
