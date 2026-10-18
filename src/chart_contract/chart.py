@@ -84,6 +84,9 @@ class Chart:
     interval_kind: str | None = None
     interval_level: float | int | None = None
     interval_method: str | None = None
+    control_total: float | int | None = None
+    control_total_source: str | None = None
+    reconciliation_tolerance: float | int | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -235,6 +238,9 @@ class Chart:
         sample_member_field: str | None = None,
         weight_field: str | None = None,
         generalizes_to_population: bool | None = None,
+        control_total: float | int | None = None,
+        control_total_source: str | None = None,
+        reconciliation_tolerance: float | int | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -276,6 +282,9 @@ class Chart:
             sample_member_field=sample_member_field,
             weight_field=weight_field,
             generalizes_to_population=generalizes_to_population,
+            control_total=control_total,
+            control_total_source=control_total_source,
+            reconciliation_tolerance=reconciliation_tolerance,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -320,6 +329,9 @@ class Chart:
         sample_member_field: str | None = None,
         weight_field: str | None = None,
         generalizes_to_population: bool | None = None,
+        control_total: float | int | None = None,
+        control_total_source: str | None = None,
+        reconciliation_tolerance: float | int | None = None,
         interval_lower_field: str | None = None,
         interval_upper_field: str | None = None,
         interval_kind: str | None = None,
@@ -377,6 +389,9 @@ class Chart:
             sample_member_field=sample_member_field,
             weight_field=weight_field,
             generalizes_to_population=generalizes_to_population,
+            control_total=control_total,
+            control_total_source=control_total_source,
+            reconciliation_tolerance=reconciliation_tolerance,
             interval_lower_field=interval_lower_field,
             interval_upper_field=interval_upper_field,
             interval_kind=interval_kind,
