@@ -235,6 +235,21 @@ jobs:
           grep -q "confidence" <<<"$uncertainty_output"
 
           set +e
+          reconciliation_output=$(chart-contract audit spec examples/traps/control_total_gap.vl.json \
+            --data examples/traps/control_total_gap.csv \
+            --claim "$(cat examples/traps/control_total_gap.claim.txt)" 2>&1)
+          reconciliation_exit=$?
+          set -e
+          echo "$reconciliation_output"
+          test "$reconciliation_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$reconciliation_output"
+          grep -q "contract.reconciliation.control_total" <<<"$reconciliation_output"
+          grep -q "data.reconciliation.components" <<<"$reconciliation_output"
+          grep -q "data.reconciliation.total" <<<"$reconciliation_output"
+          grep -q "77.1% represented" <<<"$reconciliation_output"
+          grep -q "residual=2.7" <<<"$reconciliation_output"
+
+          set +e
           metric_definition_output=$(chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
             --data examples/traps/metric_definition_drift.csv \
             --claim "$(cat examples/traps/metric_definition_drift.claim.txt)" 2>&1)

@@ -2,52 +2,59 @@
 
 ## Resume Packet
 
-- Goal: make uncertainty/error-bar semantics explicit and auditable rather than treating visible intervals as self-describing.
-- Branch: `agent/uncertainty-interval-contract`.
-- Base: `main` at `9ad28b1ef6d9237a8378903204f38de7355feebb`.
-- Pull request: #28 (`feat: audit uncertainty interval semantics`).
-- Current slice: first-party interval API/rendering, closed v1 metadata, chart/spec audits, bound containment, visible interval binding, narrow claim parity, comparison-parser collision fix, CLI trap, four new profile rules, tests, and docs.
-- Read first: `src/chart_contract/uncertainty.py`, `src/chart_contract/uncertainty_audit.py`, `tests/test_uncertainty_contract.py`, and `docs/UNCERTAINTY_CONTRACT.md`.
+- Goal: make additive component decompositions reconcile explicitly to one scalar control total.
+- Branch: `agent/control-total-reconciliation`.
+- Base: `main` at `269d5fe49ab687484a8aed5354eab1206ceb55f4`.
+- Pull request: #29 (`feat: audit control total reconciliation`).
+- Current slice: first-party reconciliation API, closed v1 receipts, chart/spec audits, component uniqueness/value checks, residual/share arithmetic, ratio-like rejection, control-total-gap CLI trap, three new profile rules, tests, and docs.
+- Read first: `src/chart_contract/reconciliation.py`, `src/chart_contract/reconciliation_audit.py`, `tests/test_reconciliation_contract.py`, and `docs/RECONCILIATION_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.trend()` and `Chart.compare()` accept:
-  - `interval_lower_field`
-  - `interval_upper_field`
-  - `interval_kind`
-  - `interval_level`
-  - `interval_method`
-- Rank is intentionally excluded from uncertainty v1 because top-N/aggregate-Other interval composition needs a separate design.
-- Supported interval kinds: confidence, credible, prediction, bootstrap.
-- First-party specs preserve a closed `usermeta.uncertainty_contract`.
-- The contract binds one visible estimate field to distinct lower/upper fields.
-- `interval_level` must be finite and in `(0,1)`.
-- Every estimate/lower/upper triplet must be complete, numeric, finite, and satisfy `lower <= estimate <= upper`.
-- First-party rendering refuses malformed bounds and visibly draws intervals as rule layers.
-- External specs must keep the declared estimate visible and bind lower/upper fields through `y/y2` or `x/x2`.
-- Deleting or rewiring the interval layer blocks even when metadata remains unchanged.
-- Narrow explicit claim forms include `95% CI`, confidence, credible, prediction, and bootstrap interval wording.
-- Missing uncertainty metadata with such wording produces REVIEW.
-- Explicit claim kind/level mismatch produces BLOCK.
-- Comparison parsing now excludes recognized interval-level percentages, so `95% CI` no longer triggers a fake percent-change baseline warning.
-- `examples/traps/interval_claim_mismatch.*` declares a valid 90% credible interval while the claim says 95% confidence interval.
-- The `audit-v0.2` profile now contains 91 rules.
+- `Chart.rank()` and `Chart.compare()` accept:
+  - `control_total`
+  - optional `control_total_source`
+  - optional `reconciliation_tolerance`
+- Reconciliation is opt-in.
+- Trend is intentionally excluded in v1 so time rows are not accidentally treated as additive components.
+- V1 uses fixed `sum` semantics only.
+- First-party specs preserve a closed `usermeta.reconciliation_contract`.
+- The contract binds `x` as component field and `y` as additive metric field.
+- Components must be non-null/non-blank and unique.
+- Metric values must be complete, finite, numeric, and non-boolean.
+- Duplicate component labels block rather than being silently summed.
+- Percent/rate/ratio metrics are rejected from sum reconciliation.
+- Component sum, residual, and represented share are recomputed from supplied evidence.
+- Represented share is available only for positive controls with non-negative components.
+- First-party rendering refuses a reconciliation outside tolerance.
+- External specs may preserve a failing but internally coherent receipt; audit then emits `data.reconciliation.total=FAIL` with the residual/share rather than misclassifying it as malformed schema.
+- Stale receipts that remain internally coherent but disagree with supplied evidence block.
+- `examples/traps/control_total_gap.*` uses 9.1M components against 11.8M control -> residual 2.7M, 77.1% represented, BLOCK.
+- No balancing component is created automatically.
+- Reconciliation covers supplied evidence; truncated rank display semantics remain independently covered by comparison-set rules.
+- The `audit-v0.2` profile now contains 94 rules.
 
 ## Important Decisions
 
-- Error bars are semantic contracts, not decoration.
-- V1 validates supplied intervals rather than computing them.
-- Visible interval binding is required so metadata cannot outlive the actual visual uncertainty encoding.
-- Claim parsing stays narrow and deterministic; general words such as uncertain/likely/error bars are not interpreted.
-- A passing contract does not certify coverage, calibration, estimator correctness, significance, or hypothesis-test validity.
-- Interval overlap/non-overlap is never interpreted as significance.
-- Interval method remains explicit descriptive identity rather than executable statistical provenance.
-- Existing population, unit, metric-definition, ratio, comparison, time-window, grain, and comparison-set contracts remain independent and composable.
-- Older schema-0.4 reports become stale-policy artifacts because four new uncertainty rules change profile semantic identity.
+- Control-total reconciliation is source-evidence arithmetic, not business-authority certification.
+- One scalar control + one sum decomposition keeps v1 deterministic and inspectable.
+- `control_total_source` is optional descriptive provenance, not authentication.
+- `reconciliation_tolerance` is an explicit absolute tolerance; no automatic tolerance is inferred from metric magnitude.
+- The tiny `math.isclose` relative tolerance exists only for floating-point stability.
+- Duplicate components are treated as ambiguous/double-count risk rather than implicitly aggregated.
+- A failed reconciliation surfaces the residual and represented share but does not infer the missing category.
+- Unknown/Other/balancing rows are never synthesized to make arithmetic pass.
+- Ratio-like metrics stay outside generic additive reconciliation.
+- Existing grain, rank/comparison-set, unit, metric-definition, population, uncertainty, ratio, comparison, and time-window contracts remain independent and composable.
+- Older schema-0.4 reports become stale-policy artifacts because three new reconciliation rules change profile semantic identity.
 
 ## Verification
 
-GitHub Actions CI run #273 (`39072662559`) passed on code-bearing head `1fadcb22201c396c5f4bdbc68bcf22b8fd051791`:
+Initial GitHub Actions CI run #276 (`39152937739`) found one stale-receipt test fixture that changed component total/residual but failed to update represented share; the closed schema correctly rejected that fixture before evidence replay.
+
+The fixture was corrected to remain internally coherent while stale versus supplied evidence.
+
+GitHub Actions CI run #277 (`39153019498`) passed on code-bearing head `9512ebded454e6f510b0ef3e2e974187d5936abf`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -55,7 +62,7 @@ GitHub Actions CI run #273 (`39072662559`) passed on code-bearing head `1fadcb22
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
 - all existing CLI trap paths -> PASSED
-- `interval_claim_mismatch` installed-CLI trap -> PASSED
+- `control_total_gap` BLOCK trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -63,15 +70,15 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- A method label can be internally consistent but statistically wrong.
-- V1 does not recompute intervals from standard errors, posterior samples, bootstrap replicates, or model outputs.
-- V1 does not validate nominal coverage or calibration.
-- V1 does not support simultaneous/multiple-comparison interval semantics.
-- Rank/top-N interval composition remains deferred.
-- The external visual-binding check intentionally verifies direct rule-field binding, not every semantically equivalent Vega-Lite construction.
+- A consistently wrong control total or source label remains undetectable.
+- V1 does not authenticate external control totals.
+- V1 does not model hierarchical controls, accounting bridges, or nested subtotal reconciliation.
+- V1 does not automatically reconcile transformed/filtered display subsets; those remain under transform and comparison-set policies.
+- V1 uses float arithmetic rather than exact decimal accounting.
+- Multi-row component definitions require upstream aggregation or a future richer reconciliation contract.
 
 ## Next Recommended Task
 
-- Confirm final PR #28 CI remains green after VERIFY/HANDOFF.
-- Merge if explicit interval semantics, direct visible binding, and narrow claim parity match the desired v1.
-- Keep significance/hypothesis testing, simultaneous intervals, calibration, and estimator provenance separate future work.
+- Confirm final PR #29 CI remains green after VERIFY/HANDOFF.
+- Merge if scalar additive reconciliation and explicit residual semantics match the intended v1.
+- Keep hierarchical control trees, accounting adjustments, and exact-decimal reconciliation separate future work.

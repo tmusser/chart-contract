@@ -342,6 +342,36 @@ Version 1 does **not** infer significance from interval overlap or certify stati
 model assumptions, or calibration. See
 [Uncertainty interval contract](docs/UNCERTAINTY_CONTRACT.md).
 
+### Control totals: reconcile component evidence
+
+A component decomposition can look complete while omitting or double-counting part of the
+business. For additive `rank` / `compare` evidence, bind the supplied components to one
+explicit scalar control total:
+
+```python
+chart = Chart.rank(
+    data=df,
+    x="region",
+    y="revenue",
+    claim="Regional revenue components are shown.",
+    source="warehouse.region_revenue",
+    unit="USD",
+    control_total=11_800_000,
+    control_total_source="finance.company_revenue",
+    reconciliation_tolerance=1.0,
+)
+```
+
+The audit recomputes the component sum, residual, and represented share when meaningful.
+A 9.1M component sum against an 11.8M control total `BLOCK`s and reports the 2.7M residual
+rather than inventing an `Unknown` bucket.
+
+Version 1 uses fixed sum semantics only and rejects percent/rate/ratio metrics. Reconciliation
+applies to the supplied component evidence; top-N display omission remains independently governed
+by the rank comparison-set contract. A passing reconciliation does not prove the control source
+is authoritative or that the component taxonomy is substantively complete. See
+[Control-total reconciliation contract](docs/RECONCILIATION_CONTRACT.md).
+
 ### Rates and ratios: declare what they are "of"
 
 A percentage, rate, or ratio is not semantically complete without numerator/denominator identity:

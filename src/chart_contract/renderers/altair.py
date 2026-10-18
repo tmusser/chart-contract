@@ -26,6 +26,12 @@ from ..population_sampling import (
 )
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
+from ..reconciliation import (
+    RECONCILIATION_INTENTS,
+    build_reconciliation_summary,
+    chart_reconciliation_declaration,
+    reconciliation_matches,
+)
 from ..ratio import RATIO_INTENTS, chart_ratio_contract
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
@@ -119,6 +125,23 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if metric_definition_contract is not None:
         usermeta["metric_definition_contract"] = metric_definition_contract
+
+    reconciliation_raw = (
+        chart_reconciliation_declaration(chart)
+        if chart.intent in RECONCILIATION_INTENTS
+        else None
+    )
+    if reconciliation_raw is not None:
+        reconciliation_summary = build_reconciliation_summary(
+            chart.data,
+            **reconciliation_raw,
+        )
+        if not reconciliation_matches(reconciliation_summary):
+            raise ValueError(
+                "Component evidence does not reconcile to the declared control total "
+                "within the declared tolerance."
+            )
+        usermeta["reconciliation_contract"] = reconciliation_summary.to_dict()
 
     population_raw = (
         chart_population_contract(chart)

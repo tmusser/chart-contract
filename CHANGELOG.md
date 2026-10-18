@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit control-total reconciliation contracts for additive rank/compare component evidence, preserving component sums, residuals, represented share, source label, and tolerance receipts.
+- Deterministic blocking for duplicate/malformed components, stale reconciliation receipts, ratio-like sum attempts, and component totals that fail to match the declared control total without synthesizing balancing buckets.
 - Explicit uncertainty interval contracts for trend/compare charts, binding estimate/lower/upper fields to interval kind, level, and method.
 - Visible interval-rule binding, deterministic bound validation, and narrow claim parity for phrases such as 95% CI versus credible/prediction/bootstrap intervals.
 - Explicit sample-versus-census population contracts for trend/rank/compare artifacts, including population identity, declared sample/population counts, sampling method, and population-generalization intent.

@@ -62,6 +62,9 @@ Policy:
 - Stop on `data.uncertainty.bounds` or `visual.uncertainty.interval`: malformed bounds or metadata detached from the visible error-bar fields invalidate the artifact.
 - Narrow explicit wording such as `95% CI` must match interval kind/level; do not generalize this parser into open-ended significance or uncertainty NLP.
 - Never translate interval overlap/non-overlap into a significance claim unless a separate supported inferential contract exists.
+- When component evidence is expected to reconcile to an authoritative scalar, preserve `reconciliation_contract` instead of assuming the component set is complete.
+- Stop on `data.reconciliation.total`; surface the residual/represented share and do not create an Unknown balancing bucket automatically.
+- Treat a passing reconciliation as arithmetic consistency against the declared control only. It does not validate control-source authority, component taxonomy, or upstream joins/filters.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A passing denominator/cohort contract is metadata consistency, not validation of upstream SQL arithmetic or population membership.
