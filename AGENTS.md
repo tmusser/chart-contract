@@ -31,6 +31,10 @@
 - Require uncertainty bounds to be complete, finite, numeric, and contain the estimate; do not repair or reorder malformed intervals automatically.
 - When interval metadata is declared, the visible spec must actually bind the declared lower/upper fields; metadata-only uncertainty is not enough.
 - Do not infer statistical significance, hypothesis-test conclusions, calibration, or coverage from interval overlap/non-overlap or a passing interval contract.
+- Treat control-total reconciliation as arithmetic over supplied component evidence, not proof that the component taxonomy is conceptually complete or that the declared control source is authoritative.
+- Do not silently synthesize Unknown/Other/balancing components to force reconciliation. Surface the residual and require upstream resolution.
+- Fixed v1 reconciliation uses sum semantics only; do not reconcile percent/rate/ratio values by summing them.
+- Reconciliation does not replace rank/top-N omission rules: full supplied evidence may reconcile while a truncated display still requires explicit comparison-set treatment.
 - Do not infer numerator, denominator, or cohort identity for ratio-like metrics from field names, claim text, or observed values; missing semantics may require review, while contradictory declared semantics block.
 - Treat a declared denominator basis field as semantic identity, not denominator magnitude: different row counts are allowed, but mixed identities such as `visitors` and `signups` under one metric must not pass.
 - Do not describe a matching ratio contract as proof that numerator/denominator arithmetic or cohort membership is correct upstream.
