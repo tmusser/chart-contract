@@ -6,6 +6,24 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `control_total_gap`
+
+Demonstrates a clean regional revenue decomposition whose supplied components total 9.1M
+against an independently declared company control total of 11.8M.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/control_total_gap.vl.json \
+  --data examples/traps/control_total_gap.csv \
+  --claim "$(cat examples/traps/control_total_gap.claim.txt)"
+```
+
+Expected findings: `contract.reconciliation.control_total=PASS`,
+`data.reconciliation.components=PASS`, and `data.reconciliation.total=FAIL` reporting a
+2.7M residual and 77.1% represented share. The audit does not synthesize an Unknown/balancing
+component.
+
 ### `interval_claim_mismatch`
 
 Demonstrates a visually valid interval whose metadata declares a 90% credible interval while
