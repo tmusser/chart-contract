@@ -211,6 +211,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_uncertainty_chart(report, chart)
 
+    from .reconciliation_audit import audit_reconciliation_chart
+
+    audit_reconciliation_chart(report, chart)
+
     from .comparison_audit import audit_comparison_chart
 
     audit_comparison_chart(report, chart)
@@ -660,6 +664,7 @@ def audit_spec(
     from .metric_definition_audit import audit_metric_definition_spec
     from .population_sampling_audit import audit_population_spec
     from .ratio_audit import audit_ratio_spec
+    from .reconciliation_audit import audit_reconciliation_spec
     from .uncertainty_audit import audit_uncertainty_spec
     from .unit_conversion_audit import audit_unit_conversion_spec
 
@@ -668,6 +673,7 @@ def audit_spec(
     audit_unit_conversion_spec(report, spec, encoding, resolved_frame, unit)
     audit_population_spec(report, spec, resolved_frame, resolved_claim)
     audit_uncertainty_spec(report, spec, resolved_frame, resolved_claim)
+    audit_reconciliation_spec(report, spec, encoding, resolved_frame, unit)
     audit_comparison_spec(
         report,
         spec,
