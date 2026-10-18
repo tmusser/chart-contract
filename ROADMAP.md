@@ -38,6 +38,7 @@ The current unreleased line adds and hardens:
 - explicit measurement-unit identity and fixed-scale conversion contracts with row-level source-unit consistency and recomputable arithmetic
 - explicit population/sample scope contracts with declared sample/population counts, optional member/weight evidence, and bounded population-generalization review semantics
 - explicit uncertainty interval contracts for trend/compare estimates, including bound integrity, visible field binding, interval kind/level/method identity, and narrow claim parity
+- explicit control-total reconciliation contracts for additive rank/compare component evidence, with durable sum/residual/share receipts and no automatic balancing bucket
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
