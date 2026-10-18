@@ -245,6 +245,7 @@ def test_external_stale_receipts_block() -> None:
     spec, frame = _external_spec()
     spec["usermeta"]["reconciliation_contract"]["component_total"] = 99.0
     spec["usermeta"]["reconciliation_contract"]["residual"] = 1.0
+    spec["usermeta"]["reconciliation_contract"]["represented_share"] = 0.99
 
     report = audit_spec(
         spec,
