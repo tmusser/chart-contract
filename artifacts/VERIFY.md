@@ -1,5 +1,61 @@
 # VERIFY
 
+2026-10-18 - Add control-total reconciliation contracts
+
+Environment:
+- Branch: `agent/control-total-reconciliation`
+- Base: `main` at `269d5fe49ab687484a8aed5354eab1206ceb55f4`
+- Pull request: #29 (`feat: audit control total reconciliation`)
+- Initial CI run #276 (`39152937739`) correctly exposed an internally inconsistent stale-receipt test fixture.
+- Corrected code-bearing GitHub Actions CI run #277 (`39153019498`) on head `9512ebded454e6f510b0ef3e2e974187d5936abf` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- all existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, metric-definition, unit-conversion, population, and uncertainty traps -> PASSED
+- new control-total-gap CLI trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `rank` and `compare` accept optional `control_total`, `control_total_source`, and `reconciliation_tolerance`;
+- reconciliation is opt-in and fixed to additive `sum` semantics in v1;
+- trend/time evidence is intentionally excluded from reconciliation v1;
+- the contract binds the chart/spec component field and quantitative metric field to one finite scalar control total;
+- optional tolerance must be finite and non-negative;
+- component labels must be complete, non-blank, and unique;
+- component metric values must be complete, numeric, finite, and non-boolean;
+- first-party rendering refuses duplicate/malformed component evidence and totals outside the declared tolerance;
+- first-party specs preserve durable component count, component total, residual, represented share, control source, and tolerance receipts;
+- represented share is emitted only when the control total is positive and all component values are non-negative;
+- external specs require the declared component field to remain visibly encoded and the metric field to remain quantitative;
+- external reconciliation receipts are replayed against supplied evidence and stale-but-internally-coherent receipts fail `data.reconciliation.total`;
+- percent/rate/ratio metrics are rejected from generic sum reconciliation;
+- a control-total gap fails `data.reconciliation.total` while keeping the contract structurally valid and inspectable;
+- the hero trap reports component total 9.1M vs control total 11.8M, residual 2.7M, represented share 77.1%, verdict BLOCK;
+- no Unknown/Other/balancing component is synthesized automatically;
+- reconciliation applies to supplied component evidence and does not replace independent rank/top-N comparison-set omission semantics;
+- machine-readable profile/documentation parity moves from 91 to 94 rules.
+
+Important policy boundary:
+- A passing reconciliation establishes arithmetic consistency against the declared control total only.
+- It does not prove the control source is authoritative, the component taxonomy is conceptually complete, or the metric is universally additive.
+- Duplicate component labels block instead of being silently aggregated.
+- Residuals are surfaced, not explained or repaired automatically.
+- Top-N display completeness remains governed independently by rank/comparison-set contracts.
+
+Remaining risks:
+- A wrong control total can still be consistently declared.
+- `control_total_source` is descriptive metadata and is not authenticated.
+- V1 supports one scalar control and one fixed sum decomposition only.
+- Components with legitimate accounting adjustments or multi-row identities need upstream modeling or a future richer contract.
+- Floating-point arithmetic uses deterministic tolerance/isclose semantics rather than exact decimal accounting.
+- External transforms can alter visible component sets; reconciliation certifies supplied evidence while transform/rank policies independently govern display behavior.
+- Adding three new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF head remains green.
+- Review and merge PR #29 if scalar additive reconciliation and no-auto-balancing semantics match the desired v1.
+- Keep hierarchical/multi-control reconciliation, accounting adjustments, and exact-decimal financial reconciliation as separate future work.
+
 2026-10-17 - Add uncertainty interval contracts
 
 Environment:
