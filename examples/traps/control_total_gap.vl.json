@@ -1,0 +1,26 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "Regional revenue components",
+  "encoding": {
+    "x": {"field": "region", "type": "nominal"},
+    "y": {"field": "revenue_m", "type": "quantitative", "scale": {"zero": true}}
+  },
+  "usermeta": {
+    "source": "synthetic.regional_revenue",
+    "unit": "USD millions",
+    "reconciliation_contract": {
+      "version": 1,
+      "component_field": "region",
+      "metric_field": "revenue_m",
+      "reconciliation": "sum",
+      "control_total": 11.8,
+      "control_total_source": "finance.company_revenue",
+      "tolerance": 0.0,
+      "component_count": 4,
+      "component_total": 9.1,
+      "residual": 2.7,
+      "represented_share": 0.771186440677966
+    }
+  }
+}
