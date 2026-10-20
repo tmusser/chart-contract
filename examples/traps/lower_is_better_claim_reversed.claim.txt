@@ -1,1 +1,1 @@
-Latency improved after launch.
+Latency improved.
