@@ -185,7 +185,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Reconciliation component labels must be complete and unique and metric values finite numeric; durable component-count/sum/residual/share receipts must match supplied evidence.
 - Reconciliation outside tolerance blocks and exposes the residual/represented share when meaningful; ratio-like sum reconciliation and automatic balancing buckets are not supported.
 - Declared directionality contracts bind the shown quantitative field to higher-is-better, lower-is-better, or neutral semantics; malformed/unsupported/field-mismatched contracts block.
-- Narrow evaluative better/worse wording without directionality or an explicit comparison baseline produces REVIEW; wording that contradicts observed movement under the declared direction blocks.
+- Within explicit comparisons, narrow evaluative better/worse wording without directionality produces REVIEW; when directionality is declared, evaluative wording without an explicit comparison baseline also produces REVIEW; contradictory observed movement blocks.
 - Neutral directionality rejects evaluative better/worse claims, while descriptive increase/decrease wording remains outside the directionality claim parser.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
