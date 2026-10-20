@@ -6,6 +6,24 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `lower_is_better_claim_reversed`
+
+Demonstrates a comparison whose arithmetic is correct but whose evaluative claim reverses the
+declared metric direction: latency rises from 200 ms to 250 ms while
+`metric_direction="lower_is_better"`, yet the claim says latency improved.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/lower_is_better_claim_reversed.vl.json \
+  --data examples/traps/lower_is_better_claim_reversed.csv \
+  --claim "$(cat examples/traps/lower_is_better_claim_reversed.claim.txt)"
+```
+
+Expected findings: `contract.metric.directionality=PASS`,
+`contract.comparison.change=PASS`, and `claim.metric.directionality=FAIL`.
+The audit treats plain increase/decrease wording as descriptive rather than evaluative.
+
 ### `control_total_gap`
 
 Demonstrates a clean regional revenue decomposition whose supplied components total 9.1M
