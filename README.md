@@ -443,9 +443,11 @@ Version 1 supports `higher_is_better`, `lower_is_better`, and `neutral`.
 Only narrow evaluative wording such as `improved`, `better`, `worsened`, `worse`,
 and `deteriorated` is adjudicated. Plain `increased` / `decreased` remains descriptive.
 
-Evaluative wording without directionality or an explicit comparison baseline produces
-`REVIEW`; wording that contradicts the declared direction and observed baseline-to-target
-movement `BLOCK`s. A passing contract does not prove the metric is a valid objective or
+When an explicit comparison already exists, evaluative wording without directionality produces
+`REVIEW`. When directionality is declared, evaluative wording without an explicit comparison
+baseline also produces `REVIEW`. Ordinary legacy prose does not invent a comparison requirement.
+Wording that contradicts the declared direction and observed baseline-to-target movement
+`BLOCK`s. A passing contract does not prove the metric is a valid objective or
 that optimization is causally justified. See
 [Metric directionality contract](docs/DIRECTIONALITY_CONTRACT.md).
 
