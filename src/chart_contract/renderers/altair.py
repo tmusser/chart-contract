@@ -15,6 +15,7 @@ from ..comparison_set import (
     build_comparison_set_summary,
     comparison_set_sort,
 )
+from ..directionality import DIRECTIONALITY_INTENTS, chart_directionality_contract, parse_directionality_contract
 from ..grain import GRAIN_INTENTS, build_grain_summary, visible_grain_fields_for_chart
 from ..metric_definition import METRIC_DEFINITION_INTENTS, chart_metric_definition_contract
 from ..population_sampling import (
@@ -125,6 +126,16 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if metric_definition_contract is not None:
         usermeta["metric_definition_contract"] = metric_definition_contract
+
+    directionality_raw = (
+        chart_directionality_contract(chart)
+        if chart.intent in DIRECTIONALITY_INTENTS
+        else None
+    )
+    if directionality_raw is not None:
+        usermeta["directionality_contract"] = parse_directionality_contract(
+            {"usermeta": {"directionality_contract": directionality_raw}}
+        )
 
     reconciliation_raw = (
         chart_reconciliation_declaration(chart)

@@ -42,6 +42,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit population/sample scope contracts for trend/rank/compare metrics, including declared population/sample counts, bounded sampling methods, optional row-level member/weight evidence, and explicit population-generalization intent
 - explicit uncertainty interval contracts for trend/compare metrics, binding the shown estimate to lower/upper fields, interval kind, level, method, and visible interval marks
 - explicit control-total reconciliation contracts for additive rank/compare component evidence, including scalar control identity, optional control source/tolerance, and durable component-total/residual/share receipts
+- explicit metric-directionality contracts for trend/compare evidence, binding the shown metric to higher-is-better, lower-is-better, or neutral semantics and narrow evaluative claim parity
 - `chart.to_altair()` and `chart.to_vega_lite()`
 - `chart-contract audit spec` with text, JSON, and Markdown reports
 - Altair/Vega-Lite as the only renderer
@@ -84,6 +85,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Reconciliation contracts verify arithmetic consistency between supplied unique component evidence and one declared scalar control total; they do not prove the control source is authoritative or the component taxonomy is substantively complete.
 - Reconciliation uses fixed sum semantics only in v1 and rejects percent/rate/ratio metrics; chart-contract never fabricates Unknown/Other/balancing components to force equality.
 - Reconciliation covers the supplied component evidence and does not replace independent top-N/comparison-set omission semantics for truncated rank displays.
+- Directionality contracts bind one visible quantitative metric to higher-is-better, lower-is-better, or neutral semantics; they do not prove the metric is a valid optimization target or that utility is monotonic outside the declared comparison.
+- Better/worse claim parsing is deliberately narrow to improvement/worsening wording. Descriptive increase/decrease language is not treated as an evaluative judgment.
+- Evaluative directionality requires an explicit comparison baseline; chart-contract does not infer targets, thresholds, acceptable ranges, or utility functions.
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
@@ -125,6 +129,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - automatic representativeness certification, survey-design validation, sample-frame completeness proof, response-bias correction, weight calibration, or statistical population-generalization approval
 - automatic confidence/credible/prediction/bootstrap interval computation, coverage certification, significance testing, p-value inference, or overlap-based hypothesis conclusions
 - automatic balancing buckets, accounting adjustments, control-total source authentication, or inference that a metric is additive merely because a sum reconciliation was declared
+- automatic optimization policy, metric-target selection, acceptable-range inference, utility-curve inference, or treating every numeric increase/decrease as a better/worse judgment
 
 ## Acceptance Criteria
 
@@ -179,6 +184,9 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Declared reconciliation contracts on rank/compare component evidence bind one visible component field and one additive quantitative metric to a finite control total with optional non-negative absolute tolerance.
 - Reconciliation component labels must be complete and unique and metric values finite numeric; durable component-count/sum/residual/share receipts must match supplied evidence.
 - Reconciliation outside tolerance blocks and exposes the residual/represented share when meaningful; ratio-like sum reconciliation and automatic balancing buckets are not supported.
+- Declared directionality contracts bind the shown quantitative field to higher-is-better, lower-is-better, or neutral semantics; malformed/unsupported/field-mismatched contracts block.
+- Within explicit comparisons, narrow evaluative better/worse wording without directionality produces REVIEW; when directionality is declared, evaluative wording without an explicit comparison baseline also produces REVIEW; contradictory observed movement blocks.
+- Neutral directionality rejects evaluative better/worse claims, while descriptive increase/decrease wording remains outside the directionality claim parser.
 - The CLI returns stable reports and exit codes for `READY`, `REVIEW`, and `BLOCK`.
 - First-party generated specs preserve intent and evidence metadata required for downstream auditing.
 - `Chart.process_tree()` blocks duplicate/null node IDs, blank labels, invalid roots, dangling parents, and cycles before rendering a deterministic top-down tree.
@@ -219,7 +227,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 94-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 96-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -250,6 +258,8 @@ For population/sampling semantics, run `python -m pytest tests/test_population_s
 For uncertainty intervals, run `python -m pytest tests/test_uncertainty_contract.py` and verify bound containment, malformed-contract blocking, first-party visible interval rendering, external visual-binding tamper detection, explicit claim kind/level parity, grouped compare intervals, and no missing-metadata inference beyond narrow interval wording.
 
 For control-total reconciliation, run `python -m pytest tests/test_reconciliation_contract.py` and verify exact/tolerance reconciliation, residual/share receipts, duplicate-component blocking, ratio-like rejection, external receipt parity, and no automatic balancing bucket.
+
+For metric directionality, run `python -m pytest tests/test_directionality_contract.py` and verify lower/higher-is-better claim parity, neutral semantics, missing-contract/baseline review, descriptive increase/decrease non-inference, external field binding, and closed-schema enforcement.
 
 ## Open Questions
 

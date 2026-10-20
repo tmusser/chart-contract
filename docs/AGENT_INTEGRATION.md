@@ -71,6 +71,9 @@ Policy:
 - If a claim states an explicit numeric percent, percentage-point, or ratio change, require a comparison baseline contract before sharing.
 - Stop on `contract.comparison.change` or `claim.comparison.change_semantics` failures; do not rewrite arithmetic labels merely to make the audit pass.
 - Treat a passing baseline contract as arithmetic reproducibility against supplied evidence, not proof the baseline controls seasonality, cohort drift, or causal comparability.
+- Preserve `directionality_contract` when claims use better/worse semantics; do not assume that a positive numeric change is beneficial.
+- Stop on `claim.metric.directionality` failures such as lower-is-better latency rising while the claim says it improved.
+- Keep descriptive `increased` / `decreased` wording separate from evaluative semantics; v1 does not infer targets, thresholds, utility functions, or optimization policy.
 - If repeated displayed keys appear, require a source-grain declaration before sharing; do not assume duplicate rows are harmless.
 - Stop on `data.grain.unique`: duplicate declared grain keys can indicate join fanout and must not be silently deduplicated or summed away.
 - For external aggregate specs, require `contract.grain.aggregation` plus the existing transform declaration/lineage checks to pass.
