@@ -41,7 +41,7 @@ def _chart(claim: str, **overrides) -> Chart:
 
 
 def test_lower_is_better_improvement_claim_blocks_when_metric_rises() -> None:
-    report = _chart("Latency improved after launch.").audit()
+    report = _chart("Latency improved.").audit()
 
     assert _finding(report, "contract.metric.directionality").severity == "PASS"
     finding = _finding(report, "claim.metric.directionality")
@@ -51,7 +51,7 @@ def test_lower_is_better_improvement_claim_blocks_when_metric_rises() -> None:
 
 
 def test_lower_is_better_worsening_claim_passes_when_metric_rises() -> None:
-    report = _chart("Latency worsened after launch.").audit()
+    report = _chart("Latency worsened.").audit()
 
     finding = _finding(report, "claim.metric.directionality")
     assert finding.severity == "PASS"
@@ -60,7 +60,7 @@ def test_lower_is_better_worsening_claim_passes_when_metric_rises() -> None:
 
 def test_higher_is_better_improvement_claim_passes_when_metric_rises() -> None:
     report = _chart(
-        "Throughput improved after launch.",
+        "Throughput improved.",
         y="latency_ms",
         metric_direction="higher_is_better",
     ).audit()
@@ -71,7 +71,7 @@ def test_higher_is_better_improvement_claim_passes_when_metric_rises() -> None:
 
 def test_neutral_metric_rejects_better_worse_claim() -> None:
     report = _chart(
-        "The metric improved after launch.",
+        "The metric improved.",
         metric_direction="neutral",
     ).audit()
 
@@ -83,7 +83,7 @@ def test_neutral_metric_rejects_better_worse_claim() -> None:
 
 def test_evaluative_claim_without_directionality_requires_review() -> None:
     report = _chart(
-        "Latency improved after launch.",
+        "Latency improved.",
         metric_direction=None,
     ).audit()
 
@@ -97,7 +97,7 @@ def test_evaluative_claim_without_explicit_comparison_requires_review() -> None:
         data=_frame(),
         x="period",
         y="latency_ms",
-        claim="Latency improved after launch.",
+        claim="Latency improved.",
         source="synthetic.latency",
         unit="milliseconds",
         title="Observed latency",
@@ -112,7 +112,7 @@ def test_evaluative_claim_without_explicit_comparison_requires_review() -> None:
 
 
 def test_plain_increase_language_is_not_evaluative() -> None:
-    report = _chart("Latency increased after launch.").audit()
+    report = _chart("Latency increased.").audit()
 
     assert _finding(report, "contract.metric.directionality").severity == "PASS"
     assert not any(
@@ -132,7 +132,7 @@ def test_unchanged_metric_rejects_improvement_claim() -> None:
         data=frame,
         x="period",
         y="latency_ms",
-        claim="Latency improved after launch.",
+        claim="Latency improved.",
         source="synthetic.latency",
         unit="milliseconds",
         title="Observed latency",
@@ -152,7 +152,7 @@ def test_unchanged_metric_rejects_improvement_claim() -> None:
 
 
 def test_first_party_spec_preserves_closed_directionality_contract() -> None:
-    spec = _chart("Latency worsened after launch.").to_vega_lite()
+    spec = _chart("Latency worsened.").to_vega_lite()
 
     assert spec["usermeta"]["directionality_contract"] == {
         "version": 1,
@@ -201,7 +201,7 @@ def test_external_directionality_mismatch_blocks() -> None:
     report = audit_spec(
         spec,
         data=frame,
-        claim="Latency improved after launch.",
+        claim="Latency improved.",
     )
 
     assert _finding(report, "contract.metric.directionality").severity == "PASS"
@@ -215,7 +215,7 @@ def test_external_matching_directionality_passes() -> None:
     report = audit_spec(
         spec,
         data=frame,
-        claim="Latency worsened after launch.",
+        claim="Latency worsened.",
     )
 
     assert _finding(report, "claim.metric.directionality").severity == "PASS"
@@ -229,7 +229,7 @@ def test_external_directionality_metric_binding_drift_blocks() -> None:
     report = audit_spec(
         spec,
         data=frame,
-        claim="Latency worsened after launch.",
+        claim="Latency worsened.",
     )
 
     assert _finding(report, "contract.metric.directionality").severity == "FAIL"
@@ -242,7 +242,7 @@ def test_closed_directionality_schema_blocks_extra_fields() -> None:
     report = audit_spec(
         spec,
         data=frame,
-        claim="Latency worsened after launch.",
+        claim="Latency worsened.",
     )
 
     assert _finding(report, "contract.metric.directionality").severity == "FAIL"
