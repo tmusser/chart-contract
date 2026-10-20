@@ -1,0 +1,30 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Observed latency",
+  "encoding": {
+    "x": {"field": "period", "type": "ordinal"},
+    "y": {"field": "latency_ms", "type": "quantitative"}
+  },
+  "usermeta": {
+    "source": "synthetic.latency",
+    "unit": "milliseconds",
+    "directionality_contract": {
+      "version": 1,
+      "metric_field": "latency_ms",
+      "direction": "lower_is_better"
+    },
+    "comparison_contract": {
+      "version": 1,
+      "metric_field": "latency_ms",
+      "baseline_field": "period",
+      "baseline_value": "before",
+      "target_value": "after",
+      "change_type": "absolute",
+      "declared_change": 50.0,
+      "baseline_metric_value": 200.0,
+      "target_metric_value": 250.0,
+      "computed_change": 50.0
+    }
+  }
+}
