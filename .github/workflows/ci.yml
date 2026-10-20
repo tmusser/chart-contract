@@ -250,6 +250,20 @@ jobs:
           grep -q "residual=2.7" <<<"$reconciliation_output"
 
           set +e
+          directionality_output=$(chart-contract audit spec examples/traps/lower_is_better_claim_reversed.vl.json \
+            --data examples/traps/lower_is_better_claim_reversed.csv \
+            --claim "$(cat examples/traps/lower_is_better_claim_reversed.claim.txt)" 2>&1)
+          directionality_exit=$?
+          set -e
+          echo "$directionality_output"
+          test "$directionality_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$directionality_output"
+          grep -q "contract.metric.directionality" <<<"$directionality_output"
+          grep -q "contract.comparison.change" <<<"$directionality_output"
+          grep -q "claim.metric.directionality" <<<"$directionality_output"
+          grep -q "worsening" <<<"$directionality_output"
+
+          set +e
           metric_definition_output=$(chart-contract audit spec examples/traps/metric_definition_drift.vl.json \
             --data examples/traps/metric_definition_drift.csv \
             --claim "$(cat examples/traps/metric_definition_drift.claim.txt)" 2>&1)
