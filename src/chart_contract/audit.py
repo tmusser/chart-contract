@@ -219,6 +219,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_comparison_chart(report, chart)
 
+    from .directionality_audit import audit_directionality_chart
+
+    audit_directionality_chart(report, chart)
+
     from .time_window_audit import audit_time_window_chart
 
     audit_time_window_chart(report, chart)
@@ -661,6 +665,7 @@ def audit_spec(
         )
 
     from .comparison_audit import audit_comparison_spec
+    from .directionality_audit import audit_directionality_spec
     from .metric_definition_audit import audit_metric_definition_spec
     from .population_sampling_audit import audit_population_spec
     from .ratio_audit import audit_ratio_spec
@@ -683,6 +688,7 @@ def audit_spec(
         unit,
         value_representation,
     )
+    audit_directionality_spec(report, spec, encoding, resolved_claim)
     from .time_window_audit import audit_time_window_spec
     from .grain_audit import audit_grain_spec
 
