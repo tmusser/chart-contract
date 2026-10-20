@@ -14,7 +14,7 @@ Chart.trend(
     data=df,
     x="period",
     y="latency_ms",
-    claim="Latency worsened after launch.",
+    claim="Latency worsened.",
     source="warehouse.latency",
     unit="milliseconds",
     metric_direction="lower_is_better",
@@ -96,7 +96,9 @@ still allowed.
 
 ## Missing metadata
 
-An evaluative claim without a directionality contract produces REVIEW.
+When an artifact already declares an explicit comparison baseline, evaluative wording without
+a directionality contract produces REVIEW. Ordinary legacy prose such as "Conversion improved"
+does not invent a comparison or directionality requirement by itself.
 
 An evaluative claim with directionality but without an explicit comparison baseline also
 produces REVIEW because the better/worse statement cannot be reproduced against selected
