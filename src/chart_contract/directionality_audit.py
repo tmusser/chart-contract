@@ -25,14 +25,14 @@ def audit_directionality_chart(report: AuditReport, chart: Any) -> None:
     raw = chart_directionality_contract(chart)
 
     if raw is None:
-        if claim_semantics is not None:
+        if claim_semantics is not None and comparison_declaration(chart) is not None:
             report.add(
                 "claim.metric.directionality",
                 WARN,
-                "Claim uses evaluative better/worse wording but no metric directionality is declared.",
+                "Explicit comparison uses evaluative better/worse wording but no metric directionality is declared.",
                 suggestion=(
                     "Declare metric_direction='higher_is_better', "
-                    "'lower_is_better', or 'neutral' before making evaluative claims."
+                    "'lower_is_better', or 'neutral' before evaluating the comparison."
                 ),
                 field="metric_direction",
             )
@@ -129,13 +129,17 @@ def audit_directionality_spec(
     claim_semantics = explicit_evaluative_claim(claim)
 
     if not has_contract:
-        if claim_semantics is not None:
+        has_comparison = (
+            isinstance(usermeta, Mapping)
+            and "comparison_contract" in usermeta
+        )
+        if claim_semantics is not None and has_comparison:
             report.add(
                 "claim.metric.directionality",
                 WARN,
-                "Claim uses evaluative better/worse wording but the spec has no directionality_contract.",
+                "Explicit comparison uses evaluative better/worse wording but the spec has no directionality_contract.",
                 suggestion=(
-                    "Add usermeta.directionality_contract before making evaluative claims."
+                    "Add usermeta.directionality_contract before evaluating the comparison."
                 ),
                 field="usermeta.directionality_contract",
             )
