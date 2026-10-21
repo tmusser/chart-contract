@@ -68,6 +68,25 @@ def target_declaration(chart: Any) -> dict[str, Any] | None:
     }
 
 
+def normalize_target_declaration(
+    *,
+    metric_field: Any,
+    selector_field: Any,
+    selector_value: Any,
+    target_value: Any,
+    operator: Any,
+    tolerance: Any,
+) -> dict[str, Any]:
+    return {
+        "metric_field": _required_string(metric_field, "metric_field"),
+        "selector_field": _required_string(selector_field, "selector_field"),
+        "selector_value": _selector_value(selector_value, "selector_value"),
+        "target_value": _finite_number(target_value, "target_value"),
+        "operator": _operator(operator),
+        "tolerance": 0.0 if tolerance is None else _nonnegative_number(tolerance, "tolerance"),
+    }
+
+
 def build_target_summary(
     frame: pd.DataFrame,
     *,
@@ -78,12 +97,20 @@ def build_target_summary(
     operator: Any,
     tolerance: Any,
 ) -> TargetSummary:
-    metric = _required_string(metric_field, "metric_field")
-    selector = _required_string(selector_field, "selector_field")
-    selected = _selector_value(selector_value, "selector_value")
-    target = _finite_number(target_value, "target_value")
-    op = _operator(operator)
-    tol = 0.0 if tolerance is None else _nonnegative_number(tolerance, "tolerance")
+    normalized = normalize_target_declaration(
+        metric_field=metric_field,
+        selector_field=selector_field,
+        selector_value=selector_value,
+        target_value=target_value,
+        operator=operator,
+        tolerance=tolerance,
+    )
+    metric = normalized["metric_field"]
+    selector = normalized["selector_field"]
+    selected = normalized["selector_value"]
+    target = normalized["target_value"]
+    op = normalized["operator"]
+    tol = normalized["tolerance"]
 
     if selector not in frame.columns:
         raise ValueError(f"Target selector field {selector!r} is missing from the data.")
