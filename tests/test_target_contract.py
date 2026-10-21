@@ -129,7 +129,8 @@ def test_selector_must_resolve_to_exactly_one_observation() -> None:
     )
     report = _chart("Conversion met target.", data=frame).audit()
 
-    finding = _finding(report, "contract.metric.target")
+    assert _finding(report, "contract.metric.target").severity == "PASS"
+    finding = _finding(report, "data.metric.target_observation")
     assert finding.severity == "FAIL"
     assert "exactly one is required" in finding.message
     assert report.verdict == "BLOCK"
