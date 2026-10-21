@@ -1,0 +1,35 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "title": "Observed conversion rate",
+  "layer": [
+    {
+      "mark": {"type": "line", "point": true},
+      "encoding": {
+        "x": {"field": "period", "type": "ordinal"},
+        "y": {"field": "conversion_rate", "type": "quantitative"}
+      }
+    },
+    {
+      "mark": {"type": "rule"},
+      "encoding": {
+        "y": {"datum": 0.8}
+      }
+    }
+  ],
+  "usermeta": {
+    "source": "synthetic.target_status",
+    "unit": "rate",
+    "target_contract": {
+      "version": 1,
+      "metric_field": "conversion_rate",
+      "selector_field": "period",
+      "selector_value": "after",
+      "target_value": 0.8,
+      "operator": "at_least",
+      "tolerance": 0.0,
+      "observed_value": 0.76,
+      "target_gap": -0.04,
+      "target_met": false
+    }
+  }
+}
