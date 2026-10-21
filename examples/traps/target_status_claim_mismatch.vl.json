@@ -18,7 +18,7 @@
   ],
   "usermeta": {
     "source": "synthetic.target_status",
-    "unit": "rate",
+    "unit": "score",
     "target_contract": {
       "version": 1,
       "metric_field": "conversion_rate",
