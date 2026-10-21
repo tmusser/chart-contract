@@ -13,11 +13,11 @@ Version 1 makes target evaluation explicit and reproducible.
 Chart.trend(
     data=df,
     x="period",
-    y="conversion_rate",
-    claim="Conversion met target.",
-    source="warehouse.funnel",
-    unit="rate",
-    metric_target=0.80,
+    y="quality_score",
+    claim="Quality score met target.",
+    source="warehouse.quality",
+    unit="points",
+    metric_target=80,
     target_operator="at_least",
     target_selector_field="period",
     target_selector_value="after",
@@ -42,14 +42,14 @@ First-party specs preserve:
   "usermeta": {
     "target_contract": {
       "version": 1,
-      "metric_field": "conversion_rate",
+      "metric_field": "quality_score",
       "selector_field": "period",
       "selector_value": "after",
-      "target_value": 0.8,
+      "target_value": 80.0,
       "operator": "at_least",
       "tolerance": 0.0,
-      "observed_value": 0.81,
-      "target_gap": 0.01,
+      "observed_value": 81.0,
+      "target_gap": 1.0,
       "target_met": true
     }
   }
