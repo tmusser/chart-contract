@@ -73,7 +73,10 @@ Policy:
 - Treat a passing baseline contract as arithmetic reproducibility against supplied evidence, not proof the baseline controls seasonality, cohort drift, or causal comparability.
 - Preserve `directionality_contract` when claims use better/worse semantics; do not assume that a positive numeric change is beneficial.
 - Stop on `claim.metric.directionality` failures such as lower-is-better latency rising while the claim says it improved.
-- Keep descriptive `increased` / `decreased` wording separate from evaluative semantics; v1 does not infer targets, thresholds, utility functions, or optimization policy.
+- Keep descriptive `increased` / `decreased` wording separate from evaluative semantics; directionality does not itself infer targets, thresholds, utility functions, or optimization policy.
+- Preserve `target_contract` when an artifact claims one selected observation met or missed a scalar target; do not choose the latest/rightmost row automatically.
+- Stop on `data.metric.target_observation` or `visual.metric.target`: stale selected-value receipts or a detached threshold line invalidate the target artifact.
+- Narrow met/missed-target wording must match recomputed target status. A passing target contract does not validate target authority, materiality, or statistical significance.
 - If repeated displayed keys appear, require a source-grain declaration before sharing; do not assume duplicate rows are harmless.
 - Stop on `data.grain.unique`: duplicate declared grain keys can indicate join fanout and must not be silently deduplicated or summed away.
 - For external aggregate specs, require `contract.grain.aggregation` plus the existing transform declaration/lineage checks to pass.
