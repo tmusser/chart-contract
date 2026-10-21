@@ -529,12 +529,10 @@ def _render_target_rule(chart: Any) -> alt.Chart | None:
     if declaration is None:
         return None
     summary = build_target_summary(chart.data, **declaration)
-    field = "__chart_contract_target__"
-    values = [{field: summary.target_value}]
     return (
-        alt.Chart(alt.InlineData(values=values))
+        alt.Chart()
         .mark_rule(strokeDash=[6, 4])
-        .encode(y=alt.Y(f"{field}:Q"))
+        .encode(y=alt.datum(summary.target_value))
     )
 
 
