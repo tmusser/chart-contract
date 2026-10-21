@@ -1,0 +1,44 @@
+name: Perch semantic regression
+
+on:
+  pull_request:
+    paths:
+      - "src/chart_contract/directionality.py"
+      - "perch.yaml"
+      - ".github/workflows/perch.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  neutral-movement:
+    # Opt in after provisioning PERCH_API_KEY; secrets are unavailable to fork PRs.
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && vars.PERCH_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Require a configured Perch API key
+        env:
+          PERCH_API_KEY: ${{ secrets.PERCH_API_KEY }}
+        run: |
+          if [ -z "$PERCH_API_KEY" ]; then
+            echo "::error::PERCH_API_KEY is missing; see docs/PERCH.md."
+            exit 1
+          fi
+
+      - name: Check neutral movement semantics
+        env:
+          PERCH_BASE_URL: https://api.typesafe.ai/v1/systemone
+          PERCH_API_KEY: ${{ secrets.PERCH_API_KEY }}
+        run: npx --yes @lakeday/perch scan src/chart_contract/directionality.py
