@@ -1,5 +1,64 @@
 # VERIFY
 
+2026-10-21 - Add metric target threshold contracts
+
+Environment:
+- Branch: `agent/metric-target-contract`
+- Base: `main` at `c8e58c006a7215d9b89ed7db7c309e49a0ba9848`
+- Pull request: #31 (`feat: audit metric target thresholds`)
+- CI run #285 (`39621270743`) correctly exposed malformed target API parameter insertion in `Chart.trend()` / `Chart.compare()`.
+- CI run #286 (`39621431123`) correctly exposed target tests that accidentally exercised existing ratio-semantics and one-row-trend guardrails.
+- The API signature was repaired; target tests/trap were made scope-neutral rather than weakening those existing rules.
+- Corrected current-head GitHub Actions CI run #289 (`39621792558`) on head `3820a91296644f38ca874c160c1ebe3a06f38613` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- all existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, metric-definition, unit-conversion, population, uncertainty, reconciliation, and directionality traps -> PASSED
+- new target-status-claim-mismatch CLI trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend` and `compare` accept optional `metric_target`, `target_operator`, `target_selector_field`, `target_selector_value`, and `target_tolerance`;
+- target semantics are opt-in and remain independent from metric directionality;
+- supported v1 operators are `at_least`, `at_most`, and `equal`;
+- target tolerance is an explicit finite non-negative absolute tolerance and defaults to zero;
+- target selection never infers latest/rightmost/max-date/comparison-target rows; the selector must resolve to exactly one supplied observation;
+- the selected metric observation must be finite numeric evidence;
+- first-party specs preserve a closed `usermeta.target_contract` containing metric/selector identity, target/operator/tolerance, observed-value receipt, signed target gap, and recomputed target-met boolean;
+- external re-audits recompute the selected observation, gap, and status and block stale receipts;
+- first-party trend/compare specs visibly render the scalar target as a datum-backed rule rather than fabricating a source-data row;
+- external target metadata must remain visibly bound to a rule at the exact declared target; removed or moved target rules fail `visual.metric.target`;
+- narrow met-target wording includes forms such as `met target`, `meets target`, `hit target`, `reached target`, and `target was met`;
+- narrow missed-target wording includes `missed target`, `misses target`, and `target was missed`;
+- explicit met/missed wording without target metadata produces REVIEW;
+- met/missed wording that disagrees with recomputed target status blocks;
+- mixed met+missed wording blocks as ambiguous;
+- ordinary claims do not invent target semantics;
+- phrases such as above/below target, on track, healthy, acceptable, dynamic targets, and ranges remain outside v1;
+- the hero trap keeps contract, evidence receipts, and visible target rule valid while selected value 0.76 misses an at-least 0.80 target and the claim incorrectly says the target was met -> BLOCK;
+- machine-readable profile/documentation parity moves from 96 to 100 rules.
+
+Important policy boundary:
+- A passing target contract establishes one selected-observation/threshold comparison and narrow claim parity only.
+- It does not prove the target is authoritative, rational, material, achievable, or statistically meaningful.
+- Directionality never implies a target operator, and a target operator never establishes metric utility.
+- `target_gap` is a signed arithmetic receipt only; its sign is not interpreted as good/bad.
+- chart-contract does not infer target selection from row order or time ordering.
+- V1 does not model acceptable bands, dynamic/time-varying targets, multiple thresholds, target ownership/authority, or optimization policy.
+
+Remaining risks:
+- A wrong or stale target can still be consistently declared.
+- A selector can choose a valid but analytically unfair observation.
+- Scalar arithmetic uses floating-point comparison/tolerance rather than exact decimal accounting.
+- The visual audit establishes exact structural target-rule binding but does not prove viewers interpret the line correctly.
+- Narrow target wording intentionally leaves broader goal language uninterpreted.
+- Adding four new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF documentation head remains green.
+- Review and merge PR #31 if explicit scalar targets, exact selected-observation receipts, visible target binding, and narrow met/missed semantics match the intended v1.
+- Keep acceptable ranges, dynamic targets, target provenance/ownership, materiality, and multi-objective policy as separate future work.
+
 2026-10-18 - Add control-total reconciliation contracts
 
 Environment:

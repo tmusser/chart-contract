@@ -2,59 +2,67 @@
 
 ## Resume Packet
 
-- Goal: make additive component decompositions reconcile explicitly to one scalar control total.
-- Branch: `agent/control-total-reconciliation`.
-- Base: `main` at `269d5fe49ab687484a8aed5354eab1206ceb55f4`.
-- Pull request: #29 (`feat: audit control total reconciliation`).
-- Current slice: first-party reconciliation API, closed v1 receipts, chart/spec audits, component uniqueness/value checks, residual/share arithmetic, ratio-like rejection, control-total-gap CLI trap, three new profile rules, tests, and docs.
-- Read first: `src/chart_contract/reconciliation.py`, `src/chart_contract/reconciliation_audit.py`, `tests/test_reconciliation_contract.py`, and `docs/RECONCILIATION_CONTRACT.md`.
+- Goal: make scalar business targets explicit, select exactly which supplied observation is evaluated, preserve durable target receipts, keep the threshold visibly bound, and audit narrow met/missed wording.
+- Branch: `agent/metric-target-contract`.
+- Base: `main` at `c8e58c006a7215d9b89ed7db7c309e49a0ba9848`.
+- Pull request: #31 (`feat: audit metric target thresholds`).
+- Current slice: first-party target API, closed v1 receipts, chart/spec audits, exact observation selection, visible datum-backed target rules, bounded met/missed claim parsing, target-status mismatch CLI trap, four new profile rules, tests, and docs.
+- Read first: `src/chart_contract/target.py`, `src/chart_contract/target_audit.py`, `tests/test_target_contract.py`, and `docs/TARGET_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.rank()` and `Chart.compare()` accept:
-  - `control_total`
-  - optional `control_total_source`
-  - optional `reconciliation_tolerance`
-- Reconciliation is opt-in.
-- Trend is intentionally excluded in v1 so time rows are not accidentally treated as additive components.
-- V1 uses fixed `sum` semantics only.
-- First-party specs preserve a closed `usermeta.reconciliation_contract`.
-- The contract binds `x` as component field and `y` as additive metric field.
-- Components must be non-null/non-blank and unique.
-- Metric values must be complete, finite, numeric, and non-boolean.
-- Duplicate component labels block rather than being silently summed.
-- Percent/rate/ratio metrics are rejected from sum reconciliation.
-- Component sum, residual, and represented share are recomputed from supplied evidence.
-- Represented share is available only for positive controls with non-negative components.
-- First-party rendering refuses a reconciliation outside tolerance.
-- External specs may preserve a failing but internally coherent receipt; audit then emits `data.reconciliation.total=FAIL` with the residual/share rather than misclassifying it as malformed schema.
-- Stale receipts that remain internally coherent but disagree with supplied evidence block.
-- `examples/traps/control_total_gap.*` uses 9.1M components against 11.8M control -> residual 2.7M, 77.1% represented, BLOCK.
-- No balancing component is created automatically.
-- Reconciliation covers supplied evidence; truncated rank display semantics remain independently covered by comparison-set rules.
-- The `audit-v0.2` profile now contains 94 rules.
+- `Chart.trend()` and `Chart.compare()` accept:
+  - `metric_target`
+  - `target_operator`
+  - `target_selector_field`
+  - `target_selector_value`
+  - optional `target_tolerance`
+- Target semantics are opt-in.
+- V1 operators are `at_least`, `at_most`, and `equal`.
+- Tolerance is absolute, finite, non-negative, and defaults to zero.
+- The selector must resolve to exactly one supplied row; chart-contract never chooses latest/rightmost/max-date automatically.
+- The selected metric value must be finite numeric evidence.
+- First-party specs preserve closed `usermeta.target_contract` metadata:
+  - metric field
+  - selector field/value
+  - target value
+  - operator
+  - tolerance
+  - observed value
+  - signed target gap
+  - target-met boolean
+- External audits recompute those receipts from supplied evidence.
+- First-party trend/compare output renders the target as a datum-backed rule so the threshold is visible without being invented as source evidence.
+- External target metadata requires a visible rule at the exact declared scalar; removed/moved rules block.
+- Narrow target-status wording without a target contract produces REVIEW.
+- Target-status wording contradictory to recomputed `target_met` blocks.
+- Mixed met/missed wording blocks.
+- Ordinary claims stay opt-in and do not create target semantics.
+- Target and directionality contracts are independent; neither is inferred from the other.
+- `examples/traps/target_status_claim_mismatch.*` uses selected value 0.76 versus at-least target 0.80 with correct receipts/rule but claim `Conversion met target.` -> BLOCK.
+- The `audit-v0.2` profile now contains 100 rules.
 
 ## Important Decisions
 
-- Control-total reconciliation is source-evidence arithmetic, not business-authority certification.
-- One scalar control + one sum decomposition keeps v1 deterministic and inspectable.
-- `control_total_source` is optional descriptive provenance, not authentication.
-- `reconciliation_tolerance` is an explicit absolute tolerance; no automatic tolerance is inferred from metric magnitude.
-- The tiny `math.isclose` relative tolerance exists only for floating-point stability.
-- Duplicate components are treated as ambiguous/double-count risk rather than implicitly aggregated.
-- A failed reconciliation surfaces the residual and represented share but does not infer the missing category.
-- Unknown/Other/balancing rows are never synthesized to make arithmetic pass.
-- Ratio-like metrics stay outside generic additive reconciliation.
-- Existing grain, rank/comparison-set, unit, metric-definition, population, uncertainty, ratio, comparison, and time-window contracts remain independent and composable.
-- Older schema-0.4 reports become stale-policy artifacts because three new reconciliation rules change profile semantic identity.
+- Scalar static thresholds keep v1 deterministic and inspectable.
+- Target selection is explicit rather than temporal/order-based.
+- `target_gap = observed - target` is stored only as arithmetic receipt; its sign is not utility semantics.
+- A datum-backed rule is target metadata made visible, not a synthetic evidence row.
+- Target contract validation and selected-observation evidence validation are separate findings.
+- `at_least`, `at_most`, and `equal` cover the bounded v1 threshold semantics; acceptable bands/ranges are deferred.
+- Met/missed claim parsing is intentionally narrow. Above/below target, on track, healthy, acceptable, and broad goal language are not interpreted.
+- A target contract is not target authority/provenance certification.
+- A passing target contract does not imply materiality, achievability, statistical significance, or causal benefit.
+- Existing directionality, comparison, uncertainty, reconciliation, ratio, population, unit, metric-definition, grain, and rank contracts remain independent and composable.
+- Older schema-0.4 reports become stale-policy artifacts because four new target rules change profile semantic identity.
 
 ## Verification
 
-Initial GitHub Actions CI run #276 (`39152937739`) found one stale-receipt test fixture that changed component total/residual but failed to update represented share; the closed schema correctly rejected that fixture before evidence replay.
+CI run #285 (`39621270743`) exposed a malformed method-signature insertion in the new public API. This was repaired without changing design semantics.
 
-The fixture was corrected to remain internally coherent while stale versus supplied evidence.
+CI run #286 (`39621431123`) exposed target test fixtures that unintentionally triggered existing ratio-contract review and minimum-trend-row blocking. Those fixtures and docs were made scope-neutral; the existing guardrails were preserved.
 
-GitHub Actions CI run #277 (`39153019498`) passed on code-bearing head `9512ebded454e6f510b0ef3e2e974187d5936abf`:
+Corrected GitHub Actions CI run #289 (`39621792558`) passed on head `3820a91296644f38ca874c160c1ebe3a06f38613`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -62,7 +70,7 @@ GitHub Actions CI run #277 (`39153019498`) passed on code-bearing head `9512ebde
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
 - all existing CLI trap paths -> PASSED
-- `control_total_gap` BLOCK trap -> PASSED
+- `target_status_claim_mismatch` BLOCK trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -70,15 +78,16 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- A consistently wrong control total or source label remains undetectable.
-- V1 does not authenticate external control totals.
-- V1 does not model hierarchical controls, accounting bridges, or nested subtotal reconciliation.
-- V1 does not automatically reconcile transformed/filtered display subsets; those remain under transform and comparison-set policies.
-- V1 uses float arithmetic rather than exact decimal accounting.
-- Multi-row component definitions require upstream aggregation or a future richer reconciliation contract.
+- Target values and selectors remain user-supplied and can be consistently wrong.
+- V1 does not authenticate target ownership/source or effective dates.
+- V1 supports one scalar static threshold, not ranges, bands, multiple thresholds, or time-varying targets.
+- V1 uses float comparison/tolerance rather than exact decimal semantics.
+- A selected row can be mechanically unique but analytically unfair.
+- Visible-rule auditing proves structural binding only.
+- Broader goal/threshold prose remains intentionally outside the parser.
 
 ## Next Recommended Task
 
-- Confirm final PR #29 CI remains green after VERIFY/HANDOFF.
-- Merge if scalar additive reconciliation and explicit residual semantics match the intended v1.
-- Keep hierarchical control trees, accounting adjustments, and exact-decimal reconciliation separate future work.
+- Confirm final PR #31 CI remains green after VERIFY/HANDOFF.
+- Merge if explicit scalar thresholds, exact selector semantics, visible target binding, and narrow target-status claim parity match the desired v1.
+- Keep target provenance/ownership, acceptable ranges, dynamic targets, materiality, and multi-objective policy separate future work.

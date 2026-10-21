@@ -50,6 +50,7 @@ from ..unit_conversion import (
     parse_unit_conversion_contract,
     source_unit_basis_status,
 )
+from ..target import TARGET_INTENTS, build_target_summary, target_declaration
 from ..statistics import (
     ECDF_PROBABILITY_FIELD,
     ECDF_VALUE_FIELD,
@@ -136,6 +137,15 @@ def render_chart(chart: Any) -> alt.Chart:
         usermeta["directionality_contract"] = parse_directionality_contract(
             {"usermeta": {"directionality_contract": directionality_raw}}
         )
+
+    target_raw = (
+        target_declaration(chart)
+        if chart.intent in TARGET_INTENTS
+        else None
+    )
+    if target_raw is not None:
+        target_summary = build_target_summary(chart.data, **target_raw)
+        usermeta["target_contract"] = target_summary.to_dict()
 
     reconciliation_raw = (
         chart_reconciliation_declaration(chart)
@@ -395,7 +405,12 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         x_type=x_type,
         x_tooltip_type=tooltip_type,
     )
-    rendered = line if interval is None else line + interval
+    target = _render_target_rule(chart)
+    rendered = line
+    if interval is not None:
+        rendered = rendered + interval
+    if target is not None:
+        rendered = rendered + target
 
     if not chart.event:
         return rendered
@@ -500,7 +515,25 @@ def _render_compare(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
         x_type="N",
         x_tooltip_type="nominal",
     )
-    return bars if interval is None else bars + interval
+    target = _render_target_rule(chart)
+    rendered = bars
+    if interval is not None:
+        rendered = rendered + interval
+    if target is not None:
+        rendered = rendered + target
+    return rendered
+
+
+def _render_target_rule(chart: Any) -> alt.Chart | None:
+    declaration = target_declaration(chart)
+    if declaration is None:
+        return None
+    summary = build_target_summary(chart.data, **declaration)
+    return (
+        alt.Chart()
+        .mark_rule(strokeDash=[6, 4])
+        .encode(y=alt.datum(summary.target_value))
+    )
 
 
 def _render_interval_rule(

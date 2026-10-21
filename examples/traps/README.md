@@ -6,6 +6,23 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `target_status_claim_mismatch`
+
+Demonstrates a fully visible and internally consistent scalar target contract whose selected
+observation misses an `at_least` threshold while the claim says the target was met.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/target_status_claim_mismatch.vl.json \
+  --data examples/traps/target_status_claim_mismatch.csv \
+  --claim "$(cat examples/traps/target_status_claim_mismatch.claim.txt)"
+```
+
+Expected findings: `contract.metric.target=PASS`,
+`data.metric.target_observation=PASS`, `visual.metric.target=PASS`, and
+`claim.metric.target_semantics=FAIL`. The audit does not rewrite the claim or move the target.
+
 ### `lower_is_better_claim_reversed`
 
 Demonstrates a comparison whose arithmetic is correct but whose evaluative claim reverses the
