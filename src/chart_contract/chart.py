@@ -88,6 +88,11 @@ class Chart:
     control_total_source: str | None = None
     reconciliation_tolerance: float | int | None = None
     metric_direction: str | None = None
+    metric_target: float | int | None = None
+    target_operator: str | None = None
+    target_selector_field: str | None = None
+    target_selector_value: str | int | float | None = None
+    target_tolerance: float | int | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -129,7 +134,12 @@ class Chart:
         interval_kind: str | None = None,
         interval_level: float | int | None = None,
         interval_method: str | None = None,
-        metric_direction: str | None = None,
+        metric_direction: str | None = None
+    metric_target: float | int | None = None
+    target_operator: str | None = None
+    target_selector_field: str | None = None
+    target_selector_value: str | int | float | None = None
+    target_tolerance: float | int | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -187,6 +197,11 @@ class Chart:
             interval_level=interval_level,
             interval_method=interval_method,
             metric_direction=metric_direction,
+            metric_target=metric_target,
+            target_operator=target_operator,
+            target_selector_field=target_selector_field,
+            target_selector_value=target_selector_value,
+            target_tolerance=target_tolerance,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
@@ -340,7 +355,12 @@ class Chart:
         interval_kind: str | None = None,
         interval_level: float | int | None = None,
         interval_method: str | None = None,
-        metric_direction: str | None = None,
+        metric_direction: str | None = None
+    metric_target: float | int | None = None
+    target_operator: str | None = None
+    target_selector_field: str | None = None
+    target_selector_value: str | int | float | None = None
+    target_tolerance: float | int | None = None,
         numerator: str | None = None,
         denominator: str | None = None,
         cohort: str | None = None,
@@ -402,6 +422,11 @@ class Chart:
             interval_level=interval_level,
             interval_method=interval_method,
             metric_direction=metric_direction,
+            metric_target=metric_target,
+            target_operator=target_operator,
+            target_selector_field=target_selector_field,
+            target_selector_value=target_selector_value,
+            target_tolerance=target_tolerance,
             numerator=numerator,
             denominator=denominator,
             cohort=cohort,
