@@ -238,15 +238,30 @@ def spec_has_target_rule(spec: Mapping[str, Any], target_value: float) -> bool:
             mark_type = mark.get("type") if isinstance(mark, Mapping) else mark
             encoding = node.get("encoding")
             if mark_type == "rule" and isinstance(encoding, Mapping):
+                data = node.get("data")
+                values = data.get("values") if isinstance(data, Mapping) else None
                 for channel in ("y", "x"):
                     definition = encoding.get(channel)
-                    if isinstance(definition, Mapping) and "datum" in definition:
+                    if not isinstance(definition, Mapping):
+                        continue
+                    if "datum" in definition:
                         datum = definition.get("datum")
                         if isinstance(datum, bool):
                             continue
                         if isinstance(datum, (int, float)) and math.isfinite(float(datum)):
                             if math.isclose(float(datum), target_value, rel_tol=1e-9, abs_tol=1e-9):
                                 return True
+                    field = definition.get("field")
+                    if isinstance(field, str) and isinstance(values, list):
+                        for row in values:
+                            if not isinstance(row, Mapping) or field not in row:
+                                continue
+                            raw = row.get(field)
+                            if isinstance(raw, bool):
+                                continue
+                            if isinstance(raw, (int, float)) and math.isfinite(float(raw)):
+                                if math.isclose(float(raw), target_value, rel_tol=1e-9, abs_tol=1e-9):
+                                    return True
             return any(walk(value) for value in node.values())
         if isinstance(node, list):
             return any(walk(value) for value in node)
