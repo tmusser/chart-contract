@@ -235,6 +235,21 @@ jobs:
           grep -q "confidence" <<<"$uncertainty_output"
 
           set +e
+          target_output=$(chart-contract audit spec examples/traps/target_status_claim_mismatch.vl.json \
+            --data examples/traps/target_status_claim_mismatch.csv \
+            --claim "$(cat examples/traps/target_status_claim_mismatch.claim.txt)" 2>&1)
+          target_exit=$?
+          set -e
+          echo "$target_output"
+          test "$target_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$target_output"
+          grep -q "contract.metric.target" <<<"$target_output"
+          grep -q "data.metric.target_observation" <<<"$target_output"
+          grep -q "visual.metric.target" <<<"$target_output"
+          grep -q "claim.metric.target_semantics" <<<"$target_output"
+          grep -q "missed" <<<"$target_output"
+
+          set +e
           reconciliation_output=$(chart-contract audit spec examples/traps/control_total_gap.vl.json \
             --data examples/traps/control_total_gap.csv \
             --claim "$(cat examples/traps/control_total_gap.claim.txt)" 2>&1)
