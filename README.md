@@ -451,6 +451,35 @@ Wording that contradicts the declared direction and observed baseline-to-target 
 that optimization is causally justified. See
 [Metric directionality contract](docs/DIRECTIONALITY_CONTRACT.md).
 
+### Metric targets: bind the threshold and the evaluated observation
+
+Directionality does not tell you whether a metric actually cleared a business threshold.
+Declare one scalar target, one operator, and the exact observation to evaluate:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="period",
+    y="conversion_rate",
+    claim="Conversion met target.",
+    source="warehouse.funnel",
+    unit="rate",
+    metric_target=0.80,
+    target_operator="at_least",
+    target_selector_field="period",
+    target_selector_value="after",
+)
+```
+
+Version 1 supports `at_least`, `at_most`, and `equal`, plus an optional absolute
+`target_tolerance`. The audit stores the selected observed value, target gap, and recomputed
+`target_met` receipt. First-party trend/compare specs visibly draw the threshold as a rule.
+
+Narrow wording such as `met target`, `hit target`, or `missed target` must agree with the
+contract. Explicit target-status wording without metadata produces `REVIEW`. The harness does
+not infer the latest row, acceptable ranges, business materiality, or target authority. See
+[Metric target contract](docs/TARGET_CONTRACT.md).
+
 ### Comparisons: bind the baseline and the arithmetic
 
 For explicit change claims, declare exactly which observations are being compared and what
