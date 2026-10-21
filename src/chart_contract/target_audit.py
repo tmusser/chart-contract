@@ -13,6 +13,7 @@ from .target import (
     TARGET_INTENTS,
     build_target_summary,
     explicit_target_claim,
+    normalize_target_declaration,
     parse_target_contract,
     spec_has_target_rule,
     target_declaration,
@@ -41,21 +42,21 @@ def audit_target_chart(report: AuditReport, chart: Any) -> None:
         return
 
     try:
-        summary = build_target_summary(chart.data, **declaration)
+        normalized = normalize_target_declaration(**declaration)
     except ValueError as exc:
         report.add(
             "contract.metric.target",
             FAIL,
             str(exc).replace("usermeta.target_contract.", "target contract "),
             suggestion=(
-                "Declare one finite scalar target, one supported operator, and one selector "
-                "that resolves to exactly one observed metric value."
+                "Declare one finite scalar target, one supported operator, and one "
+                "non-empty selector."
             ),
             field="metric_target",
         )
         return
 
-    if summary.metric_field != getattr(chart, "y", None):
+    if normalized["metric_field"] != getattr(chart, "y", None):
         report.add(
             "contract.metric.target",
             FAIL,
@@ -68,11 +69,24 @@ def audit_target_chart(report: AuditReport, chart: Any) -> None:
         "contract.metric.target",
         PASS,
         (
-            f"Metric {summary.metric_field!r} declares target "
-            f"{summary.operator} {summary.target_value:g} with tolerance "
-            f"{summary.tolerance:g}."
+            f"Metric {normalized['metric_field']!r} declares target "
+            f"{normalized['operator']} {normalized['target_value']:g} with tolerance "
+            f"{normalized['tolerance']:g}."
         ),
     )
+
+    try:
+        summary = build_target_summary(chart.data, **normalized)
+    except ValueError as exc:
+        report.add(
+            "data.metric.target_observation",
+            FAIL,
+            str(exc),
+            suggestion="Provide exactly one finite selected target observation.",
+            field="target_selector_field",
+        )
+        return
+
     report.add(
         "data.metric.target_observation",
         PASS,
