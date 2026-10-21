@@ -44,6 +44,10 @@
 - Do not equate an increase with improvement or a decrease with deterioration. When evaluative wording matters, require explicit metric directionality plus an explicit comparison baseline.
 - Keep directionality parsing deliberately narrow: better/improved versus worse/worsened/deteriorated. Descriptive increase/decrease wording is not an evaluative judgment.
 - Treat `neutral` directionality as a declaration that chart-contract should not label movement as better or worse; evaluative claims against neutral metrics block.
+- Do not infer a business target from metric directionality, the latest row, chart position, title text, or a target-looking value; target semantics are explicit and separately contracted.
+- Target contracts select exactly one supplied observation and use only `at_least`, `at_most`, or `equal` with optional absolute tolerance; do not silently choose a reporting point.
+- When target metadata is declared, preserve a visible threshold rule and durable observed-value/gap/status receipts; do not keep metadata after the line or evidence changes.
+- Treat met/missed-target claim parity as semantic consistency only, not proof that the target is authoritative, material, achievable, or statistically meaningful.
 - Treat source grain as row identity: declared grain fields must be non-null and unique; do not silently deduplicate duplicate grain keys.
 - Do not collapse a finer source grain into a coarser displayed grain without an explicit aggregation operation; never guess sum versus mean versus another reducer.
 - Treat matching grain/aggregation receipts as structural consistency only, not proof that the declared business key or aggregation is substantively correct.
