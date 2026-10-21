@@ -40,6 +40,7 @@ The current unreleased line adds and hardens:
 - explicit uncertainty interval contracts for trend/compare estimates, including bound integrity, visible field binding, interval kind/level/method identity, and narrow claim parity
 - explicit control-total reconciliation contracts for additive rank/compare component evidence, with durable sum/residual/share receipts and no automatic balancing bucket
 - explicit metric-directionality contracts for trend/compare evidence so better/worse claims respect higher-is-better, lower-is-better, or neutral semantics
+- explicit scalar metric-target contracts for trend/compare evidence, with selected-observation receipts, visible threshold rules, bounded operators/tolerance, and narrow met/missed claim parity
 - CI across Python 3.10-3.13 plus isolated wheel build and install checks
 - generated proof artifacts and current-state documentation kept in sync with the implementation
 
