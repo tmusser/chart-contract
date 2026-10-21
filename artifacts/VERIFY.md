@@ -1,5 +1,28 @@
 # VERIFY
 
+2026-10-21 - Add opt-in Perch semantic regression pilot
+
+Environment:
+- Branch: `chore/perch-neutral-directionality` (from `main`).
+- Scope: integration/configuration and deterministic tests; no production code changes.
+
+Changes:
+- Added `perch.yaml` containing the narrow neutral movement semantics invariant; `scan_types: [lint]` prevents unrelated model-review rules from entering this pilot.
+- Added an opt-in GitHub Actions check scoped to changes in `directionality.py` or the integration configuration; fork PRs are skipped.
+- Added direct pytest coverage for rising/falling neutral values and unchanged values for all supported directionalities.
+- Added `docs/PERCH.md` with activation, credentials, local checks, and explicit model-evaluation limitations.
+
+Verification status:
+- Reviewed `movement_semantics` implementation and existing integration test `test_neutral_metric_rejects_better_worse_claim`.
+- Existing behavior returns `unchanged` before considering neutral, then returns `neutral` for unequal neutral movement.
+- NOT YET RUN: repository pytest/CI (awaiting GitHub PR checks).
+- NOT YET RUN: Perch model-evaluated scan or mutation test (requires a configured System One API key).
+- Perch workflow remains skipped until the repository variable `PERCH_ENABLED=true`; an enabled workflow with no `PERCH_API_KEY` fails explicitly.
+
+Next:
+- Open PR, inspect CI results, and configure `PERCH_API_KEY` + `PERCH_ENABLED` to activate the Perch check before treating it as an enforced semantic gate.
+- Use a throwaway branch to intentionally violate the neutral guard, verify Perch catches it, and revert the deliberate regression.
+
 2026-10-21 - Add metric target threshold contracts
 
 Environment:
