@@ -1,0 +1,14 @@
+# Pilot Perch semantic rule; deterministic pytest tests remain the source of truth.
+# Limit model-based scanning to the custom invariant rather than broad code review.
+scan_types: [lint]
+
+rules:
+  - name: neutral-movement-semantics
+    where: "src/chart_contract/directionality.py"
+    each: file
+    ensure: >-
+      In movement_semantics, equal baseline and target values must return
+      "unchanged" for every supported direction. For unequal values, a
+      direction of "neutral" must always return "neutral", whether the
+      target is higher or lower than baseline. Neutral directionality must
+      never be interpreted as "improvement" or "worsening".
