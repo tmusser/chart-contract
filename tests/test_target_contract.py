@@ -27,7 +27,7 @@ def _chart(claim: str, **overrides) -> Chart:
         "y": "conversion_rate",
         "claim": claim,
         "source": "synthetic.targets",
-        "unit": "rate",
+        "unit": "score",
         "title": "Observed conversion rate",
         "metric_target": 0.80,
         "target_operator": "at_least",
@@ -76,7 +76,9 @@ def test_missing_target_contract_with_explicit_target_claim_requires_review() ->
 
 
 def test_at_most_target_semantics() -> None:
-    frame = pd.DataFrame({"period": ["now"], "latency_ms": [195.0]})
+    frame = pd.DataFrame(
+        {"period": ["before", "now"], "latency_ms": [205.0, 195.0]}
+    )
     chart = Chart.trend(
         data=frame,
         x="period",
@@ -98,7 +100,9 @@ def test_at_most_target_semantics() -> None:
 
 
 def test_equal_target_uses_absolute_tolerance() -> None:
-    frame = pd.DataFrame({"period": ["now"], "score": [99.95]})
+    frame = pd.DataFrame(
+        {"period": ["before", "now"], "score": [100.2, 99.95]}
+    )
     chart = Chart.trend(
         data=frame,
         x="period",
@@ -201,7 +205,7 @@ def _external_spec() -> tuple[dict, pd.DataFrame]:
         ],
         "usermeta": {
             "source": "synthetic.targets",
-            "unit": "rate",
+            "unit": "score",
             "target_contract": {
                 "version": 1,
                 "metric_field": "conversion_rate",
