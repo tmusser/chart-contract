@@ -223,6 +223,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_directionality_chart(report, chart)
 
+    from .target_audit import audit_target_chart
+
+    audit_target_chart(report, chart)
+
     from .time_window_audit import audit_time_window_chart
 
     audit_time_window_chart(report, chart)
@@ -689,6 +693,9 @@ def audit_spec(
         value_representation,
     )
     audit_directionality_spec(report, spec, encoding, resolved_claim)
+    from .target_audit import audit_target_spec
+
+    audit_target_spec(report, spec, encoding, resolved_frame, resolved_claim)
     from .time_window_audit import audit_time_window_spec
     from .grain_audit import audit_grain_spec
 
