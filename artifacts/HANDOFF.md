@@ -1,5 +1,21 @@
 # HANDOFF
 
+## 2026-10-21 — Current work: Perch semantic regression pilot
+
+- Branch: `chore/perch-neutral-directionality` (from `main`).
+- Goal: protect the existing `movement_semantics` neutral-direction invariant through a semantic PR check without changing production behavior.
+- Files: `perch.yaml`, `.github/workflows/perch.yml`, `tests/test_movement_semantics.py`, `docs/PERCH.md`.
+- Perch source: https://github.com/lakeday-org/perch.
+- Rule: equal values produce `unchanged`; unequal movement with neutral direction produces `neutral`, never `improvement`/`worsening`.
+- Deterministic pytest remains the authoritative behavior check. Perch is a supplementary model-evaluated pilot.
+- PR workflow scans the directionality source when that source/rule/workflow changes; same-repository PRs only. `scan_types: [lint]` restricts Perch to the custom rule.
+- Activation requires repository secret `PERCH_API_KEY` (compatible System One endpoint) and repository variable `PERCH_ENABLED=true`.
+- Without activation, the job is skipped; with activation but no secret, it fails explicitly.
+- No full pytest run or Perch model scan has been performed in this environment; observe PR CI and then test a deliberately broken implementation to calibrate detection.
+- Next: review/open the PR, provision credentials if desired, enable the check, verify it detects a mutation, and only then merge.
+
+---
+
 ## Resume Packet
 
 - Goal: make scalar business targets explicit, select exactly which supplied observation is evaluated, preserve durable target receipts, keep the threshold visibly bound, and audit narrow met/missed wording.
