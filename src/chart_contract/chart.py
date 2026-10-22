@@ -93,6 +93,11 @@ class Chart:
     target_selector_field: str | None = None
     target_selector_value: str | int | float | None = None
     target_tolerance: float | int | None = None
+    scope_id: str | None = None
+    scope_definition: str | None = None
+    scope_version: str | None = None
+    scope_basis_field: str | None = None
+    scope_basis_value: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -160,6 +165,11 @@ class Chart:
         event: Mapping[str, Any] | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
+        scope_id: str | None = None,
+        scope_definition: str | None = None,
+        scope_version: str | None = None,
+        scope_basis_field: str | None = None,
+        scope_basis_value: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -222,6 +232,11 @@ class Chart:
             event=event,
             caveat=caveat,
             filters=filters,
+            scope_id=scope_id,
+            scope_definition=scope_definition,
+            scope_version=scope_version,
+            scope_basis_field=scope_basis_field,
+            scope_basis_value=scope_basis_value,
             metadata=metadata,
         )
 
@@ -268,6 +283,11 @@ class Chart:
         other_label: str = "Other",
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
+        scope_id: str | None = None,
+        scope_definition: str | None = None,
+        scope_version: str | None = None,
+        scope_basis_field: str | None = None,
+        scope_basis_value: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -312,6 +332,11 @@ class Chart:
             other_label=other_label,
             caveat=caveat,
             filters=filters,
+            scope_id=scope_id,
+            scope_definition=scope_definition,
+            scope_version=scope_version,
+            scope_basis_field=scope_basis_field,
+            scope_basis_value=scope_basis_value,
             metadata=metadata,
         )
 
@@ -380,6 +405,11 @@ class Chart:
         target_complete: bool | None = None,
         caveat: str | None = None,
         filters: Mapping[str, Any] | str | None = None,
+        scope_id: str | None = None,
+        scope_definition: str | None = None,
+        scope_version: str | None = None,
+        scope_basis_field: str | None = None,
+        scope_basis_value: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -446,6 +476,11 @@ class Chart:
             target_complete=target_complete,
             caveat=caveat,
             filters=filters,
+            scope_id=scope_id,
+            scope_definition=scope_definition,
+            scope_version=scope_version,
+            scope_basis_field=scope_basis_field,
+            scope_basis_value=scope_basis_value,
             metadata=metadata,
         )
 
