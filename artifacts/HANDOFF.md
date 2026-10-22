@@ -2,67 +2,49 @@
 
 ## Resume Packet
 
-- Goal: make scalar business targets explicit, select exactly which supplied observation is evaluated, preserve durable target receipts, keep the threshold visibly bound, and audit narrow met/missed wording.
-- Branch: `agent/metric-target-contract`.
-- Base: `main` at `c8e58c006a7215d9b89ed7db7c309e49a0ba9848`.
-- Pull request: #31 (`feat: audit metric target thresholds`).
-- Current slice: first-party target API, closed v1 receipts, chart/spec audits, exact observation selection, visible datum-backed target rules, bounded met/missed claim parsing, target-status mismatch CLI trap, four new profile rules, tests, and docs.
-- Read first: `src/chart_contract/target.py`, `src/chart_contract/target_audit.py`, `tests/test_target_contract.py`, and `docs/TARGET_CONTRACT.md`.
+- Goal: make filtered/cohort analysis-scope identity explicit so stable metrics cannot silently compare different evidence universes.
+- Branch: `agent/analysis-scope-contract`.
+- Base: `main` at `babf9efd8f008e4b7020c5eacf6328be9048fd16`.
+- Pull request: #33 (`feat: audit analysis scope identity`).
+- Current slice: first-party scope API, closed v1 metadata, chart/spec audits, row-level scope-basis checks, renderer refusal, mixed-scope CLI trap, two new profile rules, tests, and docs.
+- Read first: `src/chart_contract/analysis_scope.py`, `src/chart_contract/analysis_scope_audit.py`, `tests/test_analysis_scope_contract.py`, and `docs/ANALYSIS_SCOPE_CONTRACT.md`.
 
 ## Current Repo State
 
-- `Chart.trend()` and `Chart.compare()` accept:
-  - `metric_target`
-  - `target_operator`
-  - `target_selector_field`
-  - `target_selector_value`
-  - optional `target_tolerance`
-- Target semantics are opt-in.
-- V1 operators are `at_least`, `at_most`, and `equal`.
-- Tolerance is absolute, finite, non-negative, and defaults to zero.
-- The selector must resolve to exactly one supplied row; chart-contract never chooses latest/rightmost/max-date automatically.
-- The selected metric value must be finite numeric evidence.
-- First-party specs preserve closed `usermeta.target_contract` metadata:
-  - metric field
-  - selector field/value
-  - target value
-  - operator
-  - tolerance
-  - observed value
-  - signed target gap
-  - target-met boolean
-- External audits recompute those receipts from supplied evidence.
-- First-party trend/compare output renders the target as a datum-backed rule so the threshold is visible without being invented as source evidence.
-- External target metadata requires a visible rule at the exact declared scalar; removed/moved rules block.
-- Narrow target-status wording without a target contract produces REVIEW.
-- Target-status wording contradictory to recomputed `target_met` blocks.
-- Mixed met/missed wording blocks.
-- Ordinary claims stay opt-in and do not create target semantics.
-- Target and directionality contracts are independent; neither is inferred from the other.
-- `examples/traps/target_status_claim_mismatch.*` uses selected value 0.76 versus at-least target 0.80 with correct receipts/rule but claim `Conversion met target.` -> BLOCK.
-- The `audit-v0.2` profile now contains 100 rules.
+- `Chart.trend()`, `Chart.rank()`, and `Chart.compare()` accept:
+  - `scope_id`
+  - `scope_definition`
+  - `scope_version`
+  - optional `scope_basis_field`
+  - optional `scope_basis_value`
+- Analysis-scope identity is opt-in.
+- If any scope identity metadata is declared, ID/definition/version must all be present and non-empty.
+- Basis field/value are optional but must be declared as a pair.
+- First-party specs preserve a closed `usermeta.analysis_scope_contract`.
+- Metadata-only scope identity is allowed; it does not fabricate row-level evidence.
+- When row-level basis evidence is declared, the field must exist and every row must carry one non-empty string identity exactly matching the expected basis value.
+- Mixed scopes block, including otherwise clean evidence that shifts from `us_paid_v1` to `all_customers_v1`.
+- The first-party renderer refuses to stamp inconsistent row-level scope evidence.
+- External specs require reconstructable data when claiming row-level scope evidence.
+- Existing free-form `filters` metadata remains separate and non-executable.
+- `examples/traps/mixed_analysis_scope.*` demonstrates same metric + same chart + different evidence universe -> BLOCK.
+- The `audit-v0.2` profile now contains 102 rules.
 
 ## Important Decisions
 
-- Scalar static thresholds keep v1 deterministic and inspectable.
-- Target selection is explicit rather than temporal/order-based.
-- `target_gap = observed - target` is stored only as arithmetic receipt; its sign is not utility semantics.
-- A datum-backed rule is target metadata made visible, not a synthetic evidence row.
-- Target contract validation and selected-observation evidence validation are separate findings.
-- `at_least`, `at_most`, and `equal` cover the bounded v1 threshold semantics; acceptable bands/ranges are deferred.
-- Met/missed claim parsing is intentionally narrow. Above/below target, on track, healthy, acceptable, and broad goal language are not interpreted.
-- A target contract is not target authority/provenance certification.
-- A passing target contract does not imply materiality, achievability, statistical significance, or causal benefit.
-- Existing directionality, comparison, uncertainty, reconciliation, ratio, population, unit, metric-definition, grain, and rank contracts remain independent and composable.
-- Older schema-0.4 reports become stale-policy artifacts because four new target rules change profile semantic identity.
+- Scope identity is separate from metric-definition identity: a metric can remain semantically stable while its cohort/filter universe changes.
+- V1 is deliberately identity-based, not a filter execution engine.
+- No SQL, dbt, arbitrary Vega expressions, or free-form filter strings are replayed merely to make a scope contract pass.
+- `scope_definition` is descriptive metadata and is not parsed for semantic equivalence.
+- Optional row-level basis identity provides bounded evidence without pretending it proves upstream membership logic.
+- Scope labels are exact strings; chart-contract does not normalize aliases.
+- A passing scope contract does not prove the scope is analytically appropriate or that exclusions are justified.
+- Existing metric-definition, population, unit, ratio, comparison, uncertainty, reconciliation, directionality, target, grain, and rank contracts remain independent and composable.
+- Older schema-0.4 reports become stale-policy artifacts because two new scope rules change profile semantic identity.
 
 ## Verification
 
-CI run #285 (`39621270743`) exposed a malformed method-signature insertion in the new public API. This was repaired without changing design semantics.
-
-CI run #286 (`39621431123`) exposed target test fixtures that unintentionally triggered existing ratio-contract review and minimum-trend-row blocking. Those fixtures and docs were made scope-neutral; the existing guardrails were preserved.
-
-Corrected GitHub Actions CI run #289 (`39621792558`) passed on head `3820a91296644f38ca874c160c1ebe3a06f38613`:
+GitHub Actions CI run #294 (`39857374077`) passed on code-bearing head `68b5db01cea5336bfc3656df6a55eba6aca2a5ff`:
 
 - Python 3.10 -> PASSED
 - Python 3.11 -> PASSED
@@ -70,7 +52,7 @@ Corrected GitHub Actions CI run #289 (`39621792558`) passed on head `3820a912966
 - Python 3.13 -> PASSED
 - source compilation / environment checks -> PASSED
 - all existing CLI trap paths -> PASSED
-- `target_status_claim_mismatch` BLOCK trap -> PASSED
+- `mixed_analysis_scope` BLOCK trap -> PASSED
 - build/distribution inspection -> PASSED
 - isolated wheel install / installed CLI and report-binding smoke -> PASSED
 
@@ -78,16 +60,14 @@ The final VERIFY/HANDOFF commits are documentation-only. Treat the final-head Ac
 
 ## Remaining Risks
 
-- Target values and selectors remain user-supplied and can be consistently wrong.
-- V1 does not authenticate target ownership/source or effective dates.
-- V1 supports one scalar static threshold, not ranges, bands, multiple thresholds, or time-varying targets.
-- V1 uses float comparison/tolerance rather than exact decimal semantics.
-- A selected row can be mechanically unique but analytically unfair.
-- Visible-rule auditing proves structural binding only.
-- Broader goal/threshold prose remains intentionally outside the parser.
+- Scope metadata can be structurally consistent but factually wrong.
+- V1 does not execute filter predicates or prove cohort membership.
+- V1 does not detect semantic drift hidden behind an unchanged scope version.
+- Free-text scope definitions are preserved but not compared for equivalence.
+- V1 does not bind the scope contract to upstream SQL/dbt/Python digests.
 
 ## Next Recommended Task
 
-- Confirm final PR #31 CI remains green after VERIFY/HANDOFF.
-- Merge if explicit scalar thresholds, exact selector semantics, visible target binding, and narrow target-status claim parity match the desired v1.
-- Keep target provenance/ownership, acceptable ranges, dynamic targets, materiality, and multi-objective policy separate future work.
+- Confirm final PR #33 CI remains green after VERIFY/HANDOFF.
+- Merge if exact scope identity and optional row-level scope-basis semantics match the desired v1.
+- Keep executable filter lineage, predicate hashing, cohort membership evidence, and cross-version scope migration semantics separate future work.
