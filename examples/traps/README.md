@@ -6,6 +6,23 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `mixed_analysis_scope`
+
+Demonstrates a visually ordinary active-user trend whose metric field stays stable while the
+supplied evidence silently switches from the declared `us_paid_v1` universe to
+`all_customers_v1`.
+
+Expected verdict: `BLOCK`
+
+```bash
+chart-contract audit spec examples/traps/mixed_analysis_scope.vl.json \
+  --data examples/traps/mixed_analysis_scope.csv \
+  --claim "$(cat examples/traps/mixed_analysis_scope.claim.txt)"
+```
+
+Expected finding: `data.analysis_scope.basis` reporting mixed analysis scopes. The audit
+does not execute or repair the underlying filter logic.
+
 ### `target_status_claim_mismatch`
 
 Demonstrates a fully visible and internally consistent scalar target contract whose selected
