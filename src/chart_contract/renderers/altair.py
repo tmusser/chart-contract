@@ -8,6 +8,12 @@ import altair as alt
 import pandas as pd
 
 from ..contracts import is_datetime_like, is_numeric_series, is_percent_unit
+from ..analysis_scope import (
+    ANALYSIS_SCOPE_INTENTS,
+    chart_analysis_scope_contract,
+    parse_analysis_scope_contract,
+    scope_basis_status,
+)
 from ..comparison import COMPARISON_INTENTS, build_comparison_summary, changes_match, comparison_declaration
 from ..comparison_set import (
     ComparisonSetSummary,
@@ -127,6 +133,25 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if metric_definition_contract is not None:
         usermeta["metric_definition_contract"] = metric_definition_contract
+
+    analysis_scope_raw = (
+        chart_analysis_scope_contract(chart)
+        if chart.intent in ANALYSIS_SCOPE_INTENTS
+        else None
+    )
+    if analysis_scope_raw is not None:
+        analysis_scope_contract = parse_analysis_scope_contract(
+            {"usermeta": {"analysis_scope_contract": analysis_scope_raw}}
+        )
+        if analysis_scope_contract["scope_basis_field"] is not None:
+            ok, message = scope_basis_status(
+                chart.data,
+                basis_field=analysis_scope_contract["scope_basis_field"],
+                basis_value=analysis_scope_contract["scope_basis_value"],
+            )
+            if not ok:
+                raise ValueError(message)
+        usermeta["analysis_scope_contract"] = analysis_scope_contract
 
     directionality_raw = (
         chart_directionality_contract(chart)
