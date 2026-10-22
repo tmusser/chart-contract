@@ -1,5 +1,54 @@
 # VERIFY
 
+2026-10-22 - Add analysis-scope identity contracts
+
+Environment:
+- Branch: `agent/analysis-scope-contract`
+- Base: `main` at `babf9efd8f008e4b7020c5eacf6328be9048fd16`
+- Pull request: #33 (`feat: audit analysis scope identity`)
+- Code-bearing GitHub Actions CI run #294 (`39857374077`) on head `68b5db01cea5336bfc3656df6a55eba6aca2a5ff` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- source compilation / environment checks -> PASSED on every Python lane
+- all existing CLI verdict, diagnostic, transform, coverage, lineage, rank, ratio, comparison, time-window, grain, comparison-set, metric-definition, unit-conversion, population, uncertainty, reconciliation, directionality, and target traps -> PASSED
+- new mixed-analysis-scope CLI trap -> PASSED
+- build + distribution inspection -> PASSED
+- isolated wheel installation and installed CLI/report verification smoke -> PASSED
+
+Verified behavior:
+- first-party `trend`, `rank`, and `compare` accept optional `scope_id`, `scope_definition`, `scope_version`, `scope_basis_field`, and `scope_basis_value`;
+- analysis-scope identity is opt-in and is never inferred from metric names, metric definitions, source strings, chart titles, or existing free-form `filters` metadata;
+- once any scope identity metadata is supplied, scope ID/definition/version are required together and must be non-empty strings;
+- optional row-level scope basis field/value must be declared together or both omitted;
+- first-party specs preserve a closed `usermeta.analysis_scope_contract`;
+- metadata-only scope identity remains valid when no row-level basis evidence is claimed;
+- when a scope basis is declared, the field must exist and every supplied row must carry one non-null, non-blank string identity;
+- mixed scope identities such as `us_paid_v1` and `all_customers_v1` fail `data.analysis_scope.basis`;
+- a uniform row-level identity that disagrees with the declared basis value also blocks;
+- first-party rendering refuses to stamp a scope contract over inconsistent row-level evidence;
+- external scope contracts with row-level basis metadata require reconstructable supplied evidence;
+- closed-schema extra fields and partial declarations block;
+- absence of scope metadata does not invent scope semantics or downgrade ordinary artifacts;
+- machine-readable profile/documentation parity moves from 100 to 102 rules.
+
+Important policy boundary:
+- A passing analysis-scope contract establishes declared filtered/cohort universe identity only.
+- It does not prove upstream SQL/Python/dbt actually implemented the stated scope.
+- It does not execute arbitrary filter expressions or compare free-text scope definitions for semantic equivalence.
+- Existing `filters` metadata remains lightweight presentation/provenance and is not treated as executable filter proof.
+- A stable metric definition and stable scope identity remain separate contracts because either can drift independently.
+
+Remaining risks:
+- A consistently wrong scope label can still be internally coherent.
+- V1 does not hash or replay executable filter logic.
+- V1 checks one optional row-level scope identity field rather than independently proving entity membership.
+- Upstream cohort drift within a stale scope version remains undetectable.
+- Adding two new rules intentionally changes `audit-profile-semantics-v1`; older schema-0.4 reports require re-audit for current policy identity.
+
+Next safest task:
+- Confirm the final VERIFY/HANDOFF documentation head remains green.
+- Review and merge PR #33 if explicit scope identity and strict row-level drift blocking match the intended v1.
+- Keep executable filter lineage, cohort-membership proofs, predicate normalization, and semantic-equivalence checks as separate future work.
+
 2026-10-21 - Add metric target threshold contracts
 
 Environment:
