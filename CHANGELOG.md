@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit analysis-scope identity metadata for trend/rank/compare artifacts, binding a filtered/cohort universe to stable ID, definition, and version.
+- Optional row-level scope-basis checks that block mixed analytical universes such as US-paid and all-customer evidence under one chart.
 - Explicit scalar metric-target contracts for trend/compare charts, binding one selected observation to `at_least`, `at_most`, or `equal` threshold semantics with optional absolute tolerance.
 - Durable target observed-value/gap/status receipts, visible threshold-rule binding, and narrow met/missed-target claim parity without inferring target authority or business materiality.
 - Explicit metric-directionality contracts for trend/compare charts, distinguishing higher-is-better, lower-is-better, and neutral metrics.
