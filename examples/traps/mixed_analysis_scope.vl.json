@@ -1,0 +1,21 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Observed active users",
+  "encoding": {
+    "x": {"field": "period", "type": "ordinal"},
+    "y": {"field": "active_users", "type": "quantitative"}
+  },
+  "usermeta": {
+    "source": "synthetic.analysis_scope",
+    "unit": "users",
+    "analysis_scope_contract": {
+      "version": 1,
+      "scope_id": "us_paid_customers",
+      "scope_definition": "Users with country=US and billing_status=paid.",
+      "scope_version": "v1",
+      "scope_basis_field": "analysis_scope",
+      "scope_basis_value": "us_paid_v1"
+    }
+  }
+}
