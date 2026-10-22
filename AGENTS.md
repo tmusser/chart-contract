@@ -20,6 +20,9 @@
 - Do not infer metric identity or definition stability from a column name, title, unit, claim, or source string; metric-definition metadata is explicit and opt-in.
 - When a metric basis field is declared, mixed or mismatched metric versions block rather than being treated as comparable observations.
 - Treat matching metric-definition metadata as identity consistency only, not proof that upstream computation implemented the declared business definition.
+- Do not assume a stable metric field/definition implies a stable filtered or cohort universe; analysis-scope identity is explicit and opt-in.
+- When a scope basis field/value is declared, mixed or mismatched row-level scope identities block rather than being treated as comparable evidence.
+- Treat matching analysis-scope metadata as identity consistency only, not proof that upstream SQL, cohort membership, or filter predicates implemented the declared scope.
 - Do not infer source measurement units from displayed labels, field names, geography, or value ranges; source/display unit identity is explicit metadata.
 - Never silently convert values to make a unit contract pass. Fixed-scale conversions must preserve original source values and reproduce the declared factor against supplied evidence.
 - Treat matching fixed conversion arithmetic as a reproducible receipt only, not validation of FX provenance, inflation methodology, time-varying rates, or offset conversions.
