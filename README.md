@@ -247,6 +247,35 @@ units, or sources. A match proves identity consistency only, not that upstream c
 implemented the definition correctly. See
 [Metric definition identity contract](docs/METRIC_DEFINITION_CONTRACT.md).
 
+### Analysis scope: bind the evidence universe
+
+A stable metric definition does not guarantee a stable filtered or cohort universe. Preserve the
+analysis scope explicitly when the same metric can be computed over different populations:
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="period",
+    y="active_users",
+    claim="Observed active users changed.",
+    source="warehouse.product_metrics",
+    unit="users",
+    scope_id="us_paid_customers",
+    scope_definition="Users with country=US and billing_status=paid.",
+    scope_version="v1",
+    scope_basis_field="analysis_scope",
+    scope_basis_value="us_paid_v1",
+)
+```
+
+The optional basis field/value checks every supplied row against one declared scope identity.
+Mixing `us_paid_v1` and `all_customers_v1` under one artifact then `BLOCK`s even when
+the metric field, metric definition, and chart shape remain unchanged.
+
+Version 1 does not execute arbitrary SQL predicates or reconstruct upstream cohort logic.
+A passing contract establishes declared scope identity consistency only. See
+[Analysis scope contract](docs/ANALYSIS_SCOPE_CONTRACT.md).
+
 ### Measurement units: bind source and display semantics
 
 A displayed unit does not prove every source row was measured in that unit. When unit identity

@@ -50,6 +50,9 @@ Policy:
 - When a metric catalog/version is available, preserve it in `metric_definition_contract` rather than assuming a stable field name implies stable semantics.
 - Stop on `data.metric.definition_basis`: supplied rows declare incompatible metric versions and should not be compared as one metric artifact.
 - A passing metric-definition contract is identity metadata, not validation that upstream SQL or Python actually implemented the declared definition.
+- When a stable metric can be computed over multiple filtered/cohort universes, preserve `analysis_scope_contract` rather than assuming the field name defines scope.
+- Stop on `data.analysis_scope.basis`: supplied rows carry incompatible scope identities and should not be treated as one analytical universe.
+- Do not execute or rewrite arbitrary SQL/filter expressions to satisfy a scope contract; v1 checks declared identity and optional row-level basis evidence only.
 - When measurement units can differ across source rows, preserve `unit_conversion_contract` instead of assuming the displayed `unit` describes raw evidence.
 - Stop on `data.unit.source_basis` for mixed source units and on `data.unit.conversion_evidence` when a fixed factor does not reproduce supplied source/display values.
 - Do not fetch FX, normalize units, or rewrite values to satisfy the audit; v1 supports identity and one explicit fixed multiplicative factor only.

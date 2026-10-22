@@ -199,6 +199,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_metric_definition_chart(report, chart)
 
+    from .analysis_scope_audit import audit_analysis_scope_chart
+
+    audit_analysis_scope_chart(report, chart)
+
     from .unit_conversion_audit import audit_unit_conversion_chart
 
     audit_unit_conversion_chart(report, chart)
@@ -679,6 +683,9 @@ def audit_spec(
 
     audit_ratio_spec(report, spec, encoding, resolved_frame, unit)
     audit_metric_definition_spec(report, spec, encoding, resolved_frame)
+    from .analysis_scope_audit import audit_analysis_scope_spec
+
+    audit_analysis_scope_spec(report, spec, resolved_frame)
     audit_unit_conversion_spec(report, spec, encoding, resolved_frame, unit)
     audit_population_spec(report, spec, resolved_frame, resolved_claim)
     audit_uncertainty_spec(report, spec, resolved_frame, resolved_claim)

@@ -1,0 +1,3 @@
+period,active_users,analysis_scope
+before,100,us_paid_v1
+after,120,all_customers_v1

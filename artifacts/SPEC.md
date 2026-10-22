@@ -38,6 +38,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit calendar/rolling comparison-window contracts with exact ISO boundaries, completeness declarations, and inclusive-day receipts
 - explicit source/output grain contracts for descriptive charts, including source-key uniqueness and bounded encoding-level aggregation semantics
 - explicit metric-definition identity for trend/rank/compare metrics, including stable ID/definition/version metadata and optional row-level version checks
+- explicit analysis-scope identity for trend/rank/compare metrics, including stable filtered/cohort universe ID/definition/version metadata and optional row-level scope-basis checks
 - explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity/fixed-scale semantics, row-level source-unit checks, and recomputable fixed conversion arithmetic
 - explicit population/sample scope contracts for trend/rank/compare metrics, including declared population/sample counts, bounded sampling methods, optional row-level member/weight evidence, and explicit population-generalization intent
 - explicit uncertainty interval contracts for trend/compare metrics, binding the shown estimate to lower/upper fields, interval kind, level, method, and visible interval marks
@@ -73,6 +74,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Grain contracts verify row-key uniqueness and declared source-to-output collapse only; they do not prove the business key, join logic, or chosen reducer is substantively correct.
 - Metric-definition contracts verify declared identity/version consistency only; they do not prove the business definition is substantively correct or that upstream computation implemented it.
 - Metric identity is never inferred from field names, titles, claims, units, or source strings; the contract is opt-in.
+- Analysis-scope contracts verify declared filtered/cohort universe identity only; they do not execute or validate arbitrary SQL predicates, cohort logic, or upstream filter application.
+- Scope identity is never inferred from a stable metric field, source string, title, or existing free-form filters metadata; the scope contract is opt-in.
 - Unit conversion contracts verify declared source/display identity and fixed multiplicative arithmetic only; they do not validate external FX provenance, inflation methodology, time-varying rates, or offset conversions.
 - Unit identity is never inferred from value ranges, geography, field names, or displayed labels, and chart-contract does not silently mutate source values to satisfy a conversion contract.
 - Population contracts make sample/census scope explicit but do not prove the target population, sampling frame, representativeness, nonresponse assumptions, or statistical validity of population inference.
@@ -130,6 +133,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - automatic prorating, exposure normalization, or inference of MTD/full-period/rolling semantics from labels alone
 - automatic deduplication, join-fanout repair, or guessing sum/mean/other aggregation when source grain is finer than displayed grain
 - inference of business metric definitions or automatic reconciliation of rows produced under different metric versions
+- execution, normalization, or semantic equivalence checking of arbitrary SQL/filter/cohort predicates merely to validate analysis scope
 - automatic unit conversion, FX lookup, inflation adjustment, time-varying conversion factors, or affine/offset conversion such as Celsius/Fahrenheit
 - automatic representativeness certification, survey-design validation, sample-frame completeness proof, response-bias correction, weight calibration, or statistical population-generalization approval
 - automatic confidence/credible/prediction/bootstrap interval computation, coverage certification, significance testing, p-value inference, or overlap-based hypothesis conclusions
@@ -177,6 +181,8 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - First-party descriptive charts refuse many-to-one source-to-display collapse; external specs may use one supported encoding-level aggregate only when grain metadata exactly matches the aggregate and recomputed row/group receipts.
 - Declared metric-definition contracts bind the shown quantitative field to one metric ID, definition, and version; partial/malformed/field-mismatched contracts block.
 - When a metric basis field is declared, missing/null/mixed row versions or versions that disagree with the contract block.
+- Declared analysis-scope contracts bind the artifact to one non-empty scope ID, definition, and version; partial/malformed contracts block.
+- Optional scope-basis field/value declarations must be paired, and every supplied row must carry one non-empty scope identity exactly matching the declared basis value.
 - Declared unit-conversion contracts bind the shown quantitative field to source/display units and either identity or fixed-scale semantics; malformed, partial, field-mismatched, or display-unit-mismatched contracts block.
 - When a source-unit basis field is declared, missing/null/mixed/mismatched source-unit identities block; fixed-scale conversions must reproduce displayed values from preserved source values and the declared factor.
 - Explicit `sample of` / `sampled from` / `survey respondent(s)` / `census of` claim wording without population metadata produces REVIEW; ordinary claims do not invent sampling semantics.
@@ -236,7 +242,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 100-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 102-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -259,6 +265,8 @@ For aggregation grain semantics, run `python -m pytest tests/test_grain_contract
 For comparison-set completeness, run `python -m pytest tests/test_rank_contract.py` and verify explicit exclusion receipts, majority-omitted review, aggregate-Other source preservation, ratio-like blocking, Other-label collision, receipt tampering, and transform tampering.
 
 For metric-definition identity, run `python -m pytest tests/test_metric_definition_contract.py` and verify closed-schema validation, quantitative-field binding, stable row-level version identity, mixed-version blocking, missing-evidence blocking, and opt-in no-inference behavior.
+
+For analysis-scope identity, run `python -m pytest tests/test_analysis_scope_contract.py` and verify closed-schema validation, metadata-only scope identity, paired basis declarations, mixed-scope blocking, renderer refusal, external evidence requirements, and opt-in no-inference behavior.
 
 For unit-conversion semantics, run `python -m pytest tests/test_unit_conversion_contract.py` and verify source-unit identity, fixed-scale recomputation, malformed-contract blocking, external binding, and stale arithmetic refusal.
 
