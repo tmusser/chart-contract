@@ -1,0 +1,30 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Orders by period",
+  "encoding": {
+    "x": {
+      "field": "period",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "orders",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.fulfillment",
+    "unit": "orders",
+    "observation_status_contract": {
+      "version": 1,
+      "metric_field": "orders",
+      "status_field": "observation_state",
+      "counts": {
+        "observed": 2,
+        "structural_zero": 0,
+        "missing": 1,
+        "suppressed": 0
+      }
+    }
+  }
+}
