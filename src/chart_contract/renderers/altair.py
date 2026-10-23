@@ -31,6 +31,11 @@ from ..population_sampling import (
     sample_member_status,
     weight_status,
 )
+from ..observation_status import (
+    OBSERVATION_STATUS_INTENTS,
+    build_observation_contract,
+    chart_observation_declaration,
+)
 from ..process_tree import process_tree_layout_records, process_tree_summary
 from ..rank import RankSelection, build_rank_selection, duplicate_rank_categories, validate_top_n
 from ..reconciliation import (
@@ -133,6 +138,18 @@ def render_chart(chart: Any) -> alt.Chart:
     )
     if metric_definition_contract is not None:
         usermeta["metric_definition_contract"] = metric_definition_contract
+
+    observation_declaration = (
+        chart_observation_declaration(chart)
+        if chart.intent in OBSERVATION_STATUS_INTENTS
+        else None
+    )
+    if observation_declaration is not None:
+        usermeta["observation_status_contract"] = build_observation_contract(
+            chart.data,
+            metric_field=observation_declaration["metric_field"],
+            status_field=observation_declaration["status_field"],
+        )
 
     analysis_scope_raw = (
         chart_analysis_scope_contract(chart)
