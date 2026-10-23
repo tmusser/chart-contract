@@ -86,6 +86,7 @@ def test_first_party_round_trip():
 ])
 def test_contradictory_state_blocks_and_renderer_refuses(state, value):
     frame = example_frame()
+    frame["sales"] = frame["sales"].astype(object)
     frame.at[1, "observation_state"] = state
     frame.at[1, "sales"] = value
     target = chart(frame)
