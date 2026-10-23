@@ -6,6 +6,20 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `missing_zero_filled`
+
+A clean-looking line chart of monthly orders has a February metric of `0` even though
+its source evidence explicitly says `observation_state=missing`.
+
+Expected verdict: `BLOCK` via `data.observation.values`. The audit does not fill,
+drop, or rewrite the contradictory value.
+
+```bash
+chart-contract audit spec examples/traps/missing_zero_filled.vl.json \
+  --data examples/traps/missing_zero_filled.csv \
+  --claim "$(cat examples/traps/missing_zero_filled.claim.txt)"
+```
+
 ### `mixed_analysis_scope`
 
 Demonstrates a visually ordinary active-user trend whose metric field stays stable while the
