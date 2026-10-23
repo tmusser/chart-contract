@@ -4,6 +4,8 @@
 
 ### Added
 
+- Explicit observation-state semantics for trend/rank/compare charts: observed, structural_zero, missing, suppressed, with first-party row validation and durable four-state count receipts.
+- Deterministic BLOCK for missing/suppressed values disguised as zero, malformed structural zeros, and stale observation-state receipts, without imputation or data mutation.
 - Explicit analysis-scope identity metadata for trend/rank/compare artifacts, binding a filtered/cohort universe to stable ID, definition, and version.
 - Optional row-level scope-basis checks that block mixed analytical universes such as US-paid and all-customer evidence under one chart.
 - Explicit scalar metric-target contracts for trend/compare charts, binding one selected observation to `at_least`, `at_most`, or `equal` threshold semantics with optional absolute tolerance.
