@@ -24,6 +24,8 @@
 - When a scope basis field/value is declared, mixed or mismatched row-level scope identities block rather than being treated as comparable evidence.
 - Treat matching analysis-scope metadata as identity consistency only, not proof that upstream SQL, cohort membership, or filter predicates implemented the declared scope.
 - Do not infer source measurement units from displayed labels, field names, geography, or value ranges; source/display unit identity is explicit metadata.
+- Never equate unavailable values with observed zero. Declared missing/suppressed rows must carry null metrics; structural-zero rows must contain numeric zero. Preserve source row states and fail on contradictions.
+- Recompute observation-state counts from the full evidence, not from the rendered subset; do not invent missingness mechanisms or claim visual gap presentation is proven by metadata.
 - Never silently convert values to make a unit contract pass. Fixed-scale conversions must preserve original source values and reproduce the declared factor against supplied evidence.
 - Treat matching fixed conversion arithmetic as a reproducible receipt only, not validation of FX provenance, inflation methodology, time-varying rates, or offset conversions.
 - Do not equate chart row count with sample size; aggregated evidence can summarize many sampled units. Only reconstruct sample size when an explicit sample-member field is supplied.

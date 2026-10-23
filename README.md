@@ -276,6 +276,26 @@ Version 1 does not execute arbitrary SQL predicates or reconstruct upstream coho
 A passing contract establishes declared scope identity consistency only. See
 [Analysis scope contract](docs/ANALYSIS_SCOPE_CONTRACT.md).
 
+### Observation status: a missing value is not zero
+
+A plotted zero might be an actual observation, a structural zero, or unavailable evidence
+that was filled with zero upstream. Make these different states auditable:
+
+```python
+chart = Chart.trend(
+    data=df, x="period", y="orders",
+    claim="Reported orders vary by period.",
+    source="warehouse.orders", unit="orders",
+    observation_status_field="observation_state",
+)
+```
+
+Supported row-level statuses: `observed`, `structural_zero`, `missing`, and
+`suppressed`. Missing/suppressed rows **must be null**; structural zeros must equal
+numeric zero. A fixed v1 spec receipt records exact state counts and fails on later drift.
+No values are filled, changed, or inferred. See
+[Observation status contract](docs/OBSERVATION_STATUS_CONTRACT.md).
+
 ### Measurement units: bind source and display semantics
 
 A displayed unit does not prove every source row was measured in that unit. When unit identity

@@ -1,5 +1,50 @@
 # VERIFY
 
+2026-10-23 - Add explicit observation-state semantics
+
+Environment:
+- Branch: `agent/observation-status-contract`
+- Base: `main` at `d943f57e6a01021c4de746a05f8f032cb7580603`
+- Pull request: #34 (`feat: audit missing versus zero observation semantics`)
+- Initial CI run #298 (`40002265352`) exposed two overly strict test assumptions: an independent legacy REVIEW in the chart audit and omission of explicit evidence in the spec round-trip test.
+- The tests were corrected without relaxing observation-state validation.
+- Code-bearing GitHub Actions CI run #299 (`40002430312`) on head `000b604729e155ec3812eb232bd41dc0488ec56f` -> PASSED
+- Python 3.10, 3.11, 3.12, and 3.13 test lanes -> PASSED
+- Existing CLI verdict/diagnostic/semantic traps -> PASSED
+- New zero-filled missing-observation CLI BLOCK trap -> PASSED
+- Build and isolated wheel install/smoke -> PASSED
+
+Verified behavior:
+- First-party trend, rank, and compare accept an optional `observation_status_field`;
+- an opt-in closed v1 contract binds the shown quantitative metric to a separate status field;
+- allowed statuses: observed, structural_zero, missing, suppressed;
+- observed values must be finite numerics, including genuine zero;
+- structural_zero requires numeric zero;
+- missing/suppressed require null values and BLOCK if a non-null value (including zero) is supplied;
+- unsupported states, absent status/value fields, null observed values, nonzero structural zeros, non-finite values, and booleans fail;
+- first-party rendering refuses contradictory states and preserves exact four-state count receipts;
+- external spec audits require the declared metric to remain a displayed quantitative field and the original data to be reconstructable;
+- spec re-audits recompute four-state counts and block stale metadata or malformed/extra fields;
+- absence of a status contract remains opt-in and does not invent status semantics;
+- profile/documentation count moves from 102 to 105 rules.
+
+Important boundary:
+- A passing status contract verifies consistency against the *supplied* data only, not correct upstream status classification.
+- It does not automatically fill, interpolate, normalize, rescale, or drop source rows.
+- It does not certify missingness mechanism, suppression policy, or the exact visual glyph used for gaps by Vega-Lite.
+- Existing coverage rules still independently review or block insufficient visible non-null evidence.
+
+Remaining risks:
+- A status can be consistently but incorrectly labeled upstream.
+- Upstream zero-filling before the supplied audit evidence cannot be detected without a retained status/source receipt.
+- V1 recognizes four fixed status strings; richer censoring and detection-limit semantics remain separate work.
+- The three new rules intentionally change audit-profile semantic identity; older bound reports require re-audit.
+
+Next safest task:
+- Confirm final VERIFY/HANDOFF documentation-only head CI is green.
+- Review PR #34 without merging automatically.
+- Keep censoring thresholds, detection limits, per-series gap rendering, and missingness-mechanism analysis as future scopes.
+
 2026-10-22 - Add analysis-scope identity contracts
 
 Environment:
