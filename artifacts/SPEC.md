@@ -39,6 +39,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - explicit source/output grain contracts for descriptive charts, including source-key uniqueness and bounded encoding-level aggregation semantics
 - explicit metric-definition identity for trend/rank/compare metrics, including stable ID/definition/version metadata and optional row-level version checks
 - explicit analysis-scope identity for trend/rank/compare metrics, including stable filtered/cohort universe ID/definition/version metadata and optional row-level scope-basis checks
+- explicit observation-status contracts for trend/rank/compare metrics, distinguishing observed values, structural zeros, missing values, and suppressed values with evidence-bound state counts
 - explicit source/display measurement-unit contracts for trend/rank/compare metrics, including identity/fixed-scale semantics, row-level source-unit checks, and recomputable fixed conversion arithmetic
 - explicit population/sample scope contracts for trend/rank/compare metrics, including declared population/sample counts, bounded sampling methods, optional row-level member/weight evidence, and explicit population-generalization intent
 - explicit uncertainty interval contracts for trend/compare metrics, binding the shown estimate to lower/upper fields, interval kind, level, method, and visible interval marks
@@ -99,6 +100,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - Transform inventory records explicit operator kinds and exact spec locations but does not execute arbitrary transform expressions or reconstruct transformed output values.
 - A matching transform declaration is transparency/provenance only; it does not prove analytical appropriateness, user intent, or consistency with upstream preprocessing.
 - Evidence coverage measures complete-case visibility for audited fields only; it does not establish missingness mechanism, representativeness, source quality, or absence of bias.
+- Observation states are explicit supplied metadata: missing/suppressed rows must remain null, structural zeros must equal numeric zero, and status counts must reproduce; a passing contract does not prove upstream missingness logic or a particular Vega-Lite gap depiction.
 - Group coverage imbalance is a review signal only and does not establish that missingness caused an observed group difference.
 - Transform lineage receipts are structural identity metadata only; they do not prove expression execution, analytical correctness, or upstream SQL/Python/dbt provenance.
 - Rank truncation metadata is reproducible against supplied evidence but does not prove the externally supplied category population is complete or that top-N is the best presentation.
@@ -126,6 +128,7 @@ The package should emit Altair/Vega-Lite output and deterministic `PASS`/`WARN`/
 - automatic audit-profile compatibility classification
 - general-purpose execution or validation of arbitrary Vega-Lite transform expressions
 - statistical imputation, missingness-mechanism classification, or automatic correction of incomplete evidence
+- automatic conversion of missing/suppressed values into zeros, inferred structural zeros, suppression approval, or verification of visual gap glyphs
 - execution tracing or attestation of upstream transformation systems
 - implicit aggregation of duplicate rank categories or hidden arbitrary tie-breaking at top-N cutoffs
 - automatic reconstruction or recomputation of ratio numerators, denominators, cohorts, or upstream rate arithmetic
@@ -242,7 +245,7 @@ For visual defaults, run `python -m pytest tests/test_spec_policy.py` and verify
 
 For audit provenance, run `python -m pytest tests/test_input_binding.py tests/test_saved_report_verification.py` and verify that unchanged artifacts reproduce their bindings while spec, data, claim, finding/verdict, and audit-profile mutations invalidate durable verification.
 
-For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 102-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
+For audit-profile inspection, run `python -m pytest tests/test_profiles.py tests/test_profile_diff.py tests/test_cli_profile.py` and verify that the 105-rule manifest stays aligned with the rule reference, version-only drift is nonsemantic, and rule-level changes are reported mechanically.
 
 For percent representation, run `python -m pytest tests/test_percent_semantics.py` and verify that fractional versus percentage-point values are explicit, display formatting matches the declaration, and raw values are never silently rescaled.
 
@@ -279,6 +282,8 @@ For control-total reconciliation, run `python -m pytest tests/test_reconciliatio
 For metric directionality, run `python -m pytest tests/test_directionality_contract.py` and verify lower/higher-is-better claim parity, neutral semantics, missing-contract/baseline review, descriptive increase/decrease non-inference, external field binding, and closed-schema enforcement.
 
 For metric targets, run `python -m pytest tests/test_target_contract.py` and verify scalar target operators/tolerance, exact selected-observation reconstruction, durable receipt parity, visible threshold-rule binding, missing-contract review, met/missed claim blocking, and closed-schema enforcement.
+
+For observation-state semantics, run `python -m pytest tests/test_observation_status_contract.py` and verify true zero preservation, null state evidence, stale receipts, detached field rejection, and zero-filled missing traps.
 
 ## Open Questions
 
