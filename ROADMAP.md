@@ -36,6 +36,7 @@ The current unreleased line adds and hardens:
 - explicit top-N comparison-set completeness contracts covering exclusion, omitted metric mass, and reproducible aggregate-Other summaries
 - explicit metric-definition identity contracts binding metric ID/version/definition plus optional row-level version consistency checks
 - explicit analysis-scope identity contracts binding filtered/cohort universe ID/version/definition plus optional row-level scope consistency checks
+- explicit observation-state contracts distinguishing reported numeric values, structural zeros, missing values, and suppressed values with recomputable row-state receipts
 - explicit measurement-unit identity and fixed-scale conversion contracts with row-level source-unit consistency and recomputable arithmetic
 - explicit population/sample scope contracts with declared sample/population counts, optional member/weight evidence, and bounded population-generalization review semantics
 - explicit uncertainty interval contracts for trend/compare estimates, including bound integrity, visible field binding, interval kind/level/method identity, and narrow claim parity
