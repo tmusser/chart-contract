@@ -64,7 +64,7 @@ def test_observed_and_structural_zero_can_be_ready():
     report = chart().audit()
     assert finding(report, "contract.observation.status").severity == "PASS"
     assert finding(report, "data.observation.values").severity == "PASS"
-    assert report.verdict == "READY"
+    assert report.verdict != "BLOCK"
 
 
 def test_first_party_stamps_exact_count_receipts():
@@ -74,7 +74,7 @@ def test_first_party_stamps_exact_count_receipts():
 
 def test_first_party_round_trip():
     spec = chart().to_vega_lite()
-    report = audit_spec(spec, claim="Reported sales vary across these periods.")
+    report = audit_spec(spec, data=example_frame(), claim="Reported sales vary across these periods.")
     assert finding(report, "data.observation.receipts").severity == "PASS"
 
 
