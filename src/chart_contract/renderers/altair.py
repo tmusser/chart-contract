@@ -44,7 +44,7 @@ from ..reconciliation import (
     chart_reconciliation_declaration,
     reconciliation_matches,
 )
-from ..ratio import RATIO_INTENTS, chart_ratio_contract
+from ..ratio import RATIO_INTENTS, chart_ratio_contract, parse_ratio_contract, ratio_arithmetic_status
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..time_window import build_time_window_summary, time_window_declaration
@@ -129,7 +129,13 @@ def render_chart(chart: Any) -> alt.Chart:
         else None
     )
     if ratio_contract is not None:
-        usermeta["ratio_contract"] = ratio_contract
+        # Validate before stamping metadata; inconsistent source arithmetic must not render.
+        parsed_ratio = parse_ratio_contract({"usermeta": {"ratio_contract": ratio_contract}})
+        if parsed_ratio["version"] == 2:
+            ok, message = ratio_arithmetic_status(chart.data, parsed_ratio)
+            if not ok:
+                raise ValueError(message)
+        usermeta["ratio_contract"] = parsed_ratio
 
     metric_definition_contract = (
         chart_metric_definition_contract(chart)
