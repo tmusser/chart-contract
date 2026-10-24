@@ -1,0 +1,31 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Monthly conversion rate",
+  "encoding": {
+    "x": {
+      "field": "period",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "conversion_rate",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.ratios",
+    "unit": "conversion rate",
+    "ratio_contract": {
+      "version": 2,
+      "metric_field": "conversion_rate",
+      "numerator": "converted_sessions",
+      "denominator": "eligible_sessions",
+      "cohort": null,
+      "denominator_basis_field": null,
+      "numerator_value_field": "conversions",
+      "denominator_value_field": "sessions",
+      "ratio_multiplier": 1,
+      "ratio_tolerance": 1e-9
+    }
+  }
+}

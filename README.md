@@ -443,8 +443,13 @@ Missing numerator/denominator identity on a ratio-like metric produces `REVIEW`.
 `denominator_basis_field` can make row-level semantics auditable: mixed identities such as
 `visitors` and `signups` under one displayed conversion-rate metric `BLOCK`.
 
-This contract records semantic identity only. It does not recompute the rate or certify
-upstream SQL arithmetic. See [Ratio denominator and cohort contract](docs/RATIO_CONTRACT.md).
+Legacy v1 metadata verifies semantic identity only. Opt into v2 row arithmetic by adding
+`numerator_value_field`, `denominator_value_field`, `ratio_multiplier` (defaults to `1`),
+and `ratio_tolerance` (defaults to `1e-9`). Every displayed value must equal
+`numerator / denominator * multiplier` within the declared absolute tolerance or the chart
+`BLOCK`s; first-party rendering also refuses mismatched evidence. The audit never repairs
+source values or certifies upstream numerator/denominator selection. See
+[Ratio denominator and cohort contract](docs/RATIO_CONTRACT.md).
 
 ### Grain: say what one row represents
 

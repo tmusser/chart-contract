@@ -4,6 +4,9 @@
 
 ### Added
 
+- Opt-in v2 ratio arithmetic evidence for trend/rank/compare: explicit numerator and denominator value fields, multiplier, and absolute tolerance with row-level recalculation and renderer refusal for mismatched metrics.
+- A deterministic incorrect-ratio CLI trap and backward-compatible v1 identity-only ratio metadata.
+
 - Explicit observation-state semantics for trend/rank/compare charts: observed, structural_zero, missing, suppressed, with first-party row validation and durable four-state count receipts.
 - Deterministic BLOCK for missing/suppressed values disguised as zero, malformed structural zeros, and stale observation-state receipts, without imputation or data mutation.
 - Explicit analysis-scope identity metadata for trend/rank/compare artifacts, binding a filtered/cohort universe to stable ID, definition, and version.

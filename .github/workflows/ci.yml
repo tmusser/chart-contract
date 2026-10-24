@@ -218,6 +218,19 @@ jobs:
           grep -q "missing/suppressed values must be null" <<<"$observation_output"
 
           set +e
+          ratio_output=$(chart-contract audit spec examples/traps/incorrect_ratio_arithmetic.vl.json \
+            --data examples/traps/incorrect_ratio_arithmetic.csv \
+            --claim "$(cat examples/traps/incorrect_ratio_arithmetic.claim.txt)" 2>&1)
+          ratio_exit=$?
+          set -e
+          echo "$ratio_output"
+          test "$ratio_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$ratio_output"
+          grep -q "contract.ratio.denominator" <<<"$ratio_output"
+          grep -q "data.ratio.arithmetic" <<<"$ratio_output"
+          grep -q "Ratio arithmetic mismatch" <<<"$ratio_output"
+
+          set +e
           scope_output=$(chart-contract audit spec examples/traps/mixed_analysis_scope.vl.json \
             --data examples/traps/mixed_analysis_scope.csv \
             --claim "$(cat examples/traps/mixed_analysis_scope.claim.txt)" 2>&1)

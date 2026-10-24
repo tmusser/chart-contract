@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+import math
+from numbers import Real
 from typing import Any
 
 import pandas as pd
 
 RATIO_CONTRACT_KEY = "ratio_contract"
 RATIO_CONTRACT_VERSION = 1
+RATIO_ARITHMETIC_VERSION = 2
 RATIO_INTENTS = {"trend", "rank", "compare"}
 
 
@@ -20,19 +23,42 @@ def chart_ratio_contract(chart: Any) -> dict[str, Any] | None:
         getattr(chart, "denominator", None),
         getattr(chart, "cohort", None),
         getattr(chart, "denominator_basis_field", None),
+        getattr(chart, "numerator_value_field", None),
+        getattr(chart, "denominator_value_field", None),
+        getattr(chart, "ratio_multiplier", None),
+        getattr(chart, "ratio_tolerance", None),
     )
     if all(value is None for value in values):
         return None
 
     metric_field = getattr(chart, "y", None)
-    return {
-        "version": RATIO_CONTRACT_VERSION,
+    arithmetic_requested = any(
+        getattr(chart, name, None) is not None
+        for name in ("numerator_value_field", "denominator_value_field",
+                     "ratio_multiplier", "ratio_tolerance")
+    )
+    result = {
+        "version": RATIO_ARITHMETIC_VERSION if arithmetic_requested else RATIO_CONTRACT_VERSION,
         "metric_field": metric_field,
         "numerator": getattr(chart, "numerator", None),
         "denominator": getattr(chart, "denominator", None),
         "cohort": getattr(chart, "cohort", None),
         "denominator_basis_field": getattr(chart, "denominator_basis_field", None),
     }
+    if arithmetic_requested:
+        result.update(
+            numerator_value_field=getattr(chart, "numerator_value_field", None),
+            denominator_value_field=getattr(chart, "denominator_value_field", None),
+            ratio_multiplier=(
+                1.0 if getattr(chart, "ratio_multiplier", None) is None
+                else getattr(chart, "ratio_multiplier")
+            ),
+            ratio_tolerance=(
+                1e-9 if getattr(chart, "ratio_tolerance", None) is None
+                else getattr(chart, "ratio_tolerance")
+            ),
+        )
+    return result
 
 
 def parse_ratio_contract(spec: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -52,6 +78,14 @@ def parse_ratio_contract(spec: Mapping[str, Any]) -> dict[str, Any] | None:
         "cohort",
         "denominator_basis_field",
     }
+    version = contract.get("version")
+    if type(version) is not int or version not in (RATIO_CONTRACT_VERSION, RATIO_ARITHMETIC_VERSION):
+        raise ValueError("usermeta.ratio_contract.version must equal 1 or 2.")
+    if version == RATIO_ARITHMETIC_VERSION:
+        expected_fields |= {
+            "numerator_value_field", "denominator_value_field",
+            "ratio_multiplier", "ratio_tolerance",
+        }
     if set(contract) != expected_fields:
         missing = sorted(expected_fields - set(contract))
         extra = sorted(set(contract) - expected_fields)
@@ -61,13 +95,10 @@ def parse_ratio_contract(spec: Mapping[str, Any]) -> dict[str, Any] | None:
         if extra:
             details.append("unsupported: " + ", ".join(extra))
         raise ValueError(
-            "usermeta.ratio_contract must use the exact v1 field set"
+            f"usermeta.ratio_contract must use the exact v{version} field set"
             + (" (" + "; ".join(details) + ")" if details else "")
             + "."
         )
-
-    if contract.get("version") != RATIO_CONTRACT_VERSION:
-        raise ValueError(f"usermeta.ratio_contract.version must equal {RATIO_CONTRACT_VERSION}.")
 
     metric_field = _required_string(contract.get("metric_field"), "metric_field")
     numerator = _required_string(contract.get("numerator"), "numerator")
@@ -78,14 +109,75 @@ def parse_ratio_contract(spec: Mapping[str, Any]) -> dict[str, Any] | None:
         "denominator_basis_field",
     )
 
-    return {
-        "version": RATIO_CONTRACT_VERSION,
+    result = {
+        "version": version,
         "metric_field": metric_field,
         "numerator": numerator,
         "denominator": denominator,
         "cohort": cohort,
         "denominator_basis_field": denominator_basis_field,
     }
+    if version == RATIO_ARITHMETIC_VERSION:
+        numerator_field = _required_string(contract.get("numerator_value_field"), "numerator_value_field")
+        denominator_field = _required_string(contract.get("denominator_value_field"), "denominator_value_field")
+        if len({metric_field, numerator_field, denominator_field}) != 3:
+            raise ValueError("Ratio metric, numerator, and denominator value fields must be distinct.")
+        result.update(
+            numerator_value_field=numerator_field,
+            denominator_value_field=denominator_field,
+            ratio_multiplier=_finite_number(contract.get("ratio_multiplier"), "ratio_multiplier", positive=True),
+            ratio_tolerance=_finite_number(contract.get("ratio_tolerance"), "ratio_tolerance"),
+        )
+    return result
+
+
+def _finite_number(value: Any, field: str, *, positive: bool = False) -> float:
+    if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value):
+        raise ValueError(f"usermeta.ratio_contract.{field} must be a finite number.")
+    if (value <= 0 if positive else value < 0):
+        raise ValueError(f"usermeta.ratio_contract.{field} must be {'positive' if positive else 'non-negative'}.")
+    return float(value)
+
+
+def ratio_arithmetic_status(frame: pd.DataFrame, contract: Mapping[str, Any]) -> tuple[bool, str]:
+    """Recompute every declared row without modifying the supplied metric."""
+
+    fields = (
+        contract["metric_field"], contract["numerator_value_field"],
+        contract["denominator_value_field"],
+    )
+    absent = [name for name in fields if name not in frame.columns]
+    if absent:
+        return False, "Ratio arithmetic evidence field(s) missing: " + ", ".join(absent) + "."
+    if frame.empty:
+        return False, "Ratio arithmetic requires at least one supplied observation."
+    largest_error = 0.0
+    for position, (reported, numerator, denominator) in enumerate(
+        frame[list(fields)].itertuples(index=False, name=None), start=1
+    ):
+        for name, value in zip(fields, (reported, numerator, denominator)):
+            if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value):
+                return False, f"Ratio arithmetic row {position} has a non-finite or non-numeric {name!r} value."
+        if denominator <= 0:
+            return False, f"Ratio arithmetic row {position} has a zero or negative denominator."
+        expected = numerator / denominator * contract["ratio_multiplier"]
+        if not math.isfinite(expected):
+            return False, f"Ratio arithmetic row {position} has a non-finite computed ratio."
+        difference = abs(reported - expected)
+        if not math.isfinite(difference):
+            return False, f"Ratio arithmetic row {position} has a non-finite arithmetic difference."
+        largest_error = max(largest_error, difference)
+        if not math.isclose(reported, expected, rel_tol=0.0, abs_tol=contract["ratio_tolerance"]):
+            return False, (
+                f"Ratio arithmetic mismatch at row {position}: observed {reported:g}, "
+                f"computed {expected:g} from {numerator:g}/{denominator:g} "
+                f"× {contract['ratio_multiplier']:g}; "
+                f"absolute error {difference:g} exceeds tolerance {contract['ratio_tolerance']:g}."
+            )
+    return True, (
+        f"Ratio arithmetic reproduces {len(frame)} displayed value(s) from source numerator/denominator; "
+        f"maximum absolute error {largest_error:g} (tolerance {contract['ratio_tolerance']:g})."
+    )
 
 
 def denominator_basis_status(

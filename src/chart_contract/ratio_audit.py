@@ -22,6 +22,7 @@ from .ratio import (
     chart_ratio_contract,
     denominator_basis_status,
     parse_ratio_contract,
+    ratio_arithmetic_status,
 )
 
 
@@ -88,6 +89,7 @@ def audit_ratio_chart(report: AuditReport, chart: Any) -> None:
         contract,
         surface_field="denominator_basis_field",
     )
+    _audit_arithmetic(report, chart.data, contract, surface_field="ratio_arithmetic")
 
 
 def audit_ratio_spec(
@@ -172,7 +174,6 @@ def audit_ratio_spec(
             suggestion="Provide the full evidence rows so denominator identity can be checked.",
             field="usermeta.ratio_contract.denominator_basis_field",
         )
-        return
 
     if frame is not None:
         _audit_basis(
@@ -181,6 +182,29 @@ def audit_ratio_spec(
             contract,
             surface_field="usermeta.ratio_contract.denominator_basis_field",
         )
+    _audit_arithmetic(
+        report, frame, contract, surface_field="usermeta.ratio_contract",
+    )
+
+
+def _audit_arithmetic(
+    report: AuditReport,
+    frame: pd.DataFrame | None,
+    contract: Mapping[str, Any],
+    *,
+    surface_field: str,
+) -> None:
+    if contract["version"] != 2:
+        return
+    if frame is None:
+        ok, message = False, "Ratio arithmetic contract requires reconstructable supplied evidence."
+    else:
+        ok, message = ratio_arithmetic_status(frame, contract)
+    report.add(
+        "data.ratio.arithmetic", PASS if ok else FAIL, message,
+        suggestion=None if ok else "Supply complete finite numerator/denominator fields and correct the upstream reported ratio; chart-contract never overwrites values.",
+        field=surface_field,
+    )
 
 
 def _audit_basis(

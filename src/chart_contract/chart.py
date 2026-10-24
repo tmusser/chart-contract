@@ -47,6 +47,10 @@ class Chart:
     denominator: str | None = None
     cohort: str | None = None
     denominator_basis_field: str | None = None
+    numerator_value_field: str | None = None
+    denominator_value_field: str | None = None
+    ratio_multiplier: float | int | None = None
+    ratio_tolerance: float | int | None = None
     baseline_field: str | None = None
     baseline_value: str | int | float | None = None
     target_value: str | int | float | None = None
@@ -150,6 +154,10 @@ class Chart:
         denominator: str | None = None,
         cohort: str | None = None,
         denominator_basis_field: str | None = None,
+        numerator_value_field: str | None = None,
+        denominator_value_field: str | None = None,
+        ratio_multiplier: float | int | None = None,
+        ratio_tolerance: float | int | None = None,
         baseline_field: str | None = None,
         baseline_value: str | int | float | None = None,
         target_value: str | int | float | None = None,
@@ -218,6 +226,10 @@ class Chart:
             denominator=denominator,
             cohort=cohort,
             denominator_basis_field=denominator_basis_field,
+            numerator_value_field=numerator_value_field,
+            denominator_value_field=denominator_value_field,
+            ratio_multiplier=ratio_multiplier,
+            ratio_tolerance=ratio_tolerance,
             baseline_field=baseline_field,
             baseline_value=baseline_value,
             target_value=target_value,
@@ -281,6 +293,10 @@ class Chart:
         denominator: str | None = None,
         cohort: str | None = None,
         denominator_basis_field: str | None = None,
+        numerator_value_field: str | None = None,
+        denominator_value_field: str | None = None,
+        ratio_multiplier: float | int | None = None,
+        ratio_tolerance: float | int | None = None,
         top_n: int | None = None,
         omitted_behavior: str | None = None,
         other_label: str = "Other",
@@ -331,6 +347,10 @@ class Chart:
             denominator=denominator,
             cohort=cohort,
             denominator_basis_field=denominator_basis_field,
+            numerator_value_field=numerator_value_field,
+            denominator_value_field=denominator_value_field,
+            ratio_multiplier=ratio_multiplier,
+            ratio_tolerance=ratio_tolerance,
             top_n=top_n,
             omitted_behavior=omitted_behavior,
             other_label=other_label,
@@ -395,6 +415,10 @@ class Chart:
         denominator: str | None = None,
         cohort: str | None = None,
         denominator_basis_field: str | None = None,
+        numerator_value_field: str | None = None,
+        denominator_value_field: str | None = None,
+        ratio_multiplier: float | int | None = None,
+        ratio_tolerance: float | int | None = None,
         baseline_field: str | None = None,
         baseline_value: str | int | float | None = None,
         target_value: str | int | float | None = None,
@@ -467,6 +491,10 @@ class Chart:
             denominator=denominator,
             cohort=cohort,
             denominator_basis_field=denominator_basis_field,
+            numerator_value_field=numerator_value_field,
+            denominator_value_field=denominator_value_field,
+            ratio_multiplier=ratio_multiplier,
+            ratio_tolerance=ratio_tolerance,
             baseline_field=baseline_field,
             baseline_value=baseline_value,
             target_value=target_value,
