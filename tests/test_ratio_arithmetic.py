@@ -15,7 +15,7 @@ def _finding(report, rule_id: str):
 def _frame() -> pd.DataFrame:
     return pd.DataFrame(
         {
-            "period": ["Jan", "Feb", "Mar"],
+            "period": ["W1", "W2", "W3"],
             "conversion_rate": [0.2, 0.3, 0.4],
             "conversions": [20, 30, 40],
             "sessions": [100, 100, 100],
