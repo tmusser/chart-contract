@@ -6,6 +6,21 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `incorrect_ratio_arithmetic`
+
+A plausible monthly conversion-rate trend reports 40% in February, despite source evidence
+of 30 conversions among 100 sessions (30%). The semantic denominator is correct but the
+numerical calculation is not.
+
+Expected verdict: `BLOCK` via `data.ratio.arithmetic` while
+`contract.ratio.denominator` passes. The audit neither rewrites the chart nor rescales data.
+
+```bash
+chart-contract audit spec examples/traps/incorrect_ratio_arithmetic.vl.json \
+  --data examples/traps/incorrect_ratio_arithmetic.csv \
+  --claim "$(cat examples/traps/incorrect_ratio_arithmetic.claim.txt)"
+```
+
 ### `missing_zero_filled`
 
 A clean-looking line chart of monthly orders has a February metric of `0` even though
