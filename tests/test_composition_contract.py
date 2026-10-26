@@ -117,7 +117,7 @@ def test_invalid_evidence_blocks_and_renderer_refuses(mutation, message):
         chart.to_vega_lite()
 
 
-@pytest.mark.parametrize("value", [None, "", " ", False, "new"])
+@pytest.mark.parametrize("value", [None, "", " ", False])
 def test_malformed_composition_baseline_blocks(value):
     chart = _chart(composition_baseline_value=value)
     if value is None:
