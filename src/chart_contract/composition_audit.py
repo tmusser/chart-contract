@@ -77,13 +77,26 @@ def audit_composition_spec(
     if not isinstance(encoding, Mapping):
         report.add("contract.composition.declared", FAIL, "Composition requires visible chart encodings.")
         return
-    fields = {_encoding_field(value) for _, value in _iter_encoding_definitions(encoding)}
-    quant = {
-        _encoding_field(value) for _, value in _iter_encoding_definitions(encoding)
-        if _encoding_type(value) == "quantitative"
+    # Tooltip-only references are not visible subgroup encodings.
+    period_fields = {
+        _encoding_field(encoding[name]) for name in ("x", "row", "column")
+        if name in encoding
     }
-    if not {contract["period_field"], contract["group_field"]}.issubset(fields) or contract["metric_field"] not in quant:
-        report.add("contract.composition.declared", FAIL, "Composition period, subgroup, and metric must be visibly encoded.")
+    group_fields = {
+        _encoding_field(encoding[name]) for name in ("color", "xOffset", "row", "column")
+        if name in encoding
+    }
+    quantitative_fields = {
+        _encoding_field(value) for name, value in _iter_encoding_definitions(encoding)
+        if name in ("x", "y") and _encoding_type(value) == "quantitative"
+    }
+    if (contract["period_field"] not in period_fields
+        or contract["group_field"] not in group_fields
+        or contract["metric_field"] not in quantitative_fields):
+        report.add(
+            "contract.composition.declared", FAIL,
+            "Composition period, subgroup, and metric must be visibly encoded; tooltip-only fields do not count.",
+        )
         return
     report.add("contract.composition.declared", PASS, "Closed composition metadata is visibly bound to the chart.")
     if frame is None:
