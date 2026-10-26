@@ -191,7 +191,7 @@ def parse_composition_contract(spec: Mapping[str, Any]) -> dict[str, Any] | None
                   "target_denominator", "baseline_overall", "target_overall"):
         _finite(raw[field], field, lower=0.0)
     for field in ("subgroup_direction", "aggregate_direction"):
-        if raw[field] not in {"up", "down", "flat", "mixed"}:
+        if not isinstance(raw[field], str) or raw[field] not in {"up", "down", "flat", "mixed"}:
             raise ValueError(f"Composition {field} has unsupported direction.")
     if type(raw["reversal"]) is not bool:
         raise ValueError("Composition reversal receipt must be a boolean.")

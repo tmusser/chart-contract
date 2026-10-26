@@ -197,3 +197,12 @@ def test_reversal_receipt_cannot_be_silently_flipped():
     spec["usermeta"]["composition_contract"]["reversal"] = False
     report = audit_spec(spec=spec, data=_frame(), claim=chart.claim)
     assert _finding(report, "data.composition.evidence").severity == "FAIL"
+
+
+@pytest.mark.parametrize("malformed", [["up"], {"direction": "up"}, None])
+def test_malformed_direction_receipt_fails_closed(malformed):
+    chart = _chart()
+    spec = deepcopy(chart.to_vega_lite())
+    spec["usermeta"]["composition_contract"]["subgroup_direction"] = malformed
+    report = audit_spec(spec=spec, data=_frame(), claim=chart.claim)
+    assert _finding(report, "contract.composition.declared").severity == "FAIL"
