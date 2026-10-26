@@ -73,6 +73,7 @@ Policy:
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.
 - A v1 passing denominator/cohort contract is metadata consistency, not arithmetic proof. When numerator and denominator source values exist, opt into v2 and require `data.ratio.arithmetic` to PASS; never overwrite a wrong displayed value.
 - V2 checks arithmetic against supplied fields, not upstream population selection or the correctness of the numerator/denominator definitions.
+- When presenting an overall conversion rate beside subgroup trends, use an explicit composition contract if the matched subgroup-period count evidence is available. Stop for human interpretation on `data.composition.reversal` WARN; `data.composition.evidence` FAIL blocks wrong or unmatched groups. A reversal is not causal evidence.
 - If a claim states an explicit numeric percent, percentage-point, or ratio change, require a comparison baseline contract before sharing.
 - Stop on `contract.comparison.change` or `claim.comparison.change_semantics` failures; do not rewrite arithmetic labels merely to make the audit pass.
 - Treat a passing baseline contract as arithmetic reproducibility against supplied evidence, not proof the baseline controls seasonality, cohort drift, or causal comparability.

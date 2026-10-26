@@ -451,6 +451,17 @@ and `ratio_tolerance` (defaults to `1e-9`). Every displayed value must equal
 source values or certifies upstream numerator/denominator selection. See
 [Ratio denominator and cohort contract](docs/RATIO_CONTRACT.md).
 
+### Subgroup composition: detect weighted reversal
+
+When denominator weights shift between periods, every subgroup's rate can improve
+while the overall weighted rate falls. A grouped `Chart.compare()` can opt into
+`composition_baseline_value` and `composition_target_value` alongside v2 ratio
+numerator/denominator value fields. The audit recomputes weighted aggregate rates,
+checks complete matched subgroup evidence, and raises `REVIEW` for a Simpson-type
+reversal; inconsistent counts or stale receipts `BLOCK`.
+
+See [Subgroup composition reversal contract](docs/COMPOSITION_CONTRACT.md).
+
 ### Grain: say what one row represents
 
 Repeated rows can be legitimate detail or accidental join fanout. Make the source-row identity explicit:

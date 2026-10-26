@@ -4,6 +4,9 @@
 
 ### Added
 
+- Opt-in subgroup composition / Simpson-type reversal auditing for two-period grouped compare charts, with matched-source proportion checks and weighted aggregate receipts.
+- A deterministic `simpsons_paradox_conversion` REVIEW trap that shows both subgroups improving while overall conversion declines; invalid count/receipt evidence BLOCKs.
+
 - Opt-in v2 ratio arithmetic evidence for trend/rank/compare: explicit numerator and denominator value fields, multiplier, and absolute tolerance with row-level recalculation and renderer refusal for mismatched metrics.
 - A deterministic incorrect-ratio CLI trap and backward-compatible v1 identity-only ratio metadata.
 

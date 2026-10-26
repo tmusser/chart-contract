@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "Subgroup conversion rate",
+  "encoding": {
+    "x": {
+      "field": "period",
+      "type": "nominal"
+    },
+    "xOffset": {
+      "field": "cohort",
+      "type": "nominal"
+    },
+    "color": {
+      "field": "cohort",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "conversion_rate",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.funnel",
+    "unit": "conversion rate",
+    "ratio_contract": {
+      "version": 2,
+      "metric_field": "conversion_rate",
+      "numerator": "conversions",
+      "denominator": "sessions",
+      "cohort": null,
+      "denominator_basis_field": null,
+      "numerator_value_field": "conversions",
+      "denominator_value_field": "sessions",
+      "ratio_multiplier": 1,
+      "ratio_tolerance": 1e-9
+    },
+    "composition_contract": {
+      "version": 1,
+      "period_field": "period",
+      "group_field": "cohort",
+      "metric_field": "conversion_rate",
+      "numerator_field": "conversions",
+      "denominator_field": "sessions",
+      "baseline_value": "before",
+      "target_value": "after",
+      "multiplier": 1,
+      "tolerance": 1e-9,
+      "group_count": 2,
+      "baseline_numerator": 82,
+      "baseline_denominator": 110,
+      "target_numerator": 39,
+      "target_denominator": 110,
+      "baseline_overall": 0.7454545454545455,
+      "target_overall": 0.35454545454545455,
+      "subgroup_direction": "up",
+      "aggregate_direction": "down",
+      "reversal": true
+    }
+  }
+}
