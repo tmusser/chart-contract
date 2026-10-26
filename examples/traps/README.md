@@ -6,6 +6,24 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `simpsons_paradox_conversion`
+
+Both high- and low-converting subgroups improve individually while the aggregate
+conversion rate falls, because the denominator weights shift between subgroups.
+The numeric counts and per-group ratios are valid; the composition reversal is
+an interpretive hazard, **not an arithmetic error**.
+
+Expected verdict: `REVIEW` via `data.composition.reversal` WARN, with the
+composition evidence rule passing. The CLI trap uses `--warnings-as-errors` to
+make the review gate return nonzero.
+
+```bash
+chart-contract audit spec examples/traps/simpsons_paradox_conversion.vl.json \
+  --data examples/traps/simpsons_paradox_conversion.csv \
+  --claim "$(cat examples/traps/simpsons_paradox_conversion.claim.txt)" \
+  --warnings-as-errors
+```
+
 ### `incorrect_ratio_arithmetic`
 
 A plausible monthly conversion-rate trend reports 40% in February, despite source evidence

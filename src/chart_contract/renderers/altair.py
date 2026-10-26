@@ -45,6 +45,7 @@ from ..reconciliation import (
     reconciliation_matches,
 )
 from ..ratio import RATIO_INTENTS, chart_ratio_contract, parse_ratio_contract, ratio_arithmetic_status
+from ..composition import composition_declaration, build_composition_receipt
 from ..set_membership import membership_summary, venn_layout_records
 from ..transforms import build_transform_lineage, first_party_transform_declaration
 from ..time_window import build_time_window_summary, time_window_declaration
@@ -136,6 +137,12 @@ def render_chart(chart: Any) -> alt.Chart:
             if not ok:
                 raise ValueError(message)
         usermeta["ratio_contract"] = parsed_ratio
+
+    composition_raw = composition_declaration(chart)
+    if composition_raw is not None:
+        if chart.intent != "compare":
+            raise ValueError("Composition v1 supports grouped compare charts only.")
+        usermeta["composition_contract"] = build_composition_receipt(chart.data, composition_raw)
 
     metric_definition_contract = (
         chart_metric_definition_contract(chart)

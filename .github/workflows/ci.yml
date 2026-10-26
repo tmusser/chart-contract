@@ -218,6 +218,20 @@ jobs:
           grep -q "missing/suppressed values must be null" <<<"$observation_output"
 
           set +e
+          paradox_output=$(chart-contract audit spec examples/traps/simpsons_paradox_conversion.vl.json \
+            --data examples/traps/simpsons_paradox_conversion.csv \
+            --claim "$(cat examples/traps/simpsons_paradox_conversion.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          paradox_exit=$?
+          set -e
+          echo "$paradox_output"
+          test "$paradox_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$paradox_output"
+          grep -q "data.composition.evidence" <<<"$paradox_output"
+          grep -q "data.composition.reversal" <<<"$paradox_output"
+          grep -q "Simpson-type composition reversal" <<<"$paradox_output"
+
+          set +e
           ratio_output=$(chart-contract audit spec examples/traps/incorrect_ratio_arithmetic.vl.json \
             --data examples/traps/incorrect_ratio_arithmetic.csv \
             --claim "$(cat examples/traps/incorrect_ratio_arithmetic.claim.txt)" 2>&1)

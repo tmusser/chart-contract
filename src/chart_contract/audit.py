@@ -194,6 +194,8 @@ def audit_chart(chart: Any) -> AuditReport:
     from .ratio_audit import audit_ratio_chart
 
     audit_ratio_chart(report, chart)
+    from .composition_audit import audit_composition_chart
+    audit_composition_chart(report, chart)
 
     from .metric_definition_audit import audit_metric_definition_chart
 
@@ -686,6 +688,8 @@ def audit_spec(
     from .unit_conversion_audit import audit_unit_conversion_spec
 
     audit_ratio_spec(report, spec, encoding, resolved_frame, unit)
+    from .composition_audit import audit_composition_spec
+    audit_composition_spec(report, spec, encoding, resolved_frame)
     audit_metric_definition_spec(report, spec, encoding, resolved_frame)
     from .analysis_scope_audit import audit_analysis_scope_spec
 
