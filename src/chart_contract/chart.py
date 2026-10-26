@@ -103,6 +103,8 @@ class Chart:
     scope_basis_field: str | None = None
     scope_basis_value: str | None = None
     observation_status_field: str | None = None
+    composition_baseline_value: str | None = None
+    composition_target_value: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
@@ -440,6 +442,8 @@ class Chart:
         scope_basis_field: str | None = None,
         scope_basis_value: str | None = None,
         observation_status_field: str | None = None,
+        composition_baseline_value: str | None = None,
+        composition_target_value: str | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -516,6 +520,8 @@ class Chart:
             scope_basis_field=scope_basis_field,
             scope_basis_value=scope_basis_value,
             observation_status_field=observation_status_field,
+            composition_baseline_value=composition_baseline_value,
+            composition_target_value=composition_target_value,
             metadata=metadata,
         )
 
