@@ -155,13 +155,24 @@ def test_opt_in_window_parity_requires_exact_windows():
         spec, data, claim = inputs[identifier]
         spec = deepcopy(spec)
         spec["usermeta"]["time_window_contract"] = deepcopy(base_window)
+        metric = spec["encoding"]["y"]["field"]
+        observed = data[metric].tolist()
+        change = float(observed[1] - observed[0])
+        spec["usermeta"]["comparison_contract"] = {
+            "version": 1, "metric_field": metric, "baseline_field": "period",
+            "baseline_value": "W1", "target_value": "W2",
+            "change_type": "absolute", "declared_change": change,
+            "baseline_metric_value": float(observed[0]),
+            "target_metric_value": float(observed[1]),
+            "computed_change": change,
+        }
         inputs[identifier] = (spec, data, claim)
     report = audit_bundle(manifest, inputs)
     assert _finding(report, "bundle.identity.time_window").severity == "PASS"
     spec, data, claim = inputs["churn"]
     spec = deepcopy(spec)
+    spec["usermeta"]["time_window_contract"]["target_start"] = "2026-01-09"
     spec["usermeta"]["time_window_contract"]["target_end"] = "2026-01-15"
-    spec["usermeta"]["time_window_contract"]["target_days"] = 8
     inputs["churn"] = (spec, data, claim)
     assert _finding(audit_bundle(manifest, inputs), "bundle.identity.time_window").severity == "FAIL"
 

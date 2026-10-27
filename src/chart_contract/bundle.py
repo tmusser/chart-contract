@@ -22,7 +22,6 @@ from .time_window import parse_time_window_contract
 
 BUNDLE_SCHEMA_VERSION = 1
 IDENTITIES = ("analysis_scope", "metric_definition", "unit", "time_window")
-_STATUSES = {PASS: 0, WARN: 1, FAIL: 2}
 
 # Identity fields deliberately exclude local column/basis names. They do not
 # authenticate upstream definitions; their declared semantic text is exact.
@@ -177,14 +176,14 @@ class BundleReport:
 
     def to_markdown(self) -> str:
         lines = [
-            "# Audit Bundle Report", "", f"Verdict: \`{self.verdict}\`",
-            "", f"Summary: \`{self.summary()}\`", "",
+            "# Audit Bundle Report", "", f"Verdict: `{self.verdict}`",
+            "", f"Summary: `{self.summary()}`", "",
             "## Component artifacts", "",
         ]
-        lines.extend(f"- \`{identifier}\`: **{report.verdict}**" for identifier, report in self.artifact_reports.items())
+        lines.extend(f"- `{identifier}`: **{report.verdict}**" for identifier, report in self.artifact_reports.items())
         lines += ["", "## Cross-artifact findings", ""]
         lines.extend(
-            f"- **{finding.severity}** \`{finding.rule_id}\`: {finding.message}"
+            f"- **{finding.severity}** `{finding.rule_id}`: {finding.message}"
             for finding in self.findings
         )
         return "\n".join(lines)
