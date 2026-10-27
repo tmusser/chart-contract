@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "id": "growth",
+      "spec": "cross_chart_paid_growth.vl.json",
+      "data": "cross_chart_paid_growth.csv"
+    },
+    {
+      "id": "churn",
+      "spec": "cross_chart_all_churn.vl.json",
+      "data": "cross_chart_all_churn.csv"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "executive_same_population",
+      "artifact_ids": [
+        "growth",
+        "churn"
+      ],
+      "equal_on": [
+        "analysis_scope"
+      ]
+    }
+  ]
+}

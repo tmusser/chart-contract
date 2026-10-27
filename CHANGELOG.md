@@ -4,6 +4,10 @@
 
 ### Added
 
+- Opt-in `audit bundle` CLI and Python audit surface for explicit cross-chart consistency obligations, independently re-auditing all component specs.
+- Cross-chart identity checks for analysis scope, metric definition, unit/representation, and time windows, with deterministic BLOCKs for missing or inconsistent declarations.
+- `cross_chart_scope_mismatch` trap: two individually READY charts blocked together by their explicitly declared shared-population relationship.
+
 - Opt-in subgroup composition / Simpson-type reversal auditing for two-period grouped compare charts, with matched-source proportion checks and weighted aggregate receipts.
 - A deterministic `simpsons_paradox_conversion` REVIEW trap that shows both subgroups improving while overall conversion declines; invalid count/receipt evidence BLOCKs.
 

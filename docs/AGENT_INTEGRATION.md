@@ -102,6 +102,13 @@ JSON and Markdown reports include deterministic input and report bindings over t
 
 This is a gate, not a publisher. It is meant to keep the agent inside a bounded audit loop before anything is shared.
 
+For multiple related charts, the operator can optionally add a closed
+`audit bundle` manifest and explicitly state which identities must match.
+Run `chart-contract audit bundle report.bundle.json` after individual chart
+creation; do not infer equality of unrelated metrics or treat a single-chart
+READY as proof of cross-chart consistency. See
+[Cross-chart audit bundles](BUNDLE_CONTRACT.md).
+
 The working pattern is:
 
 1. The agent proposes a chart.

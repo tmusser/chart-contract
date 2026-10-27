@@ -6,6 +6,20 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `cross_chart_scope_mismatch` (bundle)
+
+Two individually READY bar charts represent US-paid customer growth and
+all-customer churn, with each chart's row-level scope basis internally
+consistent. A report tries to compare them as a single population.
+
+Expected bundle verdict: `BLOCK` via `bundle.identity.analysis_scope`,
+while both component audits remain `READY`.
+
+```bash
+chart-contract audit bundle examples/traps/cross_chart_scope_mismatch.bundle.json
+```
+
+
 ### `simpsons_paradox_conversion`
 
 Both high- and low-converting subgroups improve individually while the aggregate
