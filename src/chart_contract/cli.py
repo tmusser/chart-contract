@@ -12,6 +12,7 @@ from typing import Any
 import pandas as pd
 
 from .audit import BLOCK, READY, REVIEW, AuditReport
+from .bundle import audit_bundle, parse_bundle_manifest
 from .contracts import resolve_spec_claim
 from .input_binding import (
     BOUND_REPORT_SCHEMA_VERSION,
@@ -172,6 +173,58 @@ def _run_audit_spec(args: argparse.Namespace) -> int:
     if args.markdown_path:
         _write_report(Path(args.markdown_path), report.to_markdown())
 
+    return 1 if _should_fail(report.verdict, args.fail_on, args.warnings_as_errors) else 0
+
+
+
+def _bundle_local_path(root: Path, relative: str, *, kind: str) -> Path:
+    """Resolve strictly within the manifest directory (including symlinks)."""
+    given = Path(relative)
+    if given.is_absolute() or ".." in given.parts:
+        raise CLIError(f"Bundle {kind} path must stay within the manifest directory: {relative}")
+    target = (root / given).resolve()
+    if root not in target.parents or not target.is_file():
+        raise CLIError(f"Bundle {kind} file missing or outside manifest directory: {relative}")
+    return target
+
+
+def _run_audit_bundle(args: argparse.Namespace) -> int:
+    manifest_path = Path(args.manifest_path).resolve()
+    manifest = _load_json_object(manifest_path, kind="Bundle manifest")
+    try:
+        normalized = parse_bundle_manifest(manifest)
+    except ValueError as exc:
+        raise CLIError(str(exc)) from exc
+
+    root = manifest_path.parent
+    inputs: dict[str, tuple[dict[str, Any], pd.DataFrame | None, str | None]] = {}
+    for item in normalized["artifacts"]:
+        spec_path = _bundle_local_path(root, item["spec"], kind="spec")
+        spec = _load_json_spec(spec_path)
+        data = (
+            _load_data(str(_bundle_local_path(root, item["data"], kind="data")))
+            if "data" in item else None
+        )
+        inputs[item["id"]] = (spec, data, item.get("claim"))
+
+    try:
+        report = audit_bundle(normalized, inputs)
+    except ValueError as exc:
+        raise CLIError(str(exc)) from exc
+
+    if args.format == "json":
+        output = json.dumps(report.to_dict(), indent=2, sort_keys=True)
+    elif args.format == "markdown":
+        output = report.to_markdown()
+    else:
+        output = report.to_text()
+    if args.out_path:
+        _write_report(Path(args.out_path), output)
+        print(f"Verdict: {report.verdict} | Summary: {report.summary()}")
+    else:
+        print(output)
+    if args.markdown_path:
+        _write_report(Path(args.markdown_path), report.to_markdown())
     return 1 if _should_fail(report.verdict, args.fail_on, args.warnings_as_errors) else 0
 
 
@@ -371,6 +424,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fail when the report verdict reaches this threshold.",
     )
     spec_parser.set_defaults(func=_run_audit_spec)
+
+    bundle_parser = audit_subparsers.add_parser(
+        "bundle", help="Reaudit local chart specs and declared cross-artifact identities."
+    )
+    bundle_parser.add_argument("manifest_path", help="Closed v1 audit bundle JSON manifest.")
+    bundle_parser.add_argument("--format", choices=SUPPORTED_REPORT_FORMATS, default="text")
+    bundle_parser.add_argument("--out", dest="out_path", help="Save selected bundle report.")
+    bundle_parser.add_argument("--markdown", dest="markdown_path", help="Save Markdown bundle report.")
+    bundle_parser.add_argument(
+        "--warnings-as-errors", action="store_true",
+        help="Treat REVIEW bundle results as a nonzero exit.",
+    )
+    bundle_parser.add_argument(
+        "--fail-on", choices=SUPPORTED_VERDICTS, default=BLOCK,
+        help="Fail at or above this bundle verdict.",
+    )
+    bundle_parser.set_defaults(func=_run_audit_bundle)
 
     verify_parser = subparsers.add_parser("verify", help="Verify durable audit artifacts against current inputs.")
     verify_subparsers = verify_parser.add_subparsers(dest="verify_command", required=True)
