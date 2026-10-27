@@ -1,0 +1,31 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "US paid customer growth",
+  "encoding": {
+    "x": {
+      "field": "period",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "customer_growth",
+      "type": "quantitative",
+      "scale": {
+        "zero": true
+      }
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.executive_summary",
+    "unit": "customers",
+    "claim": "Customer growth values are shown for the selected reporting periods.",
+    "analysis_scope_contract": {
+      "version": 1,
+      "scope_id": "us_paid_customers",
+      "scope_definition": "US paid customers.",
+      "scope_version": "v1",
+      "scope_basis_field": "scope_basis",
+      "scope_basis_value": "us_paid_v1"
+    }
+  }
+}

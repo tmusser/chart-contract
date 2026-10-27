@@ -1,0 +1,31 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "All customer churn",
+  "encoding": {
+    "x": {
+      "field": "period",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "customer_churn",
+      "type": "quantitative",
+      "scale": {
+        "zero": true
+      }
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.executive_summary",
+    "unit": "customers",
+    "claim": "Customer churn values are shown for the selected reporting periods.",
+    "analysis_scope_contract": {
+      "version": 1,
+      "scope_id": "all_customers",
+      "scope_definition": "All customers.",
+      "scope_version": "v1",
+      "scope_basis_field": "scope_basis",
+      "scope_basis_value": "all_v1"
+    }
+  }
+}
