@@ -232,6 +232,17 @@ jobs:
           grep -q "Simpson-type composition reversal" <<<"$paradox_output"
 
           set +e
+          bundle_output=$(chart-contract audit bundle examples/traps/cross_chart_scope_mismatch.bundle.json 2>&1)
+          bundle_exit=$?
+          set -e
+          echo "$bundle_output"
+          test "$bundle_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$bundle_output"
+          grep -q "growth: READY" <<<"$bundle_output"
+          grep -q "churn: READY" <<<"$bundle_output"
+          grep -q "bundle.identity.analysis_scope" <<<"$bundle_output"
+
+          set +e
           ratio_output=$(chart-contract audit spec examples/traps/incorrect_ratio_arithmetic.vl.json \
             --data examples/traps/incorrect_ratio_arithmetic.csv \
             --claim "$(cat examples/traps/incorrect_ratio_arithmetic.claim.txt)" 2>&1)

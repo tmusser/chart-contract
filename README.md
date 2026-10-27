@@ -704,6 +704,25 @@ Supported Python API front-door intents:
 - `Chart.process_tree()`
 - experimental `audit_spec()`
 
+### Multi-chart audits: verify declared report-level consistency
+
+A report can contain two individually READY charts that use incompatible scopes
+or metric definitions when compared together. The optional `audit bundle`
+command independently re-audits each component and then checks **only**
+explicitly declared cross-chart relationships:
+
+```bash
+chart-contract audit bundle report.bundle.json
+```
+
+Bundles can enforce matching analysis scope, metric definition, unit/scale, or
+time-window contracts across named charts. Missing or contradictory required
+identity `BLOCK`s; independent chart `REVIEW`s still propagate. A separate
+bundle v1 report preserves each chart's bound audit evidence.
+
+See [Cross-chart audit bundles](docs/BUNDLE_CONTRACT.md) and the
+[cross-chart scope mismatch trap](examples/traps/cross_chart_scope_mismatch.bundle.json).
+
 ## Scope and Non-Goals
 
 - Not a full visualization library
