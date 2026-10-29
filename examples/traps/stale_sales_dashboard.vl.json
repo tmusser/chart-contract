@@ -1,0 +1,30 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "line",
+  "title": "Sales by reporting week",
+  "encoding": {
+    "x": {
+      "field": "period",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "sales",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.stale_dashboard",
+    "unit": "systems",
+    "claim": "Recorded sales totals by reporting week.",
+    "freshness_contract": {
+      "version": 1,
+      "audit_date": "2026-10-29",
+      "observation_date_field": "observation_date",
+      "finalized_through": "2026-08-25",
+      "max_age_days": 14,
+      "require_finalized": true,
+      "data_through": "2026-08-25",
+      "row_count": 2
+    }
+  }
+}

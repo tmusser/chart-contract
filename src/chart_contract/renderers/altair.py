@@ -31,6 +31,7 @@ from ..population_sampling import (
     sample_member_status,
     weight_status,
 )
+from ..freshness import FRESHNESS_INTENTS, build_freshness_contract, freshness_declaration
 from ..observation_status import (
     OBSERVATION_STATUS_INTENTS,
     build_observation_contract,
@@ -163,6 +164,14 @@ def render_chart(chart: Any) -> alt.Chart:
             metric_field=observation_declaration["metric_field"],
             status_field=observation_declaration["status_field"],
         )
+
+    freshness_raw = (
+        freshness_declaration(chart)
+        if chart.intent in FRESHNESS_INTENTS
+        else None
+    )
+    if freshness_raw is not None:
+        usermeta["freshness_contract"] = build_freshness_contract(chart.data, freshness_raw)
 
     analysis_scope_raw = (
         chart_analysis_scope_contract(chart)
