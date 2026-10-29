@@ -103,6 +103,11 @@ class Chart:
     scope_basis_field: str | None = None
     scope_basis_value: str | None = None
     observation_status_field: str | None = None
+    freshness_audit_date: str | None = None
+    freshness_observation_date_field: str | None = None
+    freshness_finalized_through: str | None = None
+    freshness_max_age_days: int | None = None
+    freshness_require_finalized: bool | None = None
     composition_baseline_value: str | None = None
     composition_target_value: str | None = None
 
@@ -182,6 +187,11 @@ class Chart:
         scope_basis_field: str | None = None,
         scope_basis_value: str | None = None,
         observation_status_field: str | None = None,
+        freshness_audit_date: str | None = None,
+        freshness_observation_date_field: str | None = None,
+        freshness_finalized_through: str | None = None,
+        freshness_max_age_days: int | None = None,
+        freshness_require_finalized: bool | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -254,6 +264,11 @@ class Chart:
             scope_basis_field=scope_basis_field,
             scope_basis_value=scope_basis_value,
             observation_status_field=observation_status_field,
+            freshness_audit_date=freshness_audit_date,
+            freshness_observation_date_field=freshness_observation_date_field,
+            freshness_finalized_through=freshness_finalized_through,
+            freshness_max_age_days=freshness_max_age_days,
+            freshness_require_finalized=freshness_require_finalized,
             metadata=metadata,
         )
 
@@ -310,6 +325,11 @@ class Chart:
         scope_basis_field: str | None = None,
         scope_basis_value: str | None = None,
         observation_status_field: str | None = None,
+        freshness_audit_date: str | None = None,
+        freshness_observation_date_field: str | None = None,
+        freshness_finalized_through: str | None = None,
+        freshness_max_age_days: int | None = None,
+        freshness_require_finalized: bool | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -364,6 +384,11 @@ class Chart:
             scope_basis_field=scope_basis_field,
             scope_basis_value=scope_basis_value,
             observation_status_field=observation_status_field,
+            freshness_audit_date=freshness_audit_date,
+            freshness_observation_date_field=freshness_observation_date_field,
+            freshness_finalized_through=freshness_finalized_through,
+            freshness_max_age_days=freshness_max_age_days,
+            freshness_require_finalized=freshness_require_finalized,
             metadata=metadata,
         )
 
@@ -442,6 +467,11 @@ class Chart:
         scope_basis_field: str | None = None,
         scope_basis_value: str | None = None,
         observation_status_field: str | None = None,
+        freshness_audit_date: str | None = None,
+        freshness_observation_date_field: str | None = None,
+        freshness_finalized_through: str | None = None,
+        freshness_max_age_days: int | None = None,
+        freshness_require_finalized: bool | None = None,
         composition_baseline_value: str | None = None,
         composition_target_value: str | None = None,
         metadata: Mapping[str, Any] | None = None,
@@ -520,6 +550,11 @@ class Chart:
             scope_basis_field=scope_basis_field,
             scope_basis_value=scope_basis_value,
             observation_status_field=observation_status_field,
+            freshness_audit_date=freshness_audit_date,
+            freshness_observation_date_field=freshness_observation_date_field,
+            freshness_finalized_through=freshness_finalized_through,
+            freshness_max_age_days=freshness_max_age_days,
+            freshness_require_finalized=freshness_require_finalized,
             composition_baseline_value=composition_baseline_value,
             composition_target_value=composition_target_value,
             metadata=metadata,

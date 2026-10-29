@@ -213,6 +213,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_observation_chart(report, chart)
 
+    from .freshness_audit import audit_freshness_chart
+
+    audit_freshness_chart(report, chart)
+
     from .population_sampling_audit import audit_population_chart
 
     audit_population_chart(report, chart)
@@ -698,6 +702,9 @@ def audit_spec(
     from .observation_status_audit import audit_observation_spec
 
     audit_observation_spec(report, spec, encoding, resolved_frame)
+    from .freshness_audit import audit_freshness_spec
+
+    audit_freshness_spec(report, spec, resolved_frame)
     audit_population_spec(report, spec, resolved_frame, resolved_claim)
     audit_uncertainty_spec(report, spec, resolved_frame, resolved_claim)
     audit_reconciliation_spec(report, spec, encoding, resolved_frame, unit)
