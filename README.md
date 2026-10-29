@@ -296,6 +296,18 @@ numeric zero. A fixed v1 spec receipt records exact state counts and fails on la
 No values are filled, changed, or inferred. See
 [Observation status contract](docs/OBSERVATION_STATUS_CONTRACT.md).
 
+### Data freshness: make the as-of and finalization cutoff explicit
+
+A chart can be correct but too old to support the reporting claim. Opt into a
+deterministic `freshness_contract` with an explicit `freshness_audit_date`,
+source observation date field, `freshness_max_age_days`, a finalized-through
+cutoff, and a policy for preliminary observations. The audit reconstructs the
+latest source date and row-count receipts. Stale or future-dated data `BLOCK`;
+preliminary observations `REVIEW` or `BLOCK` according to the declared policy.
+
+No machine clock or inferred `today` is used. Legacy charts are unaffected.
+See [Data freshness and finalization contract](docs/FRESHNESS_CONTRACT.md).
+
 ### Measurement units: bind source and display semantics
 
 A displayed unit does not prove every source row was measured in that unit. When unit identity

@@ -6,6 +6,22 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `stale_sales_dashboard`
+
+A plausible sales trend is mathematically correct and fully finalized as of
+August 25, 2026, but its operator-declared audit date is October 29, 2026
+with a maximum allowable age of 14 days.
+
+Expected verdict: `BLOCK` via `data.freshness.age`, while
+`data.freshness.evidence` and `data.freshness.finalization` PASS.
+
+```bash
+chart-contract audit spec examples/traps/stale_sales_dashboard.vl.json \
+  --data examples/traps/stale_sales_dashboard.csv \
+  --claim "$(cat examples/traps/stale_sales_dashboard.claim.txt)"
+```
+
+
 ### `cross_chart_scope_mismatch` (bundle)
 
 Two individually READY bar charts represent US-paid customer growth and

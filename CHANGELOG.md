@@ -4,6 +4,10 @@
 
 ### Added
 
+- Opt-in closed v1 data freshness/finalization contracts for trend/rank/compare charts and external Vega-Lite specs, with explicit audit date, row-level observation dates, max-age policy, and finalized-through cutoff.
+- Deterministic source-date/row-count receipts, stale/future-data BLOCK gates, and preliminary-data REVIEW or BLOCK behavior.
+- Synthetic stale-sales dashboard CLI trap demonstrating old but otherwise valid reported data.
+
 - Opt-in `audit bundle` CLI and Python audit surface for explicit cross-chart consistency obligations, independently re-auditing all component specs.
 - Cross-chart identity checks for analysis scope, metric definition, unit/representation, and time windows, with deterministic BLOCKs for missing or inconsistent declarations.
 - `cross_chart_scope_mismatch` trap: two individually READY charts blocked together by their explicitly declared shared-population relationship.
