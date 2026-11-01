@@ -296,6 +296,26 @@ numeric zero. A fixed v1 spec receipt records exact state counts and fails on la
 No values are filled, changed, or inferred. See
 [Observation status contract](docs/OBSERVATION_STATUS_CONTRACT.md).
 
+### Trend cadence: detect missing reporting periods
+
+Two clean observations do not prove the intervening periods exist. Opt into a
+daily, weekly, or first-of-month `cadence_contract` on `Chart.trend`:
+
+```python
+Chart.trend(
+    data=df, x="week", y="sales",
+    claim="Weekly sales over the observed weeks.",
+    source="warehouse.sales", unit="systems",
+    cadence_frequency="weekly",
+    cadence_require_complete=False,  # WARN on gaps; True BLOCKs
+)
+```
+
+Audits check canonical source dates on the declared calendar grid and bind
+first/last/count/gap receipts into Vega-Lite metadata. A complete-required chart
+with an omitted week cannot be shared as READY. See
+[Trend cadence and missing periods](docs/CADENCE_CONTRACT.md).
+
 ### Data freshness: make the as-of and finalization cutoff explicit
 
 A chart can be correct but too old to support the reporting claim. Opt into a
