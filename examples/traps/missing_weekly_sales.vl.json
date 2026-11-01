@@ -1,0 +1,37 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": {
+    "type": "line",
+    "point": true
+  },
+  "title": "Weekly sales",
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "sales",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.weekly_sales",
+    "unit": "systems",
+    "claim": "Reported weekly sales increased across the displayed weeks.",
+    "cadence_contract": {
+      "version": 1,
+      "date_field": "week",
+      "frequency": "weekly",
+      "require_complete": true,
+      "start_date": "2026-09-07",
+      "end_date": "2026-09-28",
+      "observed_count": 3,
+      "expected_count": 4,
+      "missing_count": 1,
+      "missing_preview": [
+        "2026-09-14"
+      ]
+    }
+  }
+}
