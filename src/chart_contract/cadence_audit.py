@@ -43,9 +43,9 @@ def audit_cadence_chart(report: AuditReport, chart: Any) -> None:
     report.add("data.trend.cadence", severity, message)
 
 
-def _trend_visible(spec: Mapping[str, Any], encoding: Any, field: str) -> bool:
+def _trend_visible(analytical_spec: Mapping[str, Any], encoding: Any, field: str) -> bool:
     # Only simple external line specs are in scope; no guessing layered semantics.
-    mark = spec.get("mark")
+    mark = analytical_spec.get("mark")
     mark_type = mark.get("type") if isinstance(mark, Mapping) else mark
     if mark_type != "line" or not isinstance(encoding, Mapping):
         return False
@@ -60,7 +60,8 @@ def _trend_visible(spec: Mapping[str, Any], encoding: Any, field: str) -> bool:
 
 
 def audit_cadence_spec(
-    report: AuditReport, spec: Mapping[str, Any], encoding: Any, frame: pd.DataFrame | None,
+    report: AuditReport, spec: Mapping[str, Any], analytical_spec: Mapping[str, Any],
+    encoding: Any, frame: pd.DataFrame | None,
 ) -> None:
     usermeta = spec.get("usermeta")
     if not isinstance(usermeta, Mapping) or CADENCE_CONTRACT_KEY not in usermeta:
@@ -69,7 +70,7 @@ def audit_cadence_spec(
         receipt = parse_cadence_contract(spec)
         if receipt is None:
             return
-        if not _trend_visible(spec, encoding, receipt["date_field"]):
+        if not _trend_visible(analytical_spec, encoding, receipt["date_field"]):
             raise ValueError(
                 "Cadence requires a simple line spec with the declared date_field "
                 "on visible ordinal/temporal x and a quantitative y."

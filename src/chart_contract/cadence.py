@@ -91,6 +91,8 @@ def build_cadence_receipt(frame: pd.DataFrame, declaration: Mapping[str, Any]) -
             missing += 1
             if len(preview) < _PREVIEW_LIMIT:
                 preview.append(cursor.isoformat())
+        if cursor == last:
+            break
         cursor = _next_date(cursor, parsed["frequency"])
     if expected != len(unique) + missing:
         raise ValueError("Cadence dates are off-grid for the declared frequency.")
