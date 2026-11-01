@@ -6,6 +6,22 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `missing_weekly_sales`
+
+The synthetic weekly sales line shows September 7, 21 and 28, 2026,
+but has **no September 14 row**. Its closed v1 cadence receipt identifies the
+omission, with `require_complete=true`.
+
+Expected: `BLOCK` via `data.trend.cadence`; the independent
+`data.trend.cadence_evidence` receipt check must `PASS`.
+
+```bash
+chart-contract audit spec examples/traps/missing_weekly_sales.vl.json \
+  --data examples/traps/missing_weekly_sales.csv \
+  --claim "$(cat examples/traps/missing_weekly_sales.claim.txt)"
+```
+
+
 ### `stale_sales_dashboard`
 
 A plausible sales trend is mathematically correct and fully finalized as of

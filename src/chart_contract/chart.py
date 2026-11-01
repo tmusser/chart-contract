@@ -108,6 +108,8 @@ class Chart:
     freshness_finalized_through: str | None = None
     freshness_max_age_days: int | None = None
     freshness_require_finalized: bool | None = None
+    cadence_frequency: str | None = None
+    cadence_require_complete: bool | None = None
     composition_baseline_value: str | None = None
     composition_target_value: str | None = None
 
@@ -192,6 +194,8 @@ class Chart:
         freshness_finalized_through: str | None = None,
         freshness_max_age_days: int | None = None,
         freshness_require_finalized: bool | None = None,
+        cadence_frequency: str | None = None,
+        cadence_require_complete: bool | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
         return cls(
@@ -269,6 +273,8 @@ class Chart:
             freshness_finalized_through=freshness_finalized_through,
             freshness_max_age_days=freshness_max_age_days,
             freshness_require_finalized=freshness_require_finalized,
+            cadence_frequency=cadence_frequency,
+            cadence_require_complete=cadence_require_complete,
             metadata=metadata,
         )
 

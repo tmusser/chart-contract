@@ -32,6 +32,7 @@ from ..population_sampling import (
     weight_status,
 )
 from ..freshness import FRESHNESS_INTENTS, build_freshness_contract, freshness_declaration
+from ..cadence import build_cadence_receipt, chart_cadence_declaration
 from ..observation_status import (
     OBSERVATION_STATUS_INTENTS,
     build_observation_contract,
@@ -164,6 +165,13 @@ def render_chart(chart: Any) -> alt.Chart:
             metric_field=observation_declaration["metric_field"],
             status_field=observation_declaration["status_field"],
         )
+
+    cadence_raw = chart_cadence_declaration(chart) if chart.intent == "trend" else None
+    if cadence_raw is not None:
+        cadence = build_cadence_receipt(chart.data, cadence_raw)
+        if cadence["missing_count"] and cadence["require_complete"]:
+            raise ValueError("Cannot render a trend with missing cadence periods when require_complete=True.")
+        usermeta["cadence_contract"] = cadence
 
     freshness_raw = (
         freshness_declaration(chart)

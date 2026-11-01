@@ -4,6 +4,9 @@
 
 ### Added
 
+- Opt-in daily/weekly/first-of-month cadence contracts for trends, with missing internal periods WARNing by default or BLOCKing when complete reporting is required.
+- Canonical-date, duplicate/off-grid, and stale-receipt validation for first-party and external Vega-Lite audits; deterministic missing-week CLI trap.
+
 - Opt-in closed v1 data freshness/finalization contracts for trend/rank/compare charts and external Vega-Lite specs, with explicit audit date, row-level observation dates, max-age policy, and finalized-through cutoff.
 - Deterministic source-date/row-count receipts, stale/future-data BLOCK gates, and preliminary-data REVIEW or BLOCK behavior.
 - Synthetic stale-sales dashboard CLI trap demonstrating old but otherwise valid reported data.

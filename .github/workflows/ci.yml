@@ -205,6 +205,19 @@ jobs:
           grep -q "mixed source units" <<<"$unit_output"
 
           set +e
+          cadence_output=$(chart-contract audit spec examples/traps/missing_weekly_sales.vl.json \
+            --data examples/traps/missing_weekly_sales.csv \
+            --claim "$(cat examples/traps/missing_weekly_sales.claim.txt)" 2>&1)
+          cadence_exit=$?
+          set -e
+          echo "$cadence_output"
+          test "$cadence_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$cadence_output"
+          grep -q "PASS data.trend.cadence_evidence" <<<"$cadence_output"
+          grep -q "FAIL data.trend.cadence:" <<<"$cadence_output"
+          grep -q "2026-09-14" <<<"$cadence_output"
+
+          set +e
           stale_output=$(chart-contract audit spec examples/traps/stale_sales_dashboard.vl.json \
             --data examples/traps/stale_sales_dashboard.csv \
             --claim "$(cat examples/traps/stale_sales_dashboard.claim.txt)" 2>&1)
