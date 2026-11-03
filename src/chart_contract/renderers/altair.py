@@ -33,6 +33,7 @@ from ..population_sampling import (
 )
 from ..freshness import FRESHNESS_INTENTS, build_freshness_contract, freshness_declaration
 from ..cadence import build_cadence_receipt, chart_cadence_declaration
+from ..trend_influence import build_influence_receipt, chart_influence_declaration
 from ..observation_status import (
     OBSERVATION_STATUS_INTENTS,
     build_observation_contract,
@@ -165,6 +166,12 @@ def render_chart(chart: Any) -> alt.Chart:
             metric_field=observation_declaration["metric_field"],
             status_field=observation_declaration["status_field"],
         )
+
+    influence_raw = chart_influence_declaration(chart)
+    if influence_raw is not None:
+        if chart.intent != "trend":
+            raise ValueError("Trend influence is supported on trend charts only.")
+        usermeta["trend_influence_contract"] = build_influence_receipt(chart.data, influence_raw)
 
     cadence_raw = chart_cadence_declaration(chart) if chart.intent == "trend" else None
     if cadence_raw is not None:
