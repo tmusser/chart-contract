@@ -24,12 +24,14 @@
       "y_field": "sales",
       "x_kind": "date",
       "row_count": 6,
-      "full_slope": 0,
-      "loo_min_slope": 0,
-      "loo_max_slope": 0,
-      "flat_tolerance": 0,
-      "reversal_count": 0,
-      "reversal_preview": []
+      "full_slope": 0.3673469387755102,
+      "loo_min_slope": -0.14285714285714285,
+      "loo_max_slope": 0.5714285714285714,
+      "flat_tolerance": 6.857142857142858e-11,
+      "reversal_count": 1,
+      "reversal_preview": [
+        "2026-10-12"
+      ]
     }
   }
 }
