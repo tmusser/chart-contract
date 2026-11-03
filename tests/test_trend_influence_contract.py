@@ -157,7 +157,7 @@ def test_missing_spec_source_fails_closed():
 
 @pytest.mark.parametrize(("field", "bad"), [
     ("full_slope", 0.0), ("loo_min_slope", 0.0),
-    ("reversal_count", 0), ("reversal_preview", []),
+    ("reversal_count", 2), ("reversal_preview", []),
     ("row_count", 8),
 ])
 def test_stale_receipt_is_rejected(field, bad):
