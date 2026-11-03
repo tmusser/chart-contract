@@ -34,6 +34,7 @@ Policy:
 - The agent must stop on `BLOCK`.
 - Do not swap the claim attached to a chart artifact. If `usermeta.claim` exists, audit that claim or supply the exact same text; `contract.claim.consistency` blocks conflicting claim sources.
 - When percent presentation is explicit, declare `usermeta.value_representation` as `fraction` or `percentage_points`; never infer the scale from observed values and never rescale the data merely to satisfy the audit.
+- Treat `scale.override.authorization=PASS` as consent to change the axis, **not** proof that data remain visible. Inspect `visual.scale.clipped_data`: explicit bounds excluding plotted values require REVIEW even for a requested zoom. Unverifiable dynamic/transform bounds are also REVIEW; never delete or silently trim source data to make the rule pass.
 - Do not assume a generic `rate` unit means percent. Preserve the actual denominator/unit semantics supplied by the analytical contract.
 - Before sharing an external spec with explicit Vega-Lite transforms, inspect the `transform.inventory` findings and require `usermeta.transform_contract.declared` to exactly match the detected transform kinds.
 - Treat the transform declaration as a visibility contract only. It does not mean the transform was requested, executed by chart-contract, or analytically valid.

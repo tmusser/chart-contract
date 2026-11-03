@@ -6,6 +6,23 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `hidden_outlier_axis`
+
+A four-week line chart includes a genuine `-80` return, but its
+user-authorized y-axis range `[0, 15]` and `clip: true` put that
+observation outside the displayed range. Authorization alone would pass.
+
+Expected: `REVIEW` via `visual.scale.clipped_data`, while
+`scale.override.authorization` PASSes. Use `--warnings-as-errors` for
+a nonzero gate.
+
+```bash
+chart-contract audit spec examples/traps/hidden_outlier_axis.vl.json \
+  --data examples/traps/hidden_outlier_axis.csv \
+  --claim "$(cat examples/traps/hidden_outlier_axis.claim.txt)"
+```
+
+
 ### `influential_weekly_sales`
 
 Six weekly sales values (`10, 9, 8, 7, 6, 30`) yield a positive full-data

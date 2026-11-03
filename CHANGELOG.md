@@ -4,6 +4,9 @@
 
 ### Added
 
+- Spec audit rule `visual.scale.clipped_data` warns when explicit numeric axis bounds exclude directly plotted source observations, even for an authorized zoom; unverifiable dynamic/transform cases warn instead of silently passing.
+- Synthetic `hidden_outlier_axis` REVIEW trap and adversarial tests for x/y bounds, partial domains, unsupported shapes, and source-mutation safety.
+
 - Opt-in leave-one-out OLS trend influence checks for simple line charts, warning when omitting one point reverses the fitted slope's direction.
 - Closed v1 influence metadata with reproducible source-bound slope receipts, strict evidence validation and a synthetic influential-weekly-sales REVIEW trap.
 

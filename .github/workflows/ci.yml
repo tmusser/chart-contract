@@ -205,6 +205,20 @@ jobs:
           grep -q "mixed source units" <<<"$unit_output"
 
           set +e
+          clipping_output=$(chart-contract audit spec examples/traps/hidden_outlier_axis.vl.json \
+            --data examples/traps/hidden_outlier_axis.csv \
+            --claim "$(cat examples/traps/hidden_outlier_axis.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          clipping_exit=$?
+          set -e
+          echo "$clipping_output"
+          test "$clipping_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$clipping_output"
+          grep -q "PASS scale.override.authorization" <<<"$clipping_output"
+          grep -q "WARN visual.scale.clipped_data:" <<<"$clipping_output"
+          grep -q "1 of 4" <<<"$clipping_output"
+
+          set +e
           influence_output=$(chart-contract audit spec examples/traps/influential_weekly_sales.vl.json \
             --data examples/traps/influential_weekly_sales.csv \
             --claim "$(cat examples/traps/influential_weekly_sales.claim.txt)" \
