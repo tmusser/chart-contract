@@ -50,6 +50,7 @@ Policy:
 - When a metric catalog/version is available, preserve it in `metric_definition_contract` rather than assuming a stable field name implies stable semantics.
 - Stop on `data.metric.definition_basis`: supplied rows declare incompatible metric versions and should not be compared as one metric artifact.
 - A passing metric-definition contract is identity metadata, not validation that upstream SQL or Python actually implemented the declared definition.
+- For a simple unaggregated trend, optionally set `trend_influence=True` and review `stat.trend.influence` when dropping one point reverses the fitted OLS direction. A warning is descriptive sensitivity, not a significance test or permission to remove the point; invalid/mutated evidence receipts BLOCK.
 - For regular time series, declare `cadence_frequency` and `cadence_require_complete` on trend charts. Confirm that source observation dates form a daily/weekly/calendar-month grid and preserve missing-period receipts; do not interpolate or fill omitted slots to get a PASS.
 - Treat `data.trend.cadence` WARN as an analyst review signal, or FAIL as a blocking gap when the operator required a complete series. The contract detects only internal gaps, not missing leading/trailing periods or upstream ingestion truth.
 - For as-of dashboards, use the opt-in `freshness_contract` with an explicit audit date and row-level source observation dates. The contract never calls the machine clock; set the date/policy intentionally for the reporting task.

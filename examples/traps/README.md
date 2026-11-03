@@ -6,6 +6,22 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `influential_weekly_sales`
+
+Six weekly sales values (`10, 9, 8, 7, 6, 30`) yield a positive full-data
+OLS slope, but excluding the October 12 observation yields a negative slope.
+
+Expected: `REVIEW` via `stat.trend.influence`, with
+`data.trend.influence_evidence` PASS. Use `--warnings-as-errors` for a
+nonzero gate.
+
+```bash
+chart-contract audit spec examples/traps/influential_weekly_sales.vl.json \
+  --data examples/traps/influential_weekly_sales.csv \
+  --claim "$(cat examples/traps/influential_weekly_sales.claim.txt)"
+```
+
+
 ### `missing_weekly_sales`
 
 The synthetic weekly sales line shows September 7, 21 and 28, 2026,

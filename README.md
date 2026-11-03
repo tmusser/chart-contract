@@ -316,6 +316,18 @@ first/last/count/gap receipts into Vega-Lite metadata. A complete-required chart
 with an omitted week cannot be shared as READY. See
 [Trend cadence and missing periods](docs/CADENCE_CONTRACT.md).
 
+### Trend sensitivity: can one observation flip the direction?
+
+A line chart can look persuasive even when one point determines the OLS
+direction. Opt into `Chart.trend(..., trend_influence=True)` to compare the
+full-data slope against leave-one-out slopes. A direction reversal emits a
+`stat.trend.influence` **REVIEW** warning; malformed evidence and stale
+receipts **BLOCK**.
+
+The check uses unique finite x/y observations (numeric or canonical
+`YYYY-MM-DD` dates) and does not remove outliers or imply statistical
+significance. See [Trend influence contract](docs/TREND_INFLUENCE_CONTRACT.md).
+
 ### Data freshness: make the as-of and finalization cutoff explicit
 
 A chart can be correct but too old to support the reporting claim. Opt into a
