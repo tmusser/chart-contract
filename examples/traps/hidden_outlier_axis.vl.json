@@ -1,0 +1,31 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": {
+    "type": "line",
+    "clip": true,
+    "point": true
+  },
+  "title": "Recorded weekly returns",
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "returns",
+      "type": "quantitative",
+      "scale": {
+        "domain": [
+          0,
+          15
+        ]
+      }
+    }
+  },
+  "usermeta": {
+    "claim": "Recorded returns vary across the four displayed weeks.",
+    "source": "synthetic.axis_limits",
+    "unit": "dollars",
+    "user_requested_scale_override": true
+  }
+}
