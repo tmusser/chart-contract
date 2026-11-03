@@ -767,6 +767,22 @@ bundle v1 report preserves each chart's bound audit evidence.
 See [Cross-chart audit bundles](docs/BUNDLE_CONTRACT.md) and the
 [cross-chart scope mismatch trap](examples/traps/cross_chart_scope_mismatch.bundle.json).
 
+### Axis clipping: authorized zooms can still exclude observations
+
+An explicit user-requested quantitative zoom is allowed, but may hide
+evidence. The spec audit checks original numeric x/y values against
+explicit numeric `domain`, `domainMin`, or `domainMax` limits for simple
+untransformed Vega-Lite line/point/bar/tick views.
+
+`visual.scale.clipped_data` **REVIEW**s when plotted source observations
+fall outside a declared axis range, even if the zoom was authorized.
+Fully covered evidence `PASS`es; dynamic bounds, transformations, missing
+source data, and layered views receive an explicit unverifiable `REVIEW`
+rather than a false coverage PASS. No data or scale is modified.
+
+[Read the visual default and clipping policy](docs/VISUAL_DEFAULTS.md) and
+[run the hidden-outlier trap](examples/traps/hidden_outlier_axis.vl.json).
+
 ## Scope and Non-Goals
 
 - Not a full visualization library
