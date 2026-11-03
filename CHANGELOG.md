@@ -4,6 +4,9 @@
 
 ### Added
 
+- Opt-in leave-one-out OLS trend influence checks for simple line charts, warning when omitting one point reverses the fitted slope's direction.
+- Closed v1 influence metadata with reproducible source-bound slope receipts, strict evidence validation and a synthetic influential-weekly-sales REVIEW trap.
+
 - Opt-in daily/weekly/first-of-month cadence contracts for trends, with missing internal periods WARNing by default or BLOCKing when complete reporting is required.
 - Canonical-date, duplicate/off-grid, and stale-receipt validation for first-party and external Vega-Lite audits; deterministic missing-week CLI trap.
 

@@ -205,6 +205,20 @@ jobs:
           grep -q "mixed source units" <<<"$unit_output"
 
           set +e
+          influence_output=$(chart-contract audit spec examples/traps/influential_weekly_sales.vl.json \
+            --data examples/traps/influential_weekly_sales.csv \
+            --claim "$(cat examples/traps/influential_weekly_sales.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          influence_exit=$?
+          set -e
+          echo "$influence_output"
+          test "$influence_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$influence_output"
+          grep -q "PASS data.trend.influence_evidence" <<<"$influence_output"
+          grep -q "WARN stat.trend.influence:" <<<"$influence_output"
+          grep -q "2026-10-12" <<<"$influence_output"
+
+          set +e
           cadence_output=$(chart-contract audit spec examples/traps/missing_weekly_sales.vl.json \
             --data examples/traps/missing_weekly_sales.csv \
             --claim "$(cat examples/traps/missing_weekly_sales.claim.txt)" 2>&1)
