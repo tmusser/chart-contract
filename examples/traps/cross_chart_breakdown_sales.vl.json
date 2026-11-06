@@ -1,0 +1,23 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "Direct systems sales by channel",
+  "encoding": {
+    "x": {
+      "field": "channel",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "channel_sales",
+      "type": "quantitative",
+      "scale": {
+        "zero": true
+      }
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.executive_sales",
+    "unit": "systems",
+    "claim": "Sales are broken down across listed channels."
+  }
+}

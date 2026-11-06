@@ -16,6 +16,7 @@ import pandas as pd
 from .analysis_scope import parse_analysis_scope_contract
 from .audit import BLOCK, FAIL, PASS, READY, REVIEW, WARN, AuditFinding
 from .contracts import declared_unit_from_spec, declared_value_representation_from_spec
+from .bundle_reconciliation import RECONCILIATION_KIND, audit_sum_relationship, parse_sum_relationship
 from .metric_definition import parse_metric_definition_contract
 from .spec_policy import audit_spec
 from .time_window import parse_time_window_contract
@@ -80,6 +81,9 @@ def parse_bundle_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("Bundle must declare at least one relationship.")
     relationships: list[dict[str, Any]] = []
     for raw in raw_relationships:
+        if isinstance(raw, Mapping) and raw.get("kind") == RECONCILIATION_KIND:
+            relationships.append(parse_sum_relationship(raw, set(artifact_ids)))
+            continue
         if not isinstance(raw, Mapping) or set(raw) != {"id", "artifact_ids", "equal_on"}:
             raise ValueError("Bundle relationship requires exactly id, artifact_ids, equal_on.")
         relation_id = _text(raw["id"], "relationship id")
@@ -205,6 +209,7 @@ def audit_bundle(
 
     reports: dict[str, Any] = {}
     specs: dict[str, Mapping[str, Any]] = {}
+    source_data: dict[str, pd.DataFrame | None] = {}
     for artifact in normalized["artifacts"]:
         identifier = artifact["id"]
         supplied = inputs[identifier]
@@ -214,10 +219,14 @@ def audit_bundle(
         if not isinstance(spec, Mapping):
             raise ValueError(f"Bundle artifact {identifier!r} requires a spec object.")
         specs[identifier] = spec
+        source_data[identifier] = data
         reports[identifier] = audit_spec(spec=spec, data=data, claim=claim)
 
     findings: list[AuditFinding] = []
     for relation in normalized["relationships"]:
+        if relation.get("kind") == RECONCILIATION_KIND:
+            findings.extend(audit_sum_relationship(relation, specs, source_data, reports))
+            continue
         members = relation["artifact_ids"]
         for dimension in relation["equal_on"]:
             rule = f"bundle.identity.{dimension}"

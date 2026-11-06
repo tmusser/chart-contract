@@ -286,6 +286,19 @@ jobs:
           grep -q "Simpson-type composition reversal" <<<"$paradox_output"
 
           set +e
+          total_bundle_output=$(chart-contract audit bundle examples/traps/cross_chart_total_gap.bundle.json 2>&1)
+          total_bundle_exit=$?
+          set -e
+          echo "$total_bundle_output"
+          test "$total_bundle_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$total_bundle_output"
+          grep -q "headline: READY" <<<"$total_bundle_output"
+          grep -q "breakdown: READY" <<<"$total_bundle_output"
+          grep -q "PASS bundle.reconciliation.evidence" <<<"$total_bundle_output"
+          grep -q "FAIL bundle.reconciliation.total" <<<"$total_bundle_output"
+          grep -q "residual=80" <<<"$total_bundle_output"
+
+          set +e
           bundle_output=$(chart-contract audit bundle examples/traps/cross_chart_scope_mismatch.bundle.json 2>&1)
           bundle_exit=$?
           set -e

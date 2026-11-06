@@ -1,0 +1,23 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": "bar",
+  "title": "Total direct systems sales",
+  "encoding": {
+    "x": {
+      "field": "summary",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "sales_total",
+      "type": "quantitative",
+      "scale": {
+        "zero": true
+      }
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.executive_sales",
+    "unit": "systems",
+    "claim": "The report shows 1000 direct systems sales."
+  }
+}

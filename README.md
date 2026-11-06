@@ -764,8 +764,15 @@ time-window contracts across named charts. Missing or contradictory required
 identity `BLOCK`s; independent chart `REVIEW`s still propagate. A separate
 bundle v1 report preserves each chart's bound audit evidence.
 
-See [Cross-chart audit bundles](docs/BUNDLE_CONTRACT.md) and the
-[cross-chart scope mismatch trap](examples/traps/cross_chart_scope_mismatch.bundle.json).
+Bundles also support a typed `sum_reconciliation` relationship between a
+one-row headline total and a complete additive breakdown. The bundle
+reconstructs both sides from their own source evidence, requires equal
+measurement units, and **BLOCKs** disagreement; this is distinct from
+the existing within-chart control-total contract.
+
+See [Cross-chart audit bundles](docs/BUNDLE_CONTRACT.md), the
+[cross-chart scope mismatch trap](examples/traps/cross_chart_scope_mismatch.bundle.json),
+and the [cross-chart total gap trap](examples/traps/cross_chart_total_gap.bundle.json).
 
 ### Axis clipping: authorized zooms can still exclude observations
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/tmusser/chart-contract/blob/main/schemas/audit-bundle-v1.schema.json",
   "title": "chart-contract audit bundle manifest v1",
-  "description": "Closed manifest for explicitly required identity parity across two or more chart artifacts.",
+  "description": "Closed manifest for explicit cross-chart identity and additive total reconciliation obligations.",
   "type": "object",
   "required": [
     "version",
@@ -47,41 +47,96 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "artifact_ids",
-          "equal_on"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "minLength": 1
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "artifact_ids",
+              "equal_on"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_ids": {
+                "type": "array",
+                "minItems": 2,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "equal_on": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "analysis_scope",
+                    "metric_definition",
+                    "unit",
+                    "time_window"
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false
           },
-          "artifact_ids": {
-            "type": "array",
-            "minItems": 2,
-            "uniqueItems": true,
-            "items": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "equal_on": {
-            "type": "array",
-            "minItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "enum": [
-                "analysis_scope",
-                "metric_definition",
-                "unit",
-                "time_window"
-              ]
-            }
+          {
+            "type": "object",
+            "required": [
+              "kind",
+              "id",
+              "total_artifact_id",
+              "components_artifact_id",
+              "total_metric_field",
+              "component_field",
+              "component_metric_field",
+              "components_exhaustive",
+              "tolerance"
+            ],
+            "properties": {
+              "kind": {
+                "const": "sum_reconciliation"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "total_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "components_artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "total_metric_field": {
+                "type": "string",
+                "minLength": 1
+              },
+              "component_field": {
+                "type": "string",
+                "minLength": 1
+              },
+              "component_metric_field": {
+                "type": "string",
+                "minLength": 1
+              },
+              "components_exhaustive": {
+                "const": true
+              },
+              "tolerance": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
           }
-        },
-        "additionalProperties": false
+        ]
       }
     }
   },

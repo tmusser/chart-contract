@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "id": "headline",
+      "spec": "cross_chart_headline_sales.vl.json",
+      "data": "cross_chart_headline_sales.csv"
+    },
+    {
+      "id": "breakdown",
+      "spec": "cross_chart_breakdown_sales.vl.json",
+      "data": "cross_chart_breakdown_sales.csv"
+    }
+  ],
+  "relationships": [
+    {
+      "kind": "sum_reconciliation",
+      "id": "sales_breakdown_matches_headline",
+      "total_artifact_id": "headline",
+      "components_artifact_id": "breakdown",
+      "total_metric_field": "sales_total",
+      "component_field": "channel",
+      "component_metric_field": "channel_sales",
+      "components_exhaustive": true,
+      "tolerance": 0
+    }
+  ]
+}

@@ -69,6 +69,80 @@ A missing identity `BLOCK`s rather than silently excluding a component.
 Declared identity differences also `BLOCK`; this is a gate against an explicitly
 inconsistent comparison, not a claim that the charts cannot coexist.
 
+## Cross-chart additive total reconciliation
+
+A new, typed `sum_reconciliation` relationship compares **two independently
+rendered chart artifacts**: a one-row headline total and a categorical
+breakdown whose components are explicitly declared exhaustive. It is an
+additional version-1 bundle relationship shape; the existing untyped
+`artifact_ids` / `equal_on` identity contracts remain unchanged.
+
+```json
+{
+  "kind": "sum_reconciliation",
+  "id": "sales_breakdown_matches_headline",
+  "total_artifact_id": "headline",
+  "components_artifact_id": "breakdown",
+  "total_metric_field": "sales_total",
+  "component_field": "channel",
+  "component_metric_field": "channel_sales",
+  "components_exhaustive": true,
+  "tolerance": 0.0
+}
+```
+
+Place this object in `relationships` with both artifacts listed in
+`artifacts`. The two artifact IDs must differ. The metric fields may
+have **different source column names**, but the two specs must declare
+identical non-empty additive `unit` and value-representation semantics;
+percent, rate, and ratio units cannot be summed by this contract.
+`components_exhaustive: true` is an explicit obligation—not proof that
+upstream component categories were defined correctly.
+
+The headline must be one directly displayed **finite numeric value in
+exactly one source row**. The breakdown must show its component categories
+on nominal/ordinal x and numeric amounts on y. Both use simple untransformed
+bar/point charts, without aggregation, Vega-Lite filters, binning, stacks
+or hidden transformations. Every supplied component must have a non-empty,
+unique label and a complete finite metric value. No observed rows may be
+automatically imputed, filtered, grouped, or replaced with an "Unknown"
+balancing category.
+
+The bundle reruns each component's full `audit_spec` gate first.
+If either artifact `BLOCK`s, the comparison reports
+`bundle.reconciliation.skipped: WARN`, **not a fabricated PASS**.
+Otherwise the cross-chart rules are:
+
+- `bundle.reconciliation.evidence: PASS/FAIL`: two charted evidence sets
+  are compatible, complete, and reconstructable from source rows, with
+  matching additive units.
+- `bundle.reconciliation.total: PASS/FAIL`: compare the source headline
+  value to the sum of all source components within the declared *absolute*
+  tolerance. A mismatch includes the numeric residual and, where meaningful,
+  the percentage of the headline represented.
+- The bundle `BLOCK`s if either cross-chart rule FAILs, even when both
+  individual charts report READY.
+
+Use an independent `equal_on` relationship for `analysis_scope`,
+`metric_definition` and/or `time_window` if those identities must also
+match. **Arithmetic equality alone does not prove two charts share the same
+metric definition, source population, time period, or reporting cut.**
+
+The sum relationship does not use a static, self-declared control total from
+the breakdown chart. It derives the control from the *separate headline's*
+source evidence, while reusing the existing single-chart component validation.
+
+Reproduce the trap:
+
+```bash
+chart-contract audit bundle examples/traps/cross_chart_total_gap.bundle.json
+```
+
+The headline source contains 1,000 systems and the three reported channels
+contain 500 + 300 + 120 = 920. Both component charts are individually
+READY; `bundle.reconciliation.evidence` PASSes while the total comparison
+BLOCKs with an 80-system residual.
+
 ## Verdict and report
 
 The bundle re-audits all component specs using `audit_spec`, carrying forward
@@ -77,10 +151,9 @@ digests) in JSON output. Historical report files are not trusted as substitutes.
 The bundle verdict uses the worst of its component verdicts and relationship
 findings:
 
-- `READY`: all component audits READY and all declared identities match.
+- `READY`: all component audits READY and all declared identity and additive relationships pass.
 - `REVIEW`: at least one component REVIEW; no BLOCK.
-- `BLOCK`: a component BLOCK, a required identity missing/malformed, or a
-  declared relationship disagrees across charts.
+- `BLOCK`: a component BLOCK, a required identity or additive-evidence check fails, or a declared cross-chart relationship disagrees.
 
 A relationship involving an already BLOCKed component is reported as skipped,
 not incorrectly described as verified. Other valid relationships remain auditable.
@@ -95,11 +168,13 @@ bundle hash identifies the normalized manifest, **not a signed or authenticated
 aggregate report**. To check a bundle after any inputs change, rerun the command.
 `verify report` remains specific to individual saved spec reports.
 
-The v1 rule IDs are `bundle.identity.analysis_scope`,
+The bundle identity rules are `bundle.identity.analysis_scope`,
 `bundle.identity.metric_definition`, `bundle.identity.unit`,
-`bundle.identity.time_window`, and `bundle.identity.skipped`. They form a
-distinct bundle surface and are **not** silently added to the existing
-109-rule single-chart `audit-v0.2` profile.
+`bundle.identity.time_window`, and `bundle.identity.skipped`.
+The separate arithmetic rules are `bundle.reconciliation.evidence`,
+`bundle.reconciliation.total`, and `bundle.reconciliation.skipped`.
+They belong to the **bundle-only** surface and are not counted in the
+120-rule single-chart `audit-v0.2` profile.
 
 ## Reproduction
 
@@ -117,6 +192,7 @@ Matching declarations are **not** cryptographic authentication, upstream
 lineage proof, evidence-population reconstruction, or scientific certification.
 A consistently mislabeled scope can pass. This does not execute arbitrary
 Vega-Lite transforms, resolve SQL predicates, perform causal attribution, or
-infer which cross-chart comparisons a user intended. It does not reconcile
-quantitative totals across charts or establish causal comparability; those
-need distinct future contracts with their own evidence.
+infer which cross-chart comparisons a user intended. The optional
+`sum_reconciliation` relation verifies a narrow additive comparison only;
+it cannot authenticate control-source authority, component taxonomies,
+upstream completeness or causal comparability.
