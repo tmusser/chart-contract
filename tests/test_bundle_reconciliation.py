@@ -66,6 +66,7 @@ def test_explicit_absolute_tolerance_never_uses_implicit_relative_slack():
     relation = manifest["relationships"][0]
     spec, frame, claim = inputs["breakdown"]
     frame = frame.copy()
+    frame["channel_sales"] = frame["channel_sales"].astype(float)
     frame.loc[frame["channel"] == "Partnerships", "channel_sales"] = 199.5
     inputs["breakdown"] = (spec, frame, claim)
     assert _finding(audit_bundle(manifest, inputs), "bundle.reconciliation.total").severity == "FAIL"
