@@ -172,8 +172,10 @@ def test_transformed_or_unsupported_breakdown_is_not_mistaken_for_raw_evidence(e
     inputs["breakdown"] = (spec, frame, claim)
     report = audit_bundle(manifest, inputs)
     assert report.verdict == "BLOCK"
-    assert _finding(report, "bundle.reconciliation.evidence").severity == "FAIL" or (
-        _finding(report, "bundle.reconciliation.skipped").severity == "WARN"
+    findings = {f.rule_id: f.severity for f in report.findings}
+    assert (
+        findings.get("bundle.reconciliation.evidence") == "FAIL"
+        or findings.get("bundle.reconciliation.skipped") == "WARN"
     )
 
 

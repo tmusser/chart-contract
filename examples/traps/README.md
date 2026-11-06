@@ -6,6 +6,21 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `cross_chart_total_gap` (bundle)
+
+A one-row executive headline chart reports **1,000 systems sold**, while a
+three-channel breakdown sums to **920 systems**. Both chart audits are
+individually `READY`, and the declared additive units match.
+
+Expected bundle result: `BLOCK` via `bundle.reconciliation.total`,
+with `bundle.reconciliation.evidence` PASS, residual 80 systems, and
+92.0% of the headline represented. No missing category is fabricated.
+
+```bash
+chart-contract audit bundle examples/traps/cross_chart_total_gap.bundle.json
+```
+
+
 ### `hidden_outlier_axis`
 
 A four-week line chart includes a genuine `-80` return, but its

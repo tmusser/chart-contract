@@ -74,6 +74,8 @@ Policy:
 - Never translate interval overlap/non-overlap into a significance claim unless a separate supported inferential contract exists.
 - When component evidence is expected to reconcile to an authoritative scalar, preserve `reconciliation_contract` instead of assuming the component set is complete.
 - Stop on `data.reconciliation.total`; surface the residual/represented share and do not create an Unknown balancing bucket automatically.
+- For a report with a separate headline total and component chart, declare a bundle `sum_reconciliation` relationship rather than copying a headline number into component metadata. The relationship verifies the one-row headline against source component rows, requires matching additive units and a declared exhaustive component set, and BLOCKs `bundle.reconciliation.total` disagreements. Do not insert a balancing Unknown category to make the check pass.
+- Use bundle `equal_on` identity relationships in addition to reconciliation when business metric, time window, or population scope must be shared. Matching unit plus totals is not proof of matching upstream cohorts or definitions.
 - Treat a passing reconciliation as arithmetic consistency against the declared control only. It does not validate control-source authority, component taxonomy, or upstream joins/filters.
 - For percent/rate/ratio metrics, surface `contract.ratio.denominator` warnings instead of guessing what the metric is “of.”
 - If `data.ratio.denominator_basis` fails, do not compare the rows as one common metric; the supplied evidence declares incompatible denominator meanings.

@@ -4,6 +4,9 @@
 
 ### Added
 
+- Opt-in bundle `sum_reconciliation` relationships that independently compare a displayed one-row headline total against a complete additive breakdown and BLOCK discrepancies, while keeping existing identity relationships unchanged.
+- Fail-closed source/visible-field/unit checks and an executive-summary 1,000-vs-920 synthetic bundle trap with deterministic report findings.
+
 - Spec audit rule `visual.scale.clipped_data` warns when explicit numeric axis bounds exclude directly plotted source observations, even for an authorized zoom; unverifiable dynamic/transform cases warn instead of silently passing.
 - Synthetic `hidden_outlier_axis` REVIEW trap and adversarial tests for x/y bounds, partial domains, unsupported shapes, and source-mutation safety.
 
