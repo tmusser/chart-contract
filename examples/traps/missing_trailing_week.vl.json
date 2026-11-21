@@ -1,0 +1,43 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "mark": {
+    "type": "line",
+    "point": true
+  },
+  "title": "Sales by week",
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "sales",
+      "type": "quantitative"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.report_window",
+    "unit": "systems",
+    "claim": "Reported weekly sales for the declared reporting window.",
+    "cadence_contract": {
+      "version": 2,
+      "date_field": "week",
+      "frequency": "weekly",
+      "require_complete": true,
+      "expected_start": null,
+      "expected_end": "2026-10-26",
+      "start_date": "2026-10-05",
+      "end_date": "2026-10-19",
+      "observed_count": 3,
+      "expected_count": 3,
+      "missing_count": 0,
+      "missing_preview": [],
+      "expected_window_count": 4,
+      "leading_missing_count": 0,
+      "trailing_missing_count": 1,
+      "boundary_missing_preview": [
+        "2026-10-26"
+      ]
+    }
+  }
+}
