@@ -4,6 +4,9 @@
 
 ### Added
 
+- Optional cadence v2 reporting-window start/end boundaries, with source-recomputed leading/trailing gap receipts while preserving v1 internal-period semantics.
+- New `data.trend.cadence.boundaries` REVIEW/BLOCK rule and missing-final-week CLI trap; never infer expected periods or fill missing data.
+
 - Opt-in bundle `sum_reconciliation` relationships that independently compare a displayed one-row headline total against a complete additive breakdown and BLOCK discrepancies, while keeping existing identity relationships unchanged.
 - Fail-closed source/visible-field/unit checks and an executive-summary 1,000-vs-920 synthetic bundle trap with deterministic report findings.
 

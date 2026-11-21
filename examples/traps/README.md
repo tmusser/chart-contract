@@ -6,6 +6,20 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `missing_trailing_week` (cadence v2)
+
+October 5, 12 and 19 are present, but the declared report extends through
+October 26. Internal cadence and source receipts PASS; a required reporting
+boundary is missing, so `data.trend.cadence.boundaries` FAILs and verdict
+is BLOCK.
+
+```bash
+chart-contract audit spec examples/traps/missing_trailing_week.vl.json \
+  --data examples/traps/missing_trailing_week.csv \
+  --claim "$(cat examples/traps/missing_trailing_week.claim.txt)"
+```
+
+
 ### `cross_chart_total_gap` (bundle)
 
 A one-row executive headline chart reports **1,000 systems sold**, while a
