@@ -12,6 +12,7 @@ from .cadence import (
     CADENCE_CONTRACT_KEY,
     build_cadence_receipt,
     cadence_outcome,
+    cadence_boundary_outcome,
     chart_cadence_declaration,
     parse_cadence_contract,
     validate_cadence_declaration,
@@ -32,7 +33,7 @@ def audit_cadence_chart(report: AuditReport, chart: Any) -> None:
     except ValueError as exc:
         report.add("contract.trend.cadence", FAIL, str(exc))
         return
-    report.add("contract.trend.cadence", PASS, "Closed trend cadence v1 declaration is valid.")
+    report.add("contract.trend.cadence", PASS, f"Closed trend cadence v{validated['version']} declaration is valid.")
     try:
         receipt = build_cadence_receipt(chart.data, validated)
     except ValueError as exc:
@@ -41,6 +42,9 @@ def audit_cadence_chart(report: AuditReport, chart: Any) -> None:
     report.add("data.trend.cadence_evidence", PASS, "Cadence period receipts recompute from original source dates.")
     severity, message = cadence_outcome(receipt)
     report.add("data.trend.cadence", severity, message)
+    if receipt["version"] == 2:
+        boundary_severity, boundary_message = cadence_boundary_outcome(receipt)
+        report.add("data.trend.cadence.boundaries", boundary_severity, boundary_message)
 
 
 def _trend_visible(analytical_spec: Mapping[str, Any], encoding: Any, field: str) -> bool:
@@ -84,15 +88,27 @@ def audit_cadence_spec(
         return
     try:
         current = build_cadence_receipt(
-            frame, {key: receipt[key] for key in ("version", "date_field", "frequency", "require_complete")},
+            frame, {
+                key: receipt[key]
+                for key in (
+                    ("version", "date_field", "frequency", "require_complete")
+                    if receipt["version"] == 1 else
+                    ("version", "date_field", "frequency", "require_complete", "expected_start", "expected_end")
+                )
+            },
         )
     except ValueError as exc:
         report.add("data.trend.cadence_evidence", FAIL, str(exc))
         return
     keys = ("start_date", "end_date", "observed_count", "expected_count", "missing_count", "missing_preview")
+    if receipt["version"] == 2:
+        keys += ("expected_window_count", "leading_missing_count", "trailing_missing_count", "boundary_missing_preview")
     if any(current[key] != receipt[key] for key in keys):
         report.add("data.trend.cadence_evidence", FAIL, "Stale cadence receipts: source dates or gaps have changed.")
         return
     report.add("data.trend.cadence_evidence", PASS, "Cadence receipts match original supplied source dates.")
     severity, message = cadence_outcome(current)
     report.add("data.trend.cadence", severity, message)
+    if receipt["version"] == 2:
+        boundary_severity, boundary_message = cadence_boundary_outcome(receipt)
+        report.add("data.trend.cadence.boundaries", boundary_severity, boundary_message)
