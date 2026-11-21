@@ -1,4 +1,4 @@
-# Trend Cadence and Missing-Period Contract (v1)
+# Trend Cadence and Missing-Period Contract (v1/v2)
 
 A line chart can be internally valid while silently skipping a bad week or
 month. This optional contract checks the sequence of **original source
@@ -19,8 +19,9 @@ chart = Chart.trend(
 report = chart.audit()
 ```
 
-Only `Chart.trend` supports this contract. Both options must be provided or
-both omitted. No other constructor or legacy chart is affected.
+Only `Chart.trend` supports this contract. Both frequency and completeness
+options must be provided or both omitted; v2 optionally adds the explicit
+expected start and/or end. Other constructors and legacy charts are unchanged.
 
 - `cadence_frequency`: `daily`, `weekly`, or `monthly`.
 - `cadence_require_complete=False`: a missing internal period `WARN`s /
@@ -38,8 +39,8 @@ both omitted. No other constructor or legacy chart is affected.
 
 The contract operates on the **date field displayed on the x axis**, not
 `freshness_observation_date_field` or a guessed timestamp field. It checks
-internal gaps between the earliest and latest supplied date; it **cannot infer
-unobserved leading/trailing periods**. A single observed date is trivially
+internal gaps between the earliest and latest supplied date; v1 **cannot infer
+unobserved leading/trailing periods** without explicit v2 endpoints. A single observed date is trivially
 complete under this narrow definition, but ordinary trend minimum-point rules
 still apply.
 
@@ -97,6 +98,80 @@ The stored receipt truthfully records a missing September 14, 2026; the
 `data.trend.cadence_evidence` rule passes while `data.trend.cadence` blocks
 because `require_complete=true`.
 
+## Explicit reporting-window boundaries (v2)
+
+V1 retains the existing internal-gap audit and exact receipt fields. V2 is
+selected only when the caller declares `cadence_expected_start` and/or
+`cadence_expected_end`, and enables `data.trend.cadence.boundaries`.
+
+```python
+chart = Chart.trend(
+    data=frame, x="week", y="sales",
+    claim="Reported weekly sales through October 26.",
+    source="warehouse.sales", unit="systems",
+    cadence_frequency="weekly",
+    cadence_require_complete=True,
+    cadence_expected_end="2026-10-26",
+)
+```
+
+With observed dates October 5, 12 and 19, internal cadence PASSES while the
+boundary rule FAILS: October 26 is explicitly required but missing. When
+`require_complete=False`, the same gap generates WARN/REVIEW.
+The first-party renderer refuses required-complete charts with missing
+boundary slots.
+
+Both endpoints are independently optional. A missing endpoint has **no
+implicit value**, including no assumption about today. Dates must use
+canonical `YYYY-MM-DD`; `expected_start` cannot follow the first
+observation and `expected_end` cannot precede the last. Weekly dates must
+lie on the seven-day grid anchored by `expected_start` when provided, or
+by the first observed date otherwise. Monthly endpoints must be the first
+day of a calendar month; daily dates advance by one day.
+Invalid and off-grid endpoints fail instead of being rounded.
+
+V2 keeps all V1 fields and their **internal-only meaning**, and adds these
+fields to the closed `usermeta.cadence_contract`:
+
+```json
+{
+  "expected_start": null,
+  "expected_end": "2026-10-26",
+  "expected_window_count": 4,
+  "leading_missing_count": 0,
+  "trailing_missing_count": 1,
+  "boundary_missing_preview": ["2026-10-26"]
+}
+```
+
+The full receipt also includes `version: 2`, `date_field`, `frequency`,
+`require_complete`, `start_date`, `end_date`, `observed_count`,
+`expected_count`, `missing_count`, and `missing_preview`.
+A spec audit independently recomputes the exact source-bound receipt. Any
+missing, malformed or stale v2 field BLOCKS; no missing values are filled.
+The 10,000-period safety bound includes leading and trailing periods.
+
+| Rule | PASS | WARN | FAIL |
+| --- | --- | --- | --- |
+| `data.trend.cadence.boundaries` | All explicitly expected edge slots present | Gaps when complete evidence was not required | Gaps when complete evidence was required |
+
+### Missing-final-week CLI trap
+
+```bash
+chart-contract audit spec examples/traps/missing_trailing_week.vl.json \
+  --data examples/traps/missing_trailing_week.csv \
+  --claim "$(cat examples/traps/missing_trailing_week.claim.txt)"
+```
+
+Expected: `data.trend.cadence_evidence: PASS`,
+`data.trend.cadence: PASS`, and
+`data.trend.cadence.boundaries: FAIL` producing BLOCK.
+
+The declaration is an operator assertion, not authentication of upstream
+report completeness or data finality. The window is never inferred from
+the current clock. Use the independent freshness contract for a
+declared as-of data age policy.
+
 ## Deliberate boundaries
 
 - No implicit `date_range`, filling a gap with zero, interpolation, smoothing,
@@ -105,6 +180,5 @@ because `require_complete=true`.
 - No assumption that every data source has a daily/weekly/monthly cadence,
   no group-level grids, and no support for trading-day/business-day/holiday
   calendars in v1.
-- A sequence with an absent last week cannot be detected without an externally
-  declared expected end date. Consider the separate data-freshness contract
-  when a report needs an explicit `as_of` policy.
+- An absent last week cannot be detected in v1. Declare a v2 `expected_end`
+  when that date is known; use the data-freshness contract for an as-of age policy.

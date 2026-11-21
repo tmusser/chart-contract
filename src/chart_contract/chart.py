@@ -110,6 +110,8 @@ class Chart:
     freshness_require_finalized: bool | None = None
     cadence_frequency: str | None = None
     cadence_require_complete: bool | None = None
+    cadence_expected_start: str | None = None
+    cadence_expected_end: str | None = None
     trend_influence: bool | None = None
     composition_baseline_value: str | None = None
     composition_target_value: str | None = None
@@ -197,6 +199,8 @@ class Chart:
         freshness_require_finalized: bool | None = None,
         cadence_frequency: str | None = None,
         cadence_require_complete: bool | None = None,
+        cadence_expected_start: str | None = None,
+        cadence_expected_end: str | None = None,
         trend_influence: bool | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
@@ -277,6 +281,8 @@ class Chart:
             freshness_require_finalized=freshness_require_finalized,
             cadence_frequency=cadence_frequency,
             cadence_require_complete=cadence_require_complete,
+            cadence_expected_start=cadence_expected_start,
+            cadence_expected_end=cadence_expected_end,
             trend_influence=trend_influence,
             metadata=metadata,
         )

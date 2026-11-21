@@ -176,7 +176,11 @@ def render_chart(chart: Any) -> alt.Chart:
     cadence_raw = chart_cadence_declaration(chart) if chart.intent == "trend" else None
     if cadence_raw is not None:
         cadence = build_cadence_receipt(chart.data, cadence_raw)
-        if cadence["missing_count"] and cadence["require_complete"]:
+        boundary_missing = (
+            cadence["leading_missing_count"] + cadence["trailing_missing_count"]
+            if cadence["version"] == 2 else 0
+        )
+        if (cadence["missing_count"] or boundary_missing) and cadence["require_complete"]:
             raise ValueError("Cannot render a trend with missing cadence periods when require_complete=True.")
         usermeta["cadence_contract"] = cadence
 

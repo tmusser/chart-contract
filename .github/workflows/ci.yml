@@ -233,6 +233,20 @@ jobs:
           grep -q "2026-10-12" <<<"$influence_output"
 
           set +e
+          boundary_output=$(chart-contract audit spec examples/traps/missing_trailing_week.vl.json \
+            --data examples/traps/missing_trailing_week.csv \
+            --claim "$(cat examples/traps/missing_trailing_week.claim.txt)" 2>&1)
+          boundary_exit=$?
+          set -e
+          echo "$boundary_output"
+          test "$boundary_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$boundary_output"
+          grep -q "PASS data.trend.cadence_evidence" <<<"$boundary_output"
+          grep -q "PASS data.trend.cadence:" <<<"$boundary_output"
+          grep -q "FAIL data.trend.cadence.boundaries:" <<<"$boundary_output"
+          grep -q "2026-10-26" <<<"$boundary_output"
+
+          set +e
           cadence_output=$(chart-contract audit spec examples/traps/missing_weekly_sales.vl.json \
             --data examples/traps/missing_weekly_sales.csv \
             --claim "$(cat examples/traps/missing_weekly_sales.claim.txt)" 2>&1)

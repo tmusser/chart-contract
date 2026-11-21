@@ -313,8 +313,11 @@ Chart.trend(
 
 Audits check canonical source dates on the declared calendar grid and bind
 first/last/count/gap receipts into Vega-Lite metadata. A complete-required chart
-with an omitted week cannot be shared as READY. See
-[Trend cadence and missing periods](docs/CADENCE_CONTRACT.md).
+with an omitted week cannot be shared as READY. To also catch **missing first
+or last weeks**, add `cadence_expected_start` and/or `cadence_expected_end`.
+This creates a v2 receipt and an independent
+`data.trend.cadence.boundaries` finding, without changing v1 behavior.
+See [Trend cadence and missing periods](docs/CADENCE_CONTRACT.md).
 
 ### Trend sensitivity: can one observation flip the direction?
 
