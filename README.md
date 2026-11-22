@@ -793,6 +793,22 @@ rather than a false coverage PASS. No data or scale is modified.
 [Read the visual default and clipping policy](docs/VISUAL_DEFAULTS.md) and
 [run the hidden-outlier trap](examples/traps/hidden_outlier_axis.vl.json).
 
+### Log axes: detect source values the scale cannot represent
+
+An explicit `scale.type="log"` on quantitative x/y can make a chart
+misleading even without explicit zoom bounds. The spec audit rule
+`visual.scale.log_domain` checks source values: zero or a mix of positive
+and negative observations `BLOCK`; strictly positive or strictly
+negative evidence with a compatible domain `PASS`es; unverifiable
+dynamic, transformed or incomplete evidence requires `REVIEW`.
+Unlike plain logarithms in some libraries, Vega-Lite supports
+**negative-only** logarithmic domains; zero and mixed signs remain invalid.
+
+This is separate from `visual.scale.clipped_data` and authorization.
+Neither values nor plot scales are silently modified. See
+[the log-scale contract](docs/LOG_SCALE_DOMAIN.md) and the
+[mixed-sign CLI trap](examples/traps/mixed_sign_log_axis.vl.json).
+
 ## Scope and Non-Goals
 
 - Not a full visualization library

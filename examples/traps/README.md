@@ -6,6 +6,21 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `mixed_sign_log_axis`
+
+A four-week source series has net returns `3, 5, -80, 11`.
+A standard logarithmic y axis with no numeric bounds cannot
+represent negative and positive values together. Ordinary
+scale-override authorization passes, but the new
+`visual.scale.log_domain` FAILs and the overall audit BLOCKs.
+
+```bash
+chart-contract audit spec examples/traps/mixed_sign_log_axis.vl.json \
+  --data examples/traps/mixed_sign_log_axis.csv \
+  --claim "$(cat examples/traps/mixed_sign_log_axis.claim.txt)"
+```
+
+
 ### `missing_trailing_week` (cadence v2)
 
 October 5, 12 and 19 are present, but the declared report extends through

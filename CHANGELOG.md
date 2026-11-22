@@ -4,6 +4,10 @@
 
 ### Added
 
+- `visual.scale.log_domain`: FAIL zero/mixed-sign observations or incompatible fixed logarithmic domains on quantitative x/y axes; PASS valid all-positive or all-negative evidence.
+- REVIEW missing/transformed/layered/dynamic evidence instead of asserting source coverage; synthetic mixed-sign log-axis CLI trap and regression tests.
+
+
 - Optional cadence v2 reporting-window start/end boundaries, with source-recomputed leading/trailing gap receipts while preserving v1 internal-period semantics.
 - New `data.trend.cadence.boundaries` REVIEW/BLOCK rule and missing-final-week CLI trap; never infer expected periods or fill missing data.
 

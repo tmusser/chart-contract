@@ -219,6 +219,19 @@ jobs:
           grep -q "1 of 4" <<<"$clipping_output"
 
           set +e
+          log_output=$(chart-contract audit spec examples/traps/mixed_sign_log_axis.vl.json \
+            --data examples/traps/mixed_sign_log_axis.csv \
+            --claim "$(cat examples/traps/mixed_sign_log_axis.claim.txt)" 2>&1)
+          log_exit=$?
+          set -e
+          echo "$log_output"
+          test "$log_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$log_output"
+          grep -q "PASS scale.override.authorization" <<<"$log_output"
+          grep -q "FAIL visual.scale.log_domain:" <<<"$log_output"
+          grep -q "3 positive and 1 negative" <<<"$log_output"
+
+          set +e
           influence_output=$(chart-contract audit spec examples/traps/influential_weekly_sales.vl.json \
             --data examples/traps/influential_weekly_sales.csv \
             --claim "$(cat examples/traps/influential_weekly_sales.claim.txt)" \

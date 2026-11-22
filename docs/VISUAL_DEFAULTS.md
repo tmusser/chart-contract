@@ -114,6 +114,38 @@ A row with `returns=-80` is outside the requested y-axis domain. The
 override is authorized, but the new clipping rule produces `REVIEW`.
 See [the CLI trap](../examples/traps/hidden_outlier_axis.vl.json).
 
+## Logarithmic-axis mathematical domain
+
+`visual.scale.log_domain` checks an explicit quantitative x/y
+`scale.type="log"` independently of explicit axis zoom bounds.
+Vega-Lite permits **strictly positive or strictly negative** log domains,
+but never zero or a domain crossing zero. Source values spanning both
+signs cannot be displayed on a single log axis.
+
+For directly encoded, untransformed simple views:
+
+- **PASS** means all finite plotted observations are same-sign,
+  strictly nonzero and compatible with a known explicit domain.
+- **FAIL / BLOCK** means source values include zero or both signs, or
+  a fixed numeric log domain includes/crosses zero or contradicts
+  the sign of directly plotted source values.
+- **WARN / REVIEW** means a dynamic/malformed/partial domain, layered
+  or transformed spec, missing/unusable source rows or unsupported
+  encoding prevents a complete check.
+- **No finding** means no explicit log axis on quantitative x/y;
+  symmetric log (`symlog`), linear scales, implicit config-level
+  defaults and non-axis color scales are outside this rule.
+
+A four-week series `[3, 5, -80, 11]` produces BLOCK on a log y-axis,
+even without an explicit domain; the older clipping rule has no
+numeric bounds to inspect. A negative-only series can legitimately PASS.
+The auditor never filters negative observations or changes the scale;
+consider linear or `symlog` when both signs or zero are meaningful.
+
+See [the contract](LOG_SCALE_DOMAIN.md),
+[the deterministic CLI trap](../examples/traps/mixed_sign_log_axis.vl.json),
+and [Vega-Lite's documented log-domain semantics](https://vega.github.io/vega-lite/docs/scale.html).
+
 ## What the policy can and cannot detect
 
 The policy deterministically detects native Vega-Lite scale-domain overrides and native
