@@ -38,6 +38,9 @@ def audit_spec(
     from .scale_clipping import audit_scale_clipping
 
     audit_scale_clipping(report, spec, data)
+    from .scale_log import audit_log_scale
+
+    audit_log_scale(report, spec, data)
     return bind_spec_report(report, spec=spec, data=data, claim=resolved_claim)
 
 

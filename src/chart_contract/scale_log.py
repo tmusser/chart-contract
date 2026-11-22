@@ -68,7 +68,7 @@ def _declared_domain_sign(scale: Mapping[str, Any]) -> tuple[int | None, str | N
     if low == 0 or high == 0:
         return None, "explicit log-domain bound includes zero", None
     if low is not None and high is not None:
-        if low * high < 0:
+        if (low < 0 < high) or (high < 0 < low):
             return None, "explicit log domain crosses zero", None
         if low >= high:
             return None, None, "log-domain bounds are reversed or equal"
@@ -84,7 +84,6 @@ def _declared_domain_sign(scale: Mapping[str, Any]) -> tuple[int | None, str | N
 
 def _find_values(
     spec: Mapping[str, Any],
-    data: pd.DataFrame | Sequence[Mapping[str, Any]] | None,
     *,
     axis: str, definition: Mapping[str, Any],
     records: list[Mapping[str, Any]] | None,
@@ -167,7 +166,7 @@ def audit_log_scale(
             continue
 
         values, skipped, unavailable = _find_values(
-            spec, data, axis=axis, definition=definition, records=records,
+            spec, axis=axis, definition=definition, records=records,
         )
         if unavailable is not None:
             report.add(
