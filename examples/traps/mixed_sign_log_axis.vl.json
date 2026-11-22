@@ -1,0 +1,27 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+  "title": "Recorded weekly net returns",
+  "mark": {
+    "type": "line",
+    "point": true
+  },
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "net_return",
+      "type": "quantitative",
+      "scale": {
+        "type": "log"
+      }
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.log_domain",
+    "unit": "USD",
+    "user_requested_scale_override": true,
+    "claim": "Recorded net returns vary across four weeks."
+  }
+}
