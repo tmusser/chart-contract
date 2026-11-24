@@ -1,0 +1,48 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": "Weekly advertising spend and system sales",
+  "layer": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "week",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "ad_spend",
+          "type": "quantitative",
+          "axis": {
+            "title": "Ad spend ($)"
+          }
+        }
+      }
+    },
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "week",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "sales",
+          "type": "quantitative",
+          "axis": {
+            "title": "Systems sold"
+          }
+        }
+      }
+    }
+  ],
+  "resolve": {
+    "scale": {
+      "y": "independent"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.dual_axis",
+    "unit": "USD and systems",
+    "claim": "Recorded advertising spend and system sales by week."
+  }
+}
