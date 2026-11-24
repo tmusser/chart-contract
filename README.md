@@ -100,6 +100,27 @@ Exit behavior:
 
 For more agent-facing guidance on v0.2.0, see [docs/AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md), the runnable CLI traps in [examples/traps/README.md](examples/traps/README.md), and the older Python probes in [examples/quality_traps.py](examples/quality_traps.py). `Chart.from_prompt()` is intentionally not part of the release.
 
+### Compare saved audit reports across iterations
+
+Use `chart-contract audit diff before.json after.json` to compare two
+internally verified schema-0.4 reports without re-running either audit.
+See the **verdict transition**, new/resolved/worsened rule findings and
+whether the source data, chart spec, claim, tool version or **audit policy**
+changed. JSON output and `--fail-on-regression` allow deterministic
+agent workflows without treating a policy change as evidence improvement.
+
+```bash
+python examples/audit_report_diff_demo.py /tmp/chart-contract-report-diff
+chart-contract audit diff /tmp/chart-contract-report-diff/before.json \
+  /tmp/chart-contract-report-diff/after.json --fail-on-regression
+```
+
+The example changes one weekly sales observation from 6 to 15 and
+flags that 15 is outside the declared axis. Saved-report hashing is a
+mechanical consistency check, not author authentication. See
+[Saved audit-report diff](docs/AUDIT_REPORT_DIFF.md) and
+[report provenance](docs/AUDIT_PROVENANCE.md).
+
 ## Bad Chart -> Audit -> Corrected Chart
 
 The repo leads with a risky chart example because that is the point of the package: catch weak analytical defaults before a chart gets shared.

@@ -72,6 +72,11 @@ The diff deliberately emits `compatibility_judgment: null`. It does not label a 
 
 ## Relationship to saved audit reports
 
+Saved schema-0.4 reports now bind their findings and audit-policy
+identity. See [audit-report diff](AUDIT_REPORT_DIFF.md) for a separate
+historical comparison command. The command compares historical bound
+profiles without assuming the current installed profile is identical.
+
 Current bound audit reports already fingerprint the exact audited subject/spec, data, claim, and recorded tool version. This profile-inspection slice does **not** change the existing bound report schema or retroactively attach a profile digest to historical reports.
 
 That separation is deliberate. First establish a stable, inspectable profile contract; a future report-schema revision can bind reports to profile identity without silently changing the meaning of existing `0.3` reports.

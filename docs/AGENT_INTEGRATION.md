@@ -29,6 +29,17 @@ Gate behavior:
 - `REVIEW`: summarize warnings, stop, and ask a human whether to proceed.
 - `BLOCK`: stop immediately and fix the spec or data contract before sharing.
 
+To compare successive saved reports, use
+`chart-contract audit diff before.json after.json --format json`.
+This checks both saved envelopes for internal consistency and describes
+verdict/finding changes separately from spec/data/claim/tool/policy drift.
+`--fail-on-regression` is an opt-in agent gate for added WARN/FAIL or
+worsening matched findings. **A report diff is not a re-audit**; when a
+historical profile digest differs, avoid claiming that a greener verdict
+proves improved analytical quality. Re-audit current source inputs and
+run `verify report` before publishing. See
+[Audit report diffs](AUDIT_REPORT_DIFF.md).
+
 Policy:
 
 - The agent must stop on `BLOCK`.
