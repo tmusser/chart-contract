@@ -139,6 +139,20 @@ An audit-profile digest mismatch is different: the historical report can still b
 
 The CLI verification surface currently supports saved **spec-audit** JSON reports. First-party `Chart.audit()` bindings remain verifiable through `matches_chart(...)` in Python because reconstructing an arbitrary chart contract from a generic serialized CLI input would create a second contract format.
 
+## Diff two historical bound reports
+
+`chart-contract audit diff before.json after.json` validates each stored
+report's internal schema-0.4 input and result bindings, then compares
+verdicts, exact findings, and five independent identities (subject,
+explicit data, claim, tool version, and semantic audit profile). It
+does **not** re-audit either report or require the historical profile to
+match the currently installed profile.
+
+The separate `--fail-on-regression` gate exits 1 for new WARN/FAIL or
+worsened matched findings, rather than every existing warning. A changed
+audit profile is explicitly flagged as policy drift, not interpreted as
+data improvement. See [saved audit-report diffs](AUDIT_REPORT_DIFF.md).
+
 ## Boundary
 
 A fingerprint proves content identity, not analytical truth. A fully matching `READY` report means the current inputs, saved audit result, and audit-profile semantics are the same identities carried by that mechanical artifact. It does not upgrade `READY` into scientific validation or human approval.

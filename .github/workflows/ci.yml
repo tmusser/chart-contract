@@ -58,6 +58,37 @@ jobs:
         run: |
           chart-contract --version
 
+          # Generate two real saved bound reports, then require the diff gate
+          # to catch newly unrepresentable source values without inventing
+          # a source/policy explanation.
+          python examples/audit_report_diff_demo.py "$RUNNER_TEMP/chart-report-diff"
+          set +e
+          diff_output=$(chart-contract audit diff \
+            "$RUNNER_TEMP/chart-report-diff/before.json" \
+            "$RUNNER_TEMP/chart-report-diff/after.json" \
+            --fail-on-regression 2>&1)
+          diff_exit=$?
+          set -e
+          echo "$diff_output"
+          test "$diff_exit" -eq 1
+          grep -q "Verdict: READY -> REVIEW" <<<"$diff_output"
+          grep -q "Data: CHANGED" <<<"$diff_output"
+          grep -q "Audit policy: SAME" <<<"$diff_output"
+          grep -q "visual.scale.clipped_data" <<<"$diff_output"
+          chart-contract audit diff \
+            "$RUNNER_TEMP/chart-report-diff/before.json" \
+            "$RUNNER_TEMP/chart-report-diff/after.json" \
+            --format json --out "$RUNNER_TEMP/chart-report-diff/diff.json"
+          python - "$RUNNER_TEMP/chart-report-diff/diff.json" <<'PY'
+          import json
+          import sys
+          payload = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert payload["type"] == "chart_contract.audit_report_diff"
+          assert payload["input_changes"]["data_changed"] is True
+          assert payload["input_changes"]["profile_changed"] is False
+          assert payload["has_regressions"] is True
+          PY
+
           claim="$(cat examples/traps/causal_claim_missing_caveat.claim.txt)"
           chart-contract audit spec examples/traps/causal_claim_missing_caveat.vl.json \
             --data examples/traps/causal_claim_missing_caveat.csv \

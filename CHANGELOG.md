@@ -4,6 +4,10 @@
 
 ### Added
 
+- Deterministic `chart-contract audit diff before.json after.json` for internally verified schema-0.4 reports, with text/JSON output, exact finding changes, input and policy drift, and optional `--fail-on-regression` exit gate.
+- Synthetic two-audit before/after CLI example, regression and adversarial tests; historical policy changes are explicitly separated from verdict/finding changes.
+
+
 - `visual.scale.log_domain`: FAIL zero/mixed-sign observations or incompatible fixed logarithmic domains on quantitative x/y axes; PASS valid all-positive or all-negative evidence.
 - REVIEW missing/transformed/layered/dynamic evidence instead of asserting source coverage; synthetic mixed-sign log-axis CLI trap and regression tests.
 
