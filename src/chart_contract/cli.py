@@ -20,6 +20,7 @@ from .input_binding import (
     verify_input_binding,
 )
 from .profile_diff import ProfileDiff, build_profile_diff
+from .report_diff import build_audit_report_diff, format_audit_diff_text
 from .profiles import (
     DEFAULT_PROFILE,
     ProfileManifest,
@@ -228,6 +229,39 @@ def _run_audit_bundle(args: argparse.Namespace) -> int:
     return 1 if _should_fail(report.verdict, args.fail_on, args.warnings_as_errors) else 0
 
 
+def _load_bound_report_for_diff(path: str):
+    payload = _load_json_report(Path(path))
+    try:
+        return bound_report_from_dict(payload)
+    except ValueError as exc:
+        raise CLIError(
+            f"Cannot diff {path}: {exc} "
+            "Re-audit legacy/unbound or corrupted reports to schema 0.4."
+        ) from exc
+
+
+def _run_audit_diff(args: argparse.Namespace) -> int:
+    before = _load_bound_report_for_diff(args.before)
+    after = _load_bound_report_for_diff(args.after)
+    try:
+        result = build_audit_report_diff(before, after)
+    except ValueError as exc:
+        raise CLIError(str(exc)) from exc
+    if args.format == "json":
+        output = json.dumps(result, indent=2, sort_keys=True)
+    else:
+        output = format_audit_diff_text(result)
+    if args.out_path:
+        _write_report(Path(args.out_path), output)
+        print(
+            f"Audit report diff: {result['before']['verdict']} -> "
+            f"{result['after']['verdict']} | saved to {args.out_path}"
+        )
+    else:
+        print(output)
+    return 1 if args.fail_on_regression and result["has_regressions"] else 0
+
+
 def _run_verify_report(args: argparse.Namespace) -> int:
     payload = _load_json_report(Path(args.report_path))
     schema_version = payload.get("schema_version")
@@ -424,6 +458,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fail when the report verdict reaches this threshold.",
     )
     spec_parser.set_defaults(func=_run_audit_spec)
+
+    diff_parser = audit_subparsers.add_parser(
+        "diff", help="Compare two internally verified saved bound JSON audit reports."
+    )
+    diff_parser.add_argument("before", help="Earlier schema-0.4 JSON audit report.")
+    diff_parser.add_argument("after", help="Later schema-0.4 JSON audit report.")
+    diff_parser.add_argument("--format", choices=("text", "json"), default="text")
+    diff_parser.add_argument("--out", dest="out_path", help="Save the selected diff output.")
+    diff_parser.add_argument(
+        "--fail-on-regression", action="store_true",
+        help="Exit 1 on added WARN/FAIL or worsened existing findings.",
+    )
+    diff_parser.set_defaults(func=_run_audit_diff)
 
     bundle_parser = audit_subparsers.add_parser(
         "bundle", help="Reaudit local chart specs and declared cross-artifact identities."
