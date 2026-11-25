@@ -139,7 +139,7 @@ def test_numeric_gt_gte_lt_lte_predicates_recompute_correctly():
     counts = {"gt": 3, "gte": 4, "lt": 4, "lte": 5}
     for op, expected in counts.items():
         spec, data = _prepared(
-            filters=[{"filter": {"field": "systems", op: 100}}],
+            filters=[{"filter": {"field": "systems", op: 110}}],
             minimum=None,
         )
         assert spec["usermeta"]["filter_impact_contract"]["receipts"][0]["retained_count"] == expected

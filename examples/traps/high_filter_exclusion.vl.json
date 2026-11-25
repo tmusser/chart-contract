@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": "Recorded systems by customer segment",
+  "mark": "point",
+  "encoding": {
+    "x": {
+      "field": "segment",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "systems",
+      "type": "quantitative"
+    }
+  },
+  "transform": [
+    {
+      "filter": {
+        "field": "segment",
+        "equal": "Core"
+      }
+    }
+  ],
+  "usermeta": {
+    "source": "synthetic.filter_impact",
+    "unit": "systems",
+    "claim": "Recorded systems for the retained customer segment.",
+    "transform_contract": {
+      "declared": [
+        "filter"
+      ]
+    },
+    "transform_lineage": {
+      "version": 1,
+      "receipts": [
+        {
+          "kind": "filter",
+          "location": "transform[0].filter",
+          "operation_sha256": "97b4c96b57da858397477686bcf75e52b9c3ef75eee10fee704659ebfb0a2b15",
+          "input_fields": [
+            "segment"
+          ],
+          "output_fields": []
+        }
+      ]
+    },
+    "filter_impact_contract": {
+      "version": 1,
+      "minimum_retention_pct": 75,
+      "receipts": [
+        {
+          "location": "transform[0].filter",
+          "operation_sha256": "97b4c96b57da858397477686bcf75e52b9c3ef75eee10fee704659ebfb0a2b15",
+          "input_count": 8,
+          "retained_count": 5,
+          "excluded_count": 3,
+          "retained_pct": 62.5
+        }
+      ]
+    }
+  }
+}
