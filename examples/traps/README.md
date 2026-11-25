@@ -6,6 +6,24 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `dual_axis_spend_sales`
+
+A layered chart overlays weekly advertising spend (USD) and systems
+sold on independently scaled y-axes, with
+`resolve.scale.y="independent"`. Both series have legitimate source
+rows, but relative alignment depends on the two axis scales.
+
+Expected: `REVIEW` via `visual.dual_axis.review`, **not** `BLOCK`.
+The check should distinguish this from a shared-scale overlay or
+two side-by-side panels. Use `--warnings-as-errors` for an opt-in gate.
+
+```bash
+chart-contract audit spec examples/traps/dual_axis_spend_sales.vl.json \
+  --data examples/traps/dual_axis_spend_sales.csv \
+  --claim "$(cat examples/traps/dual_axis_spend_sales.claim.txt)"
+```
+
+
 ### `mixed_sign_log_axis`
 
 A four-week source series has net returns `3, 5, -80, 11`.

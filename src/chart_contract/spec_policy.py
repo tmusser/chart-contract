@@ -41,6 +41,9 @@ def audit_spec(
     from .scale_log import audit_log_scale
 
     audit_log_scale(report, spec, data)
+    from .dual_axis import audit_dual_axis
+
+    audit_dual_axis(report, spec)
     return bind_spec_report(report, spec=spec, data=data, claim=resolved_claim)
 
 

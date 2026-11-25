@@ -250,6 +250,20 @@ jobs:
           grep -q "1 of 4" <<<"$clipping_output"
 
           set +e
+          dual_axis_output=$(chart-contract audit spec examples/traps/dual_axis_spend_sales.vl.json \
+            --data examples/traps/dual_axis_spend_sales.csv \
+            --claim "$(cat examples/traps/dual_axis_spend_sales.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          dual_axis_exit=$?
+          set -e
+          echo "$dual_axis_output"
+          test "$dual_axis_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$dual_axis_output"
+          grep -q "WARN visual.dual_axis.review:" <<<"$dual_axis_output"
+          grep -q "ad_spend" <<<"$dual_axis_output"
+          grep -q "sales" <<<"$dual_axis_output"
+
+          set +e
           log_output=$(chart-contract audit spec examples/traps/mixed_sign_log_axis.vl.json \
             --data examples/traps/mixed_sign_log_axis.csv \
             --claim "$(cat examples/traps/mixed_sign_log_axis.claim.txt)" 2>&1)

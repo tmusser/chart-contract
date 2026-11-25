@@ -146,6 +146,43 @@ See [the contract](LOG_SCALE_DOMAIN.md),
 [the deterministic CLI trap](../examples/traps/mixed_sign_log_axis.vl.json),
 and [Vega-Lite's documented log-domain semantics](https://vega.github.io/vega-lite/docs/scale.html).
 
+## Overlaid independent y scales and dual-axis interpretation
+
+Vega-Lite supports dual-axis overlays by layering multiple plotted measures
+and declaring `resolve.scale.y="independent"`. Independent scales can
+make unrelated values appear aligned because each series has its own
+quantitative mapping to the vertical position. They can also be useful
+for distinctly labeled units and descriptive time comparisons.
+
+The `visual.dual_axis.review` spec rule **WARNs / REVIEWs** only
+when a layered group explicitly resolves y scales independently and
+two or more *distinct* directly encoded quantitative y fields (or
+different aggregate/time-unit definitions) are overlaid. A nested
+layer group is checked in its own scope. A second y2 range endpoint
+within a layer is not a second axis.
+
+- **WARN / REVIEW:** At least two different quantitative y measures
+  are overlaid in a layer group with independent y scales.
+- **No finding:** A default or explicitly shared y scale, independent
+  x/color scales, separate concatenated/faceted panels, or an overlay
+  of the same y measure drawn with multiple marks.
+- **No automatic FAIL:** A dual-axis chart is not intrinsically
+  misleading. The auditor does not judge scientific correlation,
+  infer the user's intent, verify all renderer-specific guide layouts,
+  or assert that axis labels/normalization resolve the ambiguity.
+
+The check is structural: it neither executes arbitrary transforms nor
+requires the underlying rows to be available to identify the explicit
+design risk. If a chart triggers this check, consider separately aligned
+small multiples or keep deliberate dual axes with clear units and a
+caveat about interpreting visual alignment. The source evidence is
+never altered.
+
+See [the contract](DUAL_AXIS_REVIEW.md) and
+[the dual-axis CLI trap](../examples/traps/dual_axis_spend_sales.vl.json).
+Vega-Lite documents [independent scale resolution](https://vega.github.io/vega-lite/docs/resolve)
+and a [dual-axis example](https://vega.github.io/vega-lite/examples/layer_dual_axis.html).
+
 ## What the policy can and cannot detect
 
 The policy deterministically detects native Vega-Lite scale-domain overrides and native

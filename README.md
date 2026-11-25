@@ -830,6 +830,25 @@ Neither values nor plot scales are silently modified. See
 [the log-scale contract](docs/LOG_SCALE_DOMAIN.md) and the
 [mixed-sign CLI trap](examples/traps/mixed_sign_log_axis.vl.json).
 
+### Dual-axis overlays: independent scales deserve review
+
+Vega-Lite layered charts can put distinct measures on separate y-axis
+scales using `resolve.scale.y="independent"`. This can be useful, but
+the apparent alignment of unrelated series depends on scale choices
+and should not be mistaken for evidence of correlation.
+
+The spec-audit rule `visual.dual_axis.review` **REVIEWs** overlays
+containing at least two distinct quantitative y measures under explicitly
+independent y scales, even if the axes are already labeled or the user
+requested them. It never automatically `BLOCK`s dual-axis charts,
+rewrites the scales, or claims the relationship is spurious.
+
+Shared-scale layers, independent x/color scales, separate panels and
+single-metric line-plus-point overlays remain unaffected. Nested
+layer groups are checked independently. See
+[dual-axis review contract](docs/DUAL_AXIS_REVIEW.md) and
+[the synthetic spend-versus-sales trap](examples/traps/dual_axis_spend_sales.vl.json).
+
 ## Scope and Non-Goals
 
 - Not a full visualization library

@@ -4,6 +4,10 @@
 
 ### Added
 
+- `visual.dual_axis.review`: WARN when a layered Vega-Lite chart uses explicit independent quantitative y scales to overlay multiple distinct measures; other panels/shared-scale layers are unaffected.
+- Synthetic advertising-spend-versus-sales dual-axis REVIEW trap, nested/inherited encoding regression coverage, and operator guidance. No automatic rejection or axis rewrite.
+
+
 - Deterministic `chart-contract audit diff before.json after.json` for internally verified schema-0.4 reports, with text/JSON output, exact finding changes, input and policy drift, and optional `--fail-on-regression` exit gate.
 - Synthetic two-audit before/after CLI example, regression and adversarial tests; historical policy changes are explicitly separated from verdict/finding changes.
 
