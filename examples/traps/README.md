@@ -6,6 +6,25 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `high_filter_exclusion` (opt-in filter-impact receipts)
+
+A synthetic customer segment filter retains **5 of 8** input rows,
+excluding 3 (37.5%). Both the transform declaration and structural
+lineage match the filter, but a declared 75% minimum retention is
+breached: the source-bound receipts `PASS` while retention `WARNs`.
+
+Expected: `REVIEW` via `data.filter.retention`, with
+`data.filter.receipts: PASS`. Use `--warnings-as-errors`
+to produce a nonzero gate without pretending that row loss is
+intrinsically wrong.
+
+```bash
+chart-contract audit spec examples/traps/high_filter_exclusion.vl.json \
+  --data examples/traps/high_filter_exclusion.csv \
+  --claim "$(cat examples/traps/high_filter_exclusion.claim.txt)"
+```
+
+
 ### `dual_axis_spend_sales`
 
 A layered chart overlays weekly advertising spend (USD) and systems

@@ -250,6 +250,23 @@ jobs:
           grep -q "1 of 4" <<<"$clipping_output"
 
           set +e
+          filter_output=$(chart-contract audit spec examples/traps/high_filter_exclusion.vl.json \
+            --data examples/traps/high_filter_exclusion.csv \
+            --claim "$(cat examples/traps/high_filter_exclusion.claim.txt)" \
+            --warnings-as-errors 2>&1)
+          filter_exit=$?
+          set -e
+          echo "$filter_output"
+          test "$filter_exit" -eq 1
+          grep -q "Verdict: REVIEW" <<<"$filter_output"
+          grep -q "PASS transform.declaration" <<<"$filter_output"
+          grep -q "PASS transform.lineage.receipts" <<<"$filter_output"
+          grep -q "PASS data.filter.receipts:" <<<"$filter_output"
+          grep -q "WARN data.filter.retention:" <<<"$filter_output"
+          grep -q "5 of 8" <<<"$filter_output"
+          grep -q "62.50%" <<<"$filter_output"
+
+          set +e
           dual_axis_output=$(chart-contract audit spec examples/traps/dual_axis_spend_sales.vl.json \
             --data examples/traps/dual_axis_spend_sales.csv \
             --claim "$(cat examples/traps/dual_axis_spend_sales.claim.txt)" \
