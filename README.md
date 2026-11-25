@@ -713,6 +713,34 @@ input/output field lineage where Vega-Lite makes it structurally recoverable.
 This is still provenance-by-structure, not transform execution or upstream SQL/dbt/Python
 attestation. See [Transform lineage receipts](docs/TRANSFORM_LINEAGE.md).
 
+### Filter-impact receipts: measure the population you excluded
+
+A structurally valid Vega-Lite `filter` may still exclude a large fraction
+of the original evidence. For simple, root-level, non-null field predicates,
+use `build_filter_impact_contract` to attach independently verifiable
+source-row counts and an optional minimum retention percentage:
+
+```python
+from chart_contract import build_filter_impact_contract, build_transform_lineage
+
+spec["usermeta"]["transform_contract"] = {"declared": ["filter"]}
+spec["usermeta"]["transform_lineage"] = build_transform_lineage(spec)
+spec["usermeta"]["filter_impact_contract"] = build_filter_impact_contract(
+    spec, original_df, minimum_retention_pct=75
+)
+```
+
+`data.filter.receipts` verifies before/after/excluded counts and operation
+hashes against the supplied **unfiltered** source evidence.
+`data.filter.retention` **REVIEWs** when the final retained percentage
+falls below the operator's explicit minimum, or reports informative
+counts without a threshold. An unsupported expression, nested dataset,
+missing evidence, or null/ambiguous predicate value is **unverifiable**,
+not a fabricated PASS. Stale or forged receipts BLOCK.
+
+See [Filter-impact receipts](docs/FILTER_IMPACT.md) and the
+[37.5%-exclusion CLI trap](examples/traps/high_filter_exclusion.vl.json).
+
 ### Rank charts: explicit top-N, ties, and omissions
 
 `Chart.rank(..., top_n=N)` now treats truncation as part of the analytical contract rather

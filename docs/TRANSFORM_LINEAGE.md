@@ -6,6 +6,15 @@ Lineage receipts answer a stronger deterministic question:
 
 **Does the metadata still describe the exact transform structure in this spec?**
 
+## Optional filter-impact evidence
+
+Structural lineage does not execute filter predicates. For restricted
+root-level sequential field filters, the separate opt-in
+[`filter_impact_contract`](FILTER_IMPACT.md) binds operation hashes
+to independently recomputed source-row retention counts and an optional
+minimum-retention policy. The two contracts complement rather than
+replace one another: structural identity is not row-impact evidence.
+
 ## Receipt shape
 
 For every auditable transform occurrence, `chart-contract` can build a structural receipt:

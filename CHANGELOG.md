@@ -4,6 +4,10 @@
 
 ### Added
 
+- Opt-in `filter_impact_contract` v1 records source-verified sequential filter input/retained/excluded counts and operation hashes for a narrow safe predicate subset.
+- New `data.filter.receipts` and `data.filter.retention` rules detect stale receipts and REVIEW operator-declared minimum retention violations without evaluating arbitrary Vega expressions; 37.5%-exclusion CLI trap and regression coverage.
+
+
 - `visual.dual_axis.review`: WARN when a layered Vega-Lite chart uses explicit independent quantitative y scales to overlay multiple distinct measures; other panels/shared-scale layers are unaffected.
 - Synthetic advertising-spend-versus-sales dual-axis REVIEW trap, nested/inherited encoding regression coverage, and operator guidance. No automatic rejection or axis rewrite.
 
