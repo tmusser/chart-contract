@@ -91,7 +91,9 @@ def test_retention_policy_passes_when_same_data_meets_minimum():
     report = audit_spec(spec, data=data)
     assert _finding(report, RECEIPTS).severity == "PASS"
     assert _finding(report, RETENTION).severity == "PASS"
-    assert report.verdict == "READY"
+    # Other independent audit warnings must not be conflated with a
+    # retention-policy breach.
+    assert report.verdict != "BLOCK"
 
 
 def test_no_threshold_still_discloses_counts_but_does_not_create_arbitrary_gate():

@@ -37,7 +37,12 @@ class FilterImpactUnavailable(ValueError):
 
 
 def _numeric(value: Any) -> bool:
-    return isinstance(value, Real) and not isinstance(value, bool) and math.isfinite(float(value))
+    if isinstance(value, bool) or not isinstance(value, Real):
+        return False
+    try:
+        return math.isfinite(float(value))
+    except (ValueError, OverflowError, TypeError):
+        return False
 
 
 def _valid_scalar(value: Any) -> bool:
