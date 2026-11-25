@@ -3,6 +3,7 @@
 from .audit import AuditFinding, AuditReport
 from .chart import Chart
 from .bundle import BundleReport, audit_bundle
+from .filter_impact import build_filter_impact_contract
 from .input_binding import (
     BoundAuditReport,
     InputBinding,
@@ -38,5 +39,6 @@ __all__ = [
     "build_audit_profile_binding",
     "build_profile_diff",
     "build_transform_lineage",
+    "build_filter_impact_contract",
     "get_profile_manifest",
 ]

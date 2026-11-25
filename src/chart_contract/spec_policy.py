@@ -44,6 +44,9 @@ def audit_spec(
     from .dual_axis import audit_dual_axis
 
     audit_dual_axis(report, spec)
+    from .filter_impact import audit_filter_impact
+
+    audit_filter_impact(report, spec, data)
     return bind_spec_report(report, spec=spec, data=data, claim=resolved_claim)
 
 
