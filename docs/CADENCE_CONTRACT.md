@@ -172,13 +172,118 @@ report completeness or data finality. The window is never inferred from
 the current clock. Use the independent freshness contract for a
 declared as-of data age policy.
 
+## Grouped cadence: date × subgroup completeness (separate v1 opt-in)
+
+The original single-series cadence v1/v2 contracts intentionally require
+unique observation dates. A multi-series chart has multiple records per
+date, so it uses a **separate closed**
+`usermeta.group_cadence_contract`. Existing single-series receipts,
+audits, and rendering remain unchanged.
+
+```python
+chart = Chart.trend(
+    data=df,
+    x="week", y="sales", group="channel",
+    claim="Reported weekly systems across Paid and Organic.",
+    source="warehouse.weekly_systems", unit="systems",
+    cadence_frequency="weekly",
+    cadence_require_complete=True,
+    cadence_expected_groups=["Paid", "Organic"],
+    cadence_expected_start="2026-10-05",  # optional
+    cadence_expected_end="2026-10-19",    # optional
+)
+```
+
+The first-party renderer uses the `group` field for colored series and
+tooltips. External Vega-Lite specs must show a simple line with the declared
+date on ordinal/temporal x, a quantitative metric on y, and the declared
+subgroup on nominal/ordinal `color`. Layered and transformed views are
+unsupported under this narrowly scoped grouped contract.
+
+The operator must list every **expected** group explicitly. No missing
+group can be inferred from already-observed categories. Each observed
+`(date, group)` must be unique and must belong to the inventory.
+Dates must be canonical `YYYY-MM-DD` and follow a daily, seven-day weekly,
+or first-of-month calendar. With no expected endpoints, the common reporting
+window is the minimum through maximum observed source date. With an
+explicit `cadence_expected_start` and/or `cadence_expected_end`, the grid
+extends only to those declared endpoints. Dates are never inferred from
+the machine clock.
+
+For five observed rows on October 5 (both groups), October 12 (both
+groups) and October 19 (**Paid only**), the complete grid has 3 weeks ×
+2 groups = **6 cells**. This omits **Organic on October 19**, although
+every week appears somewhere in the source. The old ungrouped date check
+cannot establish this type of completeness.
+
+A first-party/externally supplied v1 receipt contains:
+
+```json
+{
+  "version": 1,
+  "date_field": "week",
+  "group_field": "channel",
+  "frequency": "weekly",
+  "require_complete": true,
+  "expected_groups": ["Paid", "Organic"],
+  "expected_start": "2026-10-05",
+  "expected_end": "2026-10-19",
+  "start_date": "2026-10-05",
+  "end_date": "2026-10-19",
+  "observed_count": 5,
+  "expected_period_count": 3,
+  "expected_cell_count": 6,
+  "missing_count": 1,
+  "missing_preview": [
+    {"date": "2026-10-19", "group": "Organic"}
+  ]
+}
+```
+
+The spec audit independently reconstructs the full grid from supplied
+original source rows and checks **every** stored field. Reordered rows
+produce identical receipts. Previews are bounded to the first five
+missing cells in chronological order, then expected-group order. Grids
+are capped at 10,000 group × period cells and 32 declared groups.
+
+| Rule | PASS | WARN / REVIEW | FAIL / BLOCK |
+| --- | --- | --- | --- |
+| `contract.trend.cadence_groups` | Valid closed declaration and visible bindings | — | Invalid or detached group contract |
+| `data.trend.cadence_groups_evidence` | Recomputed original (date, group) source receipts | — | Duplicate/off-grid/undeclared source row, malformed or stale receipts |
+| `data.trend.cadence.groups` | Complete expected date × group grid | Missing cells when completeness is optional | Missing cells when complete grid required |
+
+A strict first-party chart refuses to render when expected cells are
+missing. No synthetic zero, null observation, interpolation or implicit
+aggregation is ever created. A real source value of zero **is a present
+observation**, not a missing subgroup-period row.
+
+The contract is a declared completeness obligation, not proof of source
+ingestion, changing group membership, business/holiday calendars, cohort
+eligibility or why a subgroup was absent. Irregular/onboarding cohorts
+should use a truthful, narrower inventory/window, or a different contract.
+`group_cadence_contract` does not silently mix with the single-series
+`cadence_contract`.
+
+### CLI trap: one missing subgroup-week
+
+```bash
+chart-contract audit spec examples/traps/missing_subgroup_week.vl.json \
+  --data examples/traps/missing_subgroup_week.csv \
+  --claim "$(cat examples/traps/missing_subgroup_week.claim.txt)"
+```
+
+Expected: `contract.trend.cadence_groups: PASS` and
+`data.trend.cadence_groups_evidence: PASS` (receipt matches genuine
+source rows), but `data.trend.cadence.groups: FAIL`, so overall
+`BLOCK`, with `Organic @ 2026-10-19` shown.
+
 ## Deliberate boundaries
 
 - No implicit `date_range`, filling a gap with zero, interpolation, smoothing,
   or imputation. A skipped week may be a source outage or a genuinely
   non-applicable observation; the check does not infer the cause.
 - No assumption that every data source has a daily/weekly/monthly cadence,
-  no group-level grids, and no support for trading-day/business-day/holiday
-  calendars in v1.
+  no automatic group-level grid inference, and no support for trading-day/business-day/holiday
+  calendars in v1/v2. The separate opt-in grouped contract checks only explicitly expected groups.
 - An absent last week cannot be detected in v1. Declare a v2 `expected_end`
   when that date is known; use the data-freshness contract for an as-of age policy.

@@ -112,6 +112,7 @@ class Chart:
     cadence_require_complete: bool | None = None
     cadence_expected_start: str | None = None
     cadence_expected_end: str | None = None
+    cadence_expected_groups: tuple[str, ...] | list[str] | None = None
     trend_influence: bool | None = None
     composition_baseline_value: str | None = None
     composition_target_value: str | None = None
@@ -128,6 +129,7 @@ class Chart:
         x: str,
         y: str,
         claim: str,
+        group: str | None = None,
         source: str | None = None,
         unit: str | None = None,
         value_representation: str | None = None,
@@ -201,6 +203,7 @@ class Chart:
         cadence_require_complete: bool | None = None,
         cadence_expected_start: str | None = None,
         cadence_expected_end: str | None = None,
+        cadence_expected_groups: tuple[str, ...] | list[str] | None = None,
         trend_influence: bool | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> "Chart":
@@ -210,6 +213,7 @@ class Chart:
             x=x,
             y=y,
             claim=claim,
+            group=group,
             source=source,
             unit=unit,
             value_representation=value_representation,
@@ -283,6 +287,7 @@ class Chart:
             cadence_require_complete=cadence_require_complete,
             cadence_expected_start=cadence_expected_start,
             cadence_expected_end=cadence_expected_end,
+            cadence_expected_groups=cadence_expected_groups,
             trend_influence=trend_influence,
             metadata=metadata,
         )

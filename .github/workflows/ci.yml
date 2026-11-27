@@ -308,6 +308,20 @@ jobs:
           grep -q "2026-10-12" <<<"$influence_output"
 
           set +e
+          subgroup_output=$(chart-contract audit spec examples/traps/missing_subgroup_week.vl.json \
+            --data examples/traps/missing_subgroup_week.csv \
+            --claim "$(cat examples/traps/missing_subgroup_week.claim.txt)" 2>&1)
+          subgroup_exit=$?
+          set -e
+          echo "$subgroup_output"
+          test "$subgroup_exit" -eq 1
+          grep -q "Verdict: BLOCK" <<<"$subgroup_output"
+          grep -q "PASS contract.trend.cadence_groups:" <<<"$subgroup_output"
+          grep -q "PASS data.trend.cadence_groups_evidence:" <<<"$subgroup_output"
+          grep -q "FAIL data.trend.cadence.groups:" <<<"$subgroup_output"
+          grep -q "Organic @ 2026-10-19" <<<"$subgroup_output"
+
+          set +e
           boundary_output=$(chart-contract audit spec examples/traps/missing_trailing_week.vl.json \
             --data examples/traps/missing_trailing_week.csv \
             --claim "$(cat examples/traps/missing_trailing_week.claim.txt)" 2>&1)

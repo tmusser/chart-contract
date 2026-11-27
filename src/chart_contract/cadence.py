@@ -34,6 +34,9 @@ def _date(value: Any, field: str) -> date:
 
 
 def chart_cadence_declaration(chart: Any) -> dict[str, Any] | None:
+    # Grouped grids have separate receipts; preserve legacy single-series v1/v2.
+    if getattr(chart, "cadence_expected_groups", None) is not None:
+        return None
     freq = getattr(chart, "cadence_frequency", None)
     complete = getattr(chart, "cadence_require_complete", None)
     start = getattr(chart, "cadence_expected_start", None)

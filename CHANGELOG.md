@@ -4,6 +4,9 @@
 
 ### Added
 
+- Opt-in grouped trend cadence verifies every declared date × subgroup cell, including wholly absent groups, with closed source-recomputed receipts and strict optional/required gap outcomes.
+- New `contract.trend.cadence_groups`, `data.trend.cadence_groups_evidence`, and `data.trend.cadence.groups` rules; first-party colored trend series, reproducible missing Organic-week trap, adversarial regressions, and no change to single-series v1/v2 receipts.
+
 - Opt-in `filter_impact_contract` v1 records source-verified sequential filter input/retained/excluded counts and operation hashes for a narrow safe predicate subset.
 - New `data.filter.receipts` and `data.filter.retention` rules detect stale receipts and REVIEW operator-declared minimum retention violations without evaluating arbitrary Vega expressions; 37.5%-exclusion CLI trap and regression coverage.
 
