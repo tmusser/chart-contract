@@ -1,0 +1,51 @@
+{
+  "mark": {
+    "type": "line",
+    "point": true
+  },
+  "title": "Weekly sales by channel",
+  "encoding": {
+    "x": {
+      "field": "week",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "sales",
+      "type": "quantitative"
+    },
+    "color": {
+      "field": "channel",
+      "type": "nominal"
+    }
+  },
+  "usermeta": {
+    "source": "synthetic.group_sales",
+    "unit": "systems",
+    "claim": "Reported weekly systems across Paid and Organic.",
+    "group_cadence_contract": {
+      "version": 1,
+      "date_field": "week",
+      "group_field": "channel",
+      "frequency": "weekly",
+      "require_complete": true,
+      "expected_groups": [
+        "Paid",
+        "Organic"
+      ],
+      "expected_start": "2026-10-05",
+      "expected_end": "2026-10-19",
+      "start_date": "2026-10-05",
+      "end_date": "2026-10-19",
+      "observed_count": 5,
+      "expected_period_count": 3,
+      "expected_cell_count": 6,
+      "missing_count": 1,
+      "missing_preview": [
+        {
+          "date": "2026-10-19",
+          "group": "Organic"
+        }
+      ]
+    }
+  }
+}
