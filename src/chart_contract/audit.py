@@ -221,6 +221,10 @@ def audit_chart(chart: Any) -> AuditReport:
 
     audit_cadence_chart(report, chart)
 
+    from .cadence_groups_audit import audit_group_cadence_chart
+
+    audit_group_cadence_chart(report, chart)
+
     from .trend_influence_audit import audit_influence_chart
 
     audit_influence_chart(report, chart)
@@ -716,6 +720,9 @@ def audit_spec(
     from .cadence_audit import audit_cadence_spec
 
     audit_cadence_spec(report, spec, analytical_spec, encoding, resolved_frame)
+    from .cadence_groups_audit import audit_group_cadence_spec
+
+    audit_group_cadence_spec(report, spec, resolved_frame)
     from .trend_influence_audit import audit_influence_spec
 
     audit_influence_spec(report, spec, analytical_spec, encoding, resolved_frame)

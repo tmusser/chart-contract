@@ -26,6 +26,10 @@ def audit_cadence_chart(report: AuditReport, chart: Any) -> None:
     if chart.intent != "trend":
         report.add("contract.trend.cadence", FAIL, "Cadence contract supports trend charts only.")
         return
+    if getattr(chart, "group", None):
+        report.add("contract.trend.cadence", FAIL,
+                   "Grouped trend cadence requires explicit cadence_expected_groups inventory.")
+        return
     try:
         validated = validate_cadence_declaration(declared)
         if validated["date_field"] == getattr(chart, "y", None):

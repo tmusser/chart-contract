@@ -33,6 +33,7 @@ from ..population_sampling import (
 )
 from ..freshness import FRESHNESS_INTENTS, build_freshness_contract, freshness_declaration
 from ..cadence import build_cadence_receipt, chart_cadence_declaration
+from ..cadence_groups import build_group_cadence_receipt, chart_group_cadence_declaration
 from ..trend_influence import build_influence_receipt, chart_influence_declaration
 from ..observation_status import (
     OBSERVATION_STATUS_INTENTS,
@@ -172,6 +173,15 @@ def render_chart(chart: Any) -> alt.Chart:
         if chart.intent != "trend":
             raise ValueError("Trend influence is supported on trend charts only.")
         usermeta["trend_influence_contract"] = build_influence_receipt(chart.data, influence_raw)
+
+    group_cadence_raw = chart_group_cadence_declaration(chart) if chart.intent == "trend" else None
+    if group_cadence_raw is not None:
+        if any(getattr(chart, key, None) is not None for key in ("interval_kind", "metric_target", "event")):
+            raise ValueError("Grouped cadence requires a simple unlayered line chart.")
+        group_cadence = build_group_cadence_receipt(chart.data, group_cadence_raw)
+        if group_cadence["missing_count"] and group_cadence["require_complete"]:
+            raise ValueError("Cannot render a trend with missing subgroup cadence periods when require_complete=True.")
+        usermeta["group_cadence_contract"] = group_cadence
 
     cadence_raw = chart_cadence_declaration(chart) if chart.intent == "trend" else None
     if cadence_raw is not None:
@@ -473,13 +483,19 @@ def _render_trend(chart: Any, records: list[dict[str, Any]]) -> alt.Chart:
     else:
         x_type = "O"
         tooltip_type = "nominal"
+    tooltip = [
+        alt.Tooltip(field=chart.x, type=tooltip_type),
+        alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
+    ]
+    extra = {}
+    if chart.group is not None:
+        tooltip.append(alt.Tooltip(field=chart.group, type="nominal"))
+        extra["color"] = alt.Color(f"{chart.group}:N", title=chart.group.replace("_", " ").title())
     line = base.mark_line(point=True).encode(
         x=alt.X(f"{chart.x}:{x_type}", title=chart.x.replace("_", " ").title()),
         y=alt.Y(f"{chart.y}:Q", title=_y_title(chart), **_metric_axis_kwargs(chart)),
-        tooltip=[
-            alt.Tooltip(field=chart.x, type=tooltip_type),
-            alt.Tooltip(field=chart.y, type="quantitative", **_metric_tooltip_kwargs(chart)),
-        ],
+        tooltip=tooltip,
+        **extra,
     )
 
     interval = _render_interval_rule(
