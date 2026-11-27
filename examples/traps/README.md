@@ -6,6 +6,24 @@ Each trap keeps the spec, data, and claim text separate so the failure mode stay
 
 ## Fixtures
 
+### `missing_subgroup_week` (opt-in grouped cadence)
+
+Five rows cover three weeks: both Paid and Organic exist October 5
+and 12, but **Organic is absent October 19**. The global list of dates
+is complete. The declared inventory obliges two subgroup rows each
+week, so the 3 × 2 grid expects six cells but only five exist.
+
+Expected: `BLOCK`; `contract.trend.cadence_groups: PASS`,
+`data.trend.cadence_groups_evidence: PASS`, and
+`data.trend.cadence.groups: FAIL` with the exact missing cell.
+
+```bash
+chart-contract audit spec examples/traps/missing_subgroup_week.vl.json \
+  --data examples/traps/missing_subgroup_week.csv \
+  --claim "$(cat examples/traps/missing_subgroup_week.claim.txt)"
+```
+
+
 ### `high_filter_exclusion` (opt-in filter-impact receipts)
 
 A synthetic customer segment filter retains **5 of 8** input rows,

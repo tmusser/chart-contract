@@ -338,6 +338,14 @@ with an omitted week cannot be shared as READY. To also catch **missing first
 or last weeks**, add `cadence_expected_start` and/or `cadence_expected_end`.
 This creates a v2 receipt and an independent
 `data.trend.cadence.boundaries` finding, without changing v1 behavior.
+
+**Grouped trends** can have a complete global timeline while one series is
+missing a week. Opt into a separate, source-bound
+`group_cadence_contract` with `Chart.trend(group="channel",
+cadence_expected_groups=["Paid", "Organic"], cadence_frequency="weekly",
+cadence_require_complete=True)`. The `data.trend.cadence.groups` rule
+checks the full date × subgroup grid, without changing the original
+single-series cadence contract. [Grouped cadence contract](docs/CADENCE_CONTRACT.md#grouped-cadence-date--subgroup-completeness-separate-v1-opt-in).
 See [Trend cadence and missing periods](docs/CADENCE_CONTRACT.md).
 
 ### Trend sensitivity: can one observation flip the direction?
